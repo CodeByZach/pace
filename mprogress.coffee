@@ -69,6 +69,9 @@ class Bar
     do @render
 
   render: ->
+    if not $('body').length
+      return false
+
     @getElement().style.width = "#{ @progress }%"
 
   done: ->
@@ -221,11 +224,13 @@ class Scaler
     @last = @sinceLastUpdate = 0
     @rate = 0.03
     @catchup = 0
+    @progress = 0
 
-    @progress = result(@source, 'progress')
+    if @source?
+      @progress = result(@source, 'progress')
 
-  tick: (frameTime) ->
-    val = result(@source, 'progress')
+  tick: (frameTime, val) ->
+    val ?= result(@source, 'progress')
 
     if val >= 100
       @done = true
@@ -258,70 +263,66 @@ class Scaler
 
     @progress
 
-sources = [new AjaxMonitor, new ElementMonitor('body', '.x'), new DocumentMonitor, new EventLagMonitor]
+sources = [new AjaxMonitor, new ElementMonitor('body'), new DocumentMonitor, new EventLagMonitor]
 scalers = []
 
-clone = (obj) ->
-  n = {}
-  for own key of obj
-    n[key] = obj[key]
-  n
-
 bar = new Bar
-console.log 'start', clone performance.timing
-bar.render()
 
-$ ->
-  console.log 'ready', clone performance.timing
+go = ->
+  bar.render()
 
-bar.render()
+  uniScaler = new Scaler
 
-runAnimation (frameTime, enqueueNextFrame) ->
-  # Every source gives us a progress number from 0 - 100
-  # It's up to us to figure out how to turn that into a smoothly moving bar
-  #
-  # Their progress numbers can only increment.  We try to interpolate
-  # between the numbers.
+  lastSum = lastCount = lastAvg = 0
+  runAnimation (frameTime, enqueueNextFrame) ->
+    # Every source gives us a progress number from 0 - 100
+    # It's up to us to figure out how to turn that into a smoothly moving bar
+    #
+    # Their progress numbers can only increment.  We try to interpolate
+    # between the numbers.
 
-  remaining = 100 - bar.progress
+    remaining = 100 - bar.progress
 
-  count = sum = 0
-  done = true
-  # A source is composed of a bunch of elements, each with a raw, unscaled progress
-  for source, i in sources
-    scalerList = scalers[i] ?= []
+    count = active = sum = 0
+    done = true
+    # A source is composed of a bunch of elements, each with a raw, unscaled progress
+    for source, i in sources
+      scalerList = scalers[i] ?= []
 
-    elements = source.elements ? [source]
+      elements = source.elements ? [source]
 
-    # Each element is given it's own scaler, which turns its value into something
-    # smoothed for display
-    for element, j in elements
-      scaler = scalerList[j] ?= new Scaler element
+      # Each element is given it's own scaler, which turns its value into something
+      # smoothed for display
+      for element, j in elements
+        scaler = scalerList[j] ?= new Scaler element
 
-      done &= scaler.done
+        done &= scaler.done
 
-      if scaler.done
-        continue
+        active++
+        if not scaler.done
+          count++
 
-      sum += scaler.tick(frameTime)
-      count++
+        sum += scaler.tick(frameTime)
 
-  avg = sum / count
+    avg = sum / active
 
-  # The bar can't move backwards, so we only have what's left to play with.
-  # The bar is supposed to represent what share of the total work is done, so we
-  # don't let it fill up more than 15% in a single frame.
-  if avg > bar.progress
-    # TODO: The bar should always move if there's progress, even if the scale has
-    # changed
-    bar.update(bar.progress + ((avg - bar.progress) * Math.min(0.15, remaining/100)))
+    bar.update uniScaler.tick(frameTime, avg)
 
-  start = now()
-  if bar.done() or done
-    bar.update 100
+    start = now()
+    if bar.done() or done
+      bar.update 100
 
-    setTimeout ->
-      bar.hide()
-    , Math.max(GHOST_TIME, Math.min(MIN_TIME, now() - start))
+      setTimeout ->
+        bar.hide()
+      , Math.max(GHOST_TIME, Math.min(MIN_TIME, now() - start))
+    else
+      enqueueNextFrame()
+
+do check = ->
+  bar.render()
+
+  if not $('.mprogress-bar').length
+    setTimeout check, 50
   else
-    enqueueNextFrame()
+    go()
+

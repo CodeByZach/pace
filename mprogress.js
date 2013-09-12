@@ -1,5 +1,5 @@
 (function() {
-  var $, AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MIN_TIME, RequestIntercept, RequestTracker, Scaler, avgKey, bar, clone, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
+  var $, AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MIN_TIME, RequestIntercept, RequestTracker, Scaler, avgKey, bar, check, go, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -80,6 +80,9 @@
     };
 
     Bar.prototype.render = function() {
+      if (!$('body').length) {
+        return false;
+      }
       return this.getElement().style.width = "" + this.progress + "%";
     };
 
@@ -308,12 +311,17 @@
       this.last = this.sinceLastUpdate = 0;
       this.rate = 0.03;
       this.catchup = 0;
-      this.progress = result(this.source, 'progress');
+      this.progress = 0;
+      if (this.source != null) {
+        this.progress = result(this.source, 'progress');
+      }
     }
 
-    Scaler.prototype.tick = function(frameTime) {
-      var scaling, val;
-      val = result(this.source, 'progress');
+    Scaler.prototype.tick = function(frameTime, val) {
+      var scaling;
+      if (val == null) {
+        val = result(this.source, 'progress');
+      }
       if (val >= 100) {
         this.done = true;
       }
@@ -341,65 +349,58 @@
 
   })();
 
-  sources = [new AjaxMonitor, new ElementMonitor('body', '.x'), new DocumentMonitor, new EventLagMonitor];
+  sources = [new AjaxMonitor, new ElementMonitor('body'), new DocumentMonitor, new EventLagMonitor];
 
   scalers = [];
 
-  clone = function(obj) {
-    var key, n;
-    n = {};
-    for (key in obj) {
-      if (!__hasProp.call(obj, key)) continue;
-      n[key] = obj[key];
-    }
-    return n;
-  };
-
   bar = new Bar;
 
-  console.log('start', clone(performance.timing));
-
-  bar.render();
-
-  $(function() {
-    return console.log('ready', clone(performance.timing));
-  });
-
-  bar.render();
-
-  runAnimation(function(frameTime, enqueueNextFrame) {
-    var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
-    remaining = 100 - bar.progress;
-    count = sum = 0;
-    done = true;
-    for (i = _i = 0, _len = sources.length; _i < _len; i = ++_i) {
-      source = sources[i];
-      scalerList = scalers[i] != null ? scalers[i] : scalers[i] = [];
-      elements = (_ref = source.elements) != null ? _ref : [source];
-      for (j = _j = 0, _len1 = elements.length; _j < _len1; j = ++_j) {
-        element = elements[j];
-        scaler = scalerList[j] != null ? scalerList[j] : scalerList[j] = new Scaler(element);
-        done &= scaler.done;
-        if (scaler.done) {
-          continue;
+  go = function() {
+    var lastAvg, lastCount, lastSum, uniScaler;
+    bar.render();
+    uniScaler = new Scaler;
+    lastSum = lastCount = lastAvg = 0;
+    return runAnimation(function(frameTime, enqueueNextFrame) {
+      var active, avg, count, done, element, elements, i, j, remaining, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
+      remaining = 100 - bar.progress;
+      count = active = sum = 0;
+      done = true;
+      for (i = _i = 0, _len = sources.length; _i < _len; i = ++_i) {
+        source = sources[i];
+        scalerList = scalers[i] != null ? scalers[i] : scalers[i] = [];
+        elements = (_ref = source.elements) != null ? _ref : [source];
+        for (j = _j = 0, _len1 = elements.length; _j < _len1; j = ++_j) {
+          element = elements[j];
+          scaler = scalerList[j] != null ? scalerList[j] : scalerList[j] = new Scaler(element);
+          done &= scaler.done;
+          active++;
+          if (!scaler.done) {
+            count++;
+          }
+          sum += scaler.tick(frameTime);
         }
-        sum += scaler.tick(frameTime);
-        count++;
       }
-    }
-    avg = sum / count;
-    if (avg > bar.progress) {
-      bar.update(bar.progress + ((avg - bar.progress) * Math.min(0.15, remaining / 100)));
-    }
-    start = now();
-    if (bar.done() || done) {
-      bar.update(100);
-      return setTimeout(function() {
-        return bar.hide();
-      }, Math.max(GHOST_TIME, Math.min(MIN_TIME, now() - start)));
+      avg = sum / active;
+      bar.update(uniScaler.tick(frameTime, avg));
+      start = now();
+      if (bar.done() || done) {
+        bar.update(100);
+        return setTimeout(function() {
+          return bar.hide();
+        }, Math.max(GHOST_TIME, Math.min(MIN_TIME, now() - start)));
+      } else {
+        return enqueueNextFrame();
+      }
+    });
+  };
+
+  (check = function() {
+    bar.render();
+    if (!$('.mprogress-bar').length) {
+      return setTimeout(check, 50);
     } else {
-      return enqueueNextFrame();
+      return go();
     }
-  });
+  })();
 
 }).call(this);
