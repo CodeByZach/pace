@@ -1,5 +1,5 @@
 (function() {
-  var AjaxMonitor, Bar, CATCHUP_TIME, Events, GHOST_TIME, INITIAL_RATE, MIN_TIME, RequestIntercept, RequestTracker, Scaler, avgKey, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
+  var AjaxMonitor, Bar, CATCHUP_TIME, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, Events, GHOST_TIME, INITIAL_RATE, MIN_TIME, RequestIntercept, RequestTracker, Scaler, avgKey, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -11,6 +11,8 @@
   MIN_TIME = 500;
 
   GHOST_TIME = 250;
+
+  ELEMENT_CHECK_INTERVAL = 100;
 
   now = function() {
     var _ref;
@@ -208,6 +210,51 @@
 
   })();
 
+  ElementMonitor = (function() {
+    function ElementMonitor() {
+      var selectors, set, _i, _len;
+      selectors = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      this.elements = [];
+      for (_i = 0, _len = selectors.length; _i < _len; _i++) {
+        set = selectors[_i];
+        this.elements.push(new ElementTracker(set));
+      }
+    }
+
+    return ElementMonitor;
+
+  })();
+
+  ElementTracker = (function() {
+    function ElementTracker(selectors) {
+      this.progress = 0;
+      if (typeof selectors === 'string') {
+        this.selector = selectors;
+      } else {
+        this.selector = selectors.join(',');
+      }
+      this.check();
+    }
+
+    ElementTracker.prototype.check = function() {
+      var _this = this;
+      if ($(this.selector).length) {
+        return this.done();
+      } else {
+        return setTimeout((function() {
+          return _this.check();
+        }), ELEMENT_CHECK_INTERVAL);
+      }
+    };
+
+    ElementTracker.prototype.done = function() {
+      return this.progress = 100;
+    };
+
+    return ElementTracker;
+
+  })();
+
   Scaler = (function() {
     function Scaler(source) {
       this.source = source;
@@ -245,7 +292,7 @@
 
   })();
 
-  sources = [new AjaxMonitor];
+  sources = [new AjaxMonitor, new ElementMonitor('body', '.x')];
 
   scalers = [];
 
@@ -254,26 +301,23 @@
     bar = new Bar;
     bar.render();
     return runAnimation(function(frameTime, enqueueNextFrame) {
-      var avg, done, element, i, j, max, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
-      max = 0;
+      var avg, count, done, element, i, j, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
+      count = sum = 0;
+      done = true;
       for (i = _i = 0, _len = sources.length; _i < _len; i = ++_i) {
         source = sources[i];
         scalerList = scalers[i] != null ? scalers[i] : scalers[i] = [];
-        avg = sum = 0;
-        done = !!source.elements.length;
         _ref = source.elements;
         for (j = _j = 0, _len1 = _ref.length; _j < _len1; j = ++_j) {
           element = _ref[j];
           scaler = scalerList[j] != null ? scalerList[j] : scalerList[j] = new Scaler(element);
           sum += scaler.tick(frameTime);
+          count++;
           done &= scaler.done;
         }
-        if (source.elements.length) {
-          avg = sum / source.elements.length;
-        }
-        max = Math.max(max, avg);
       }
-      bar.update(max);
+      avg = sum / count;
+      bar.update(avg);
       start = now();
       if (bar.done() || done) {
         bar.update(100);

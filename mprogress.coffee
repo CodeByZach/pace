@@ -16,6 +16,10 @@ MIN_TIME = 500
 # update before disappearing
 GHOST_TIME = 250
 
+# How frequently in ms should we check for the elements being tested for
+# using the element monitor?
+ELEMENT_CHECK_INTERVAL = 100
+
 now = ->
   performance?.now?() ? +new Date
 
@@ -149,6 +153,34 @@ class RequestTracker
     request.onload = request.onerror = request.ontimeout = request.onabort = =>
       @progress = 100
 
+class ElementMonitor
+  constructor: (selectors...) ->
+    @elements = []
+
+    for set in selectors
+      @elements.push new ElementTracker set
+    
+class ElementTracker
+  constructor: (selectors) ->
+    @progress = 0
+
+    if typeof selectors is 'string'
+      @selector = selectors
+    else
+      @selector = selectors.join(',')
+
+    @check()
+
+  check: ->
+    if $(@selector).length
+      @done()
+    else
+      setTimeout (=> @check()),
+        ELEMENT_CHECK_INTERVAL
+
+  done: ->
+    @progress = 100
+         
 class Scaler
   constructor: (@source) ->
     @last = @sinceLastUpdate = 0
@@ -190,7 +222,7 @@ class Scaler
 
     @progress
 
-sources = [new AjaxMonitor]
+sources = [new AjaxMonitor, new ElementMonitor('body', '.x')]
 scalers = []
 
 $ ->
@@ -204,25 +236,25 @@ $ ->
     # Their progress numbers can only increment.  We try to interpolate
     # between the numbers.
   
-    max = 0
+    count = sum = 0
+    done = true
+    # A source is composed of a bunch of elements, each with a raw, unscaled progress
     for source, i in sources
       scalerList = scalers[i] ?= []
 
-      avg = sum = 0
-      done = !!source.elements.length
+      # Each element is given it's own scaler, which turns its value into something
+      # smoothed for display
       for element, j in source.elements
         scaler = scalerList[j] ?= new Scaler element
 
         sum += scaler.tick(frameTime)
+        count++
 
         done &= scaler.done
 
-      if source.elements.length
-        avg = sum / source.elements.length
+    avg = sum / count
 
-      max = Math.max(max, avg)
-
-    bar.update max
+    bar.update avg
 
     start = now()
     if bar.done() or done
