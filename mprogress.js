@@ -362,14 +362,13 @@
   bar = new Bar;
 
   go = function() {
-    var lastAvg, lastCount, lastSum, uniScaler;
+    var uniScaler;
     bar.render();
     uniScaler = new Scaler;
-    lastSum = lastCount = lastAvg = 0;
     return runAnimation(function(frameTime, enqueueNextFrame) {
-      var active, avg, count, done, element, elements, i, j, remaining, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
+      var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
       remaining = 100 - bar.progress;
-      count = active = sum = 0;
+      count = sum = 0;
       done = true;
       for (i = _i = 0, _len = sources.length; _i < _len; i = ++_i) {
         source = sources[i];
@@ -379,14 +378,14 @@
           element = elements[j];
           scaler = scalerList[j] != null ? scalerList[j] : scalerList[j] = new Scaler(element);
           done &= scaler.done;
-          active++;
-          if (!scaler.done) {
-            count++;
+          if (scaler.done) {
+            continue;
           }
+          count++;
           sum += scaler.tick(frameTime);
         }
       }
-      avg = sum / active;
+      avg = sum / count;
       bar.update(uniScaler.tick(frameTime, avg));
       start = now();
       if (bar.done() || done) {

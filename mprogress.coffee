@@ -284,7 +284,6 @@ go = ->
 
   uniScaler = new Scaler
 
-  lastSum = lastCount = lastAvg = 0
   runAnimation (frameTime, enqueueNextFrame) ->
     # Every source gives us a progress number from 0 - 100
     # It's up to us to figure out how to turn that into a smoothly moving bar
@@ -294,7 +293,7 @@ go = ->
 
     remaining = 100 - bar.progress
 
-    count = active = sum = 0
+    count = sum = 0
     done = true
     # A source is composed of a bunch of elements, each with a raw, unscaled progress
     for source, i in sources
@@ -309,13 +308,12 @@ go = ->
 
         done &= scaler.done
 
-        active++
-        if not scaler.done
-          count++
+        continue if scaler.done
 
+        count++
         sum += scaler.tick(frameTime)
 
-    avg = sum / active
+    avg = sum / count
 
     bar.update uniScaler.tick(frameTime, avg)
 
