@@ -181,6 +181,40 @@ class ElementTracker
 
   done: ->
     @progress = 100
+
+class DocumentMonitor
+  states:
+    loading: 0
+    interactive: 50
+    complete: 100
+
+  constructor: ->
+    @progress = 0
+
+    document.onreadystatechange = =>
+      if @states[document.readyState]?
+        @progress = @states[document.readyState]
+
+
+class EventLagMonitor
+  constructor: ->
+    @progress = 0
+
+    avg = 0
+
+    points = 0
+    last = now()
+    setInterval =>
+      diff = now() - last - 50
+      last = now()
+
+      avg = avg + (diff - avg)/15
+
+      if points++ > 20 and Math.abs(avg) < 3
+        avg = 0
+
+      @progress = 100 * (3 / (avg + 3))
+    , 50
          
 class Scaler
   constructor: (@source) ->
@@ -224,57 +258,70 @@ class Scaler
 
     @progress
 
-sources = [new AjaxMonitor, new ElementMonitor('body', '.x')]
+sources = [new AjaxMonitor, new ElementMonitor('body', '.x'), new DocumentMonitor, new EventLagMonitor]
 scalers = []
 
+clone = (obj) ->
+  n = {}
+  for own key of obj
+    n[key] = obj[key]
+  n
+
+bar = new Bar
+console.log 'start', clone performance.timing
+bar.render()
+
 $ ->
-  bar = new Bar
-  bar.render()
+  console.log 'ready', clone performance.timing
 
-  runAnimation (frameTime, enqueueNextFrame) ->
-    # Every source gives us a progress number from 0 - 100
-    # It's up to us to figure out how to turn that into a smoothly moving bar
-    #
-    # Their progress numbers can only increment.  We try to interpolate
-    # between the numbers.
-  
-    remaining = 100 - bar.progress
+bar.render()
 
-    count = sum = 0
-    done = true
-    # A source is composed of a bunch of elements, each with a raw, unscaled progress
-    for source, i in sources
-      scalerList = scalers[i] ?= []
+runAnimation (frameTime, enqueueNextFrame) ->
+  # Every source gives us a progress number from 0 - 100
+  # It's up to us to figure out how to turn that into a smoothly moving bar
+  #
+  # Their progress numbers can only increment.  We try to interpolate
+  # between the numbers.
 
-      # Each element is given it's own scaler, which turns its value into something
-      # smoothed for display
-      for element, j in source.elements
-        scaler = scalerList[j] ?= new Scaler element
+  remaining = 100 - bar.progress
 
-        done &= scaler.done
+  count = sum = 0
+  done = true
+  # A source is composed of a bunch of elements, each with a raw, unscaled progress
+  for source, i in sources
+    scalerList = scalers[i] ?= []
 
-        if scaler.done
-          continue
+    elements = source.elements ? [source]
 
-        sum += scaler.tick(frameTime)
-        count++
+    # Each element is given it's own scaler, which turns its value into something
+    # smoothed for display
+    for element, j in elements
+      scaler = scalerList[j] ?= new Scaler element
 
-    avg = sum / count
+      done &= scaler.done
 
-    # The bar can't move backwards, so we only have what's left to play with.
-    # The bar is supposed to represent what share of the total work is done, so we
-    # don't let it fill up more than 15% in a single frame.
-    if avg > bar.progress
-      # TODO: The bar should always move if there's progress, even if the scale has
-      # changed
-      bar.update(bar.progress + ((avg - bar.progress) * Math.min(0.15, remaining/100)))
+      if scaler.done
+        continue
 
-    start = now()
-    if bar.done() or done
-      bar.update 100
+      sum += scaler.tick(frameTime)
+      count++
 
-      setTimeout ->
-        bar.hide()
-      , Math.max(GHOST_TIME, Math.min(MIN_TIME, now() - start))
-    else
-      enqueueNextFrame()
+  avg = sum / count
+
+  # The bar can't move backwards, so we only have what's left to play with.
+  # The bar is supposed to represent what share of the total work is done, so we
+  # don't let it fill up more than 15% in a single frame.
+  if avg > bar.progress
+    # TODO: The bar should always move if there's progress, even if the scale has
+    # changed
+    bar.update(bar.progress + ((avg - bar.progress) * Math.min(0.15, remaining/100)))
+
+  start = now()
+  if bar.done() or done
+    bar.update 100
+
+    setTimeout ->
+      bar.hide()
+    , Math.max(GHOST_TIME, Math.min(MIN_TIME, now() - start))
+  else
+    enqueueNextFrame()

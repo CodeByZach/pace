@@ -1,5 +1,5 @@
 (function() {
-  var $, AjaxMonitor, Bar, CATCHUP_TIME, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, Events, GHOST_TIME, INITIAL_RATE, MIN_TIME, RequestIntercept, RequestTracker, Scaler, avgKey, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
+  var $, AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MIN_TIME, RequestIntercept, RequestTracker, Scaler, avgKey, bar, clone, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -257,6 +257,51 @@
 
   })();
 
+  DocumentMonitor = (function() {
+    DocumentMonitor.prototype.states = {
+      loading: 0,
+      interactive: 50,
+      complete: 100
+    };
+
+    function DocumentMonitor() {
+      var _this = this;
+      this.progress = 0;
+      document.onreadystatechange = function() {
+        if (_this.states[document.readyState] != null) {
+          return _this.progress = _this.states[document.readyState];
+        }
+      };
+    }
+
+    return DocumentMonitor;
+
+  })();
+
+  EventLagMonitor = (function() {
+    function EventLagMonitor() {
+      var avg, last, points,
+        _this = this;
+      this.progress = 0;
+      avg = 0;
+      points = 0;
+      last = now();
+      setInterval(function() {
+        var diff;
+        diff = now() - last - 50;
+        last = now();
+        avg = avg + (diff - avg) / 15;
+        if (points++ > 20 && Math.abs(avg) < 3) {
+          avg = 0;
+        }
+        return _this.progress = 100 * (3 / (avg + 3));
+      }, 50);
+    }
+
+    return EventLagMonitor;
+
+  })();
+
   Scaler = (function() {
     function Scaler(source) {
       this.source = source;
@@ -296,48 +341,65 @@
 
   })();
 
-  sources = [new AjaxMonitor, new ElementMonitor('body', '.x')];
+  sources = [new AjaxMonitor, new ElementMonitor('body', '.x'), new DocumentMonitor, new EventLagMonitor];
 
   scalers = [];
 
+  clone = function(obj) {
+    var key, n;
+    n = {};
+    for (key in obj) {
+      if (!__hasProp.call(obj, key)) continue;
+      n[key] = obj[key];
+    }
+    return n;
+  };
+
+  bar = new Bar;
+
+  console.log('start', clone(performance.timing));
+
+  bar.render();
+
   $(function() {
-    var bar;
-    bar = new Bar;
-    bar.render();
-    return runAnimation(function(frameTime, enqueueNextFrame) {
-      var avg, count, done, element, i, j, remaining, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
-      remaining = 100 - bar.progress;
-      count = sum = 0;
-      done = true;
-      for (i = _i = 0, _len = sources.length; _i < _len; i = ++_i) {
-        source = sources[i];
-        scalerList = scalers[i] != null ? scalers[i] : scalers[i] = [];
-        _ref = source.elements;
-        for (j = _j = 0, _len1 = _ref.length; _j < _len1; j = ++_j) {
-          element = _ref[j];
-          scaler = scalerList[j] != null ? scalerList[j] : scalerList[j] = new Scaler(element);
-          done &= scaler.done;
-          if (scaler.done) {
-            continue;
-          }
-          sum += scaler.tick(frameTime);
-          count++;
+    return console.log('ready', clone(performance.timing));
+  });
+
+  bar.render();
+
+  runAnimation(function(frameTime, enqueueNextFrame) {
+    var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
+    remaining = 100 - bar.progress;
+    count = sum = 0;
+    done = true;
+    for (i = _i = 0, _len = sources.length; _i < _len; i = ++_i) {
+      source = sources[i];
+      scalerList = scalers[i] != null ? scalers[i] : scalers[i] = [];
+      elements = (_ref = source.elements) != null ? _ref : [source];
+      for (j = _j = 0, _len1 = elements.length; _j < _len1; j = ++_j) {
+        element = elements[j];
+        scaler = scalerList[j] != null ? scalerList[j] : scalerList[j] = new Scaler(element);
+        done &= scaler.done;
+        if (scaler.done) {
+          continue;
         }
+        sum += scaler.tick(frameTime);
+        count++;
       }
-      avg = sum / count;
-      if (avg > bar.progress) {
-        bar.update(bar.progress + ((avg - bar.progress) * Math.min(0.15, remaining / 100)));
-      }
-      start = now();
-      if (bar.done() || done) {
-        bar.update(100);
-        return setTimeout(function() {
-          return bar.hide();
-        }, Math.max(GHOST_TIME, Math.min(MIN_TIME, now() - start)));
-      } else {
-        return enqueueNextFrame();
-      }
-    });
+    }
+    avg = sum / count;
+    if (avg > bar.progress) {
+      bar.update(bar.progress + ((avg - bar.progress) * Math.min(0.15, remaining / 100)));
+    }
+    start = now();
+    if (bar.done() || done) {
+      bar.update(100);
+      return setTimeout(function() {
+        return bar.hide();
+      }, Math.max(GHOST_TIME, Math.min(MIN_TIME, now() - start)));
+    } else {
+      return enqueueNextFrame();
+    }
   });
 
 }).call(this);
