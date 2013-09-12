@@ -1,8 +1,10 @@
 (function() {
-  var AjaxMonitor, Bar, CATCHUP_TIME, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, Events, GHOST_TIME, INITIAL_RATE, MIN_TIME, RequestIntercept, RequestTracker, Scaler, avgKey, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
+  var $, AjaxMonitor, Bar, CATCHUP_TIME, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, Events, GHOST_TIME, INITIAL_RATE, MIN_TIME, RequestIntercept, RequestTracker, Scaler, avgKey, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  $ = jQuery;
 
   CATCHUP_TIME = 500;
 
@@ -63,7 +65,7 @@
       if (this.el == null) {
         this.el = $('<div>')[0];
         this.el.className = 'mprogress-bar';
-        $('body').append(this.el);
+        $('body').prepend(this.el);
       }
       return this.el;
     };
@@ -138,7 +140,7 @@
             url: url,
             request: req
           });
-          return _open.apply(this, arguments);
+          return _open.apply(req, arguments);
         };
         return req;
       };
@@ -273,7 +275,9 @@
       if (val === this.last) {
         this.sinceLastUpdate += frameTime;
       } else {
-        this.rate = (val - this.last) / this.sinceLastUpdate;
+        if (this.sinceLastUpdate) {
+          this.rate = (val - this.last) / this.sinceLastUpdate;
+        }
         this.catchup = (val - this.progress) / CATCHUP_TIME;
         this.sinceLastUpdate = 0;
         this.last = val;
@@ -301,7 +305,8 @@
     bar = new Bar;
     bar.render();
     return runAnimation(function(frameTime, enqueueNextFrame) {
-      var avg, count, done, element, i, j, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
+      var avg, count, done, element, i, j, remaining, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
+      remaining = 100 - bar.progress;
       count = sum = 0;
       done = true;
       for (i = _i = 0, _len = sources.length; _i < _len; i = ++_i) {
@@ -311,13 +316,18 @@
         for (j = _j = 0, _len1 = _ref.length; _j < _len1; j = ++_j) {
           element = _ref[j];
           scaler = scalerList[j] != null ? scalerList[j] : scalerList[j] = new Scaler(element);
+          done &= scaler.done;
+          if (scaler.done) {
+            continue;
+          }
           sum += scaler.tick(frameTime);
           count++;
-          done &= scaler.done;
         }
       }
       avg = sum / count;
-      bar.update(avg);
+      if (avg > bar.progress) {
+        bar.update(bar.progress + ((avg - bar.progress) * Math.min(0.15, remaining / 100)));
+      }
       start = now();
       if (bar.done() || done) {
         bar.update(100);

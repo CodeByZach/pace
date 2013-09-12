@@ -1,3 +1,4 @@
+$ = jQuery
 # Track ajax requests, we want a clean event for their progress
 
 # How long should it take for the bar to animate to a new
@@ -55,7 +56,7 @@ class Bar
     if not @el?
       @el = $('<div>')[0]
       @el.className = 'mprogress-bar'
-      $('body').append @el
+      $('body').prepend @el
 
     @el
 
@@ -105,7 +106,7 @@ class RequestIntercept extends Events
       req.open = (type, url, async) ->
         _intercept.trigger 'request', {type, url, request: req}
 
-        _open.apply @, arguments
+        _open.apply req, arguments
 
       req
 
@@ -198,7 +199,8 @@ class Scaler
     if val == @last
       @sinceLastUpdate += frameTime
     else
-      @rate = (val - @last) / @sinceLastUpdate
+      if @sinceLastUpdate
+        @rate = (val - @last) / @sinceLastUpdate
 
       @catchup = (val - @progress) / CATCHUP_TIME
 
@@ -236,6 +238,8 @@ $ ->
     # Their progress numbers can only increment.  We try to interpolate
     # between the numbers.
   
+    remaining = 100 - bar.progress
+
     count = sum = 0
     done = true
     # A source is composed of a bunch of elements, each with a raw, unscaled progress
@@ -247,14 +251,23 @@ $ ->
       for element, j in source.elements
         scaler = scalerList[j] ?= new Scaler element
 
+        done &= scaler.done
+
+        if scaler.done
+          continue
+
         sum += scaler.tick(frameTime)
         count++
 
-        done &= scaler.done
-
     avg = sum / count
 
-    bar.update avg
+    # The bar can't move backwards, so we only have what's left to play with.
+    # The bar is supposed to represent what share of the total work is done, so we
+    # don't let it fill up more than 15% in a single frame.
+    if avg > bar.progress
+      # TODO: The bar should always move if there's progress, even if the scale has
+      # changed
+      bar.update(bar.progress + ((avg - bar.progress) * Math.min(0.15, remaining/100)))
 
     start = now()
     if bar.done() or done
