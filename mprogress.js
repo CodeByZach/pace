@@ -1,5 +1,5 @@
 (function() {
-  var $, AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MIN_TIME, RequestIntercept, RequestTracker, Scaler, avgKey, bar, check, go, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
+  var $, AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, EASE_FACTOR, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MAX_PROGRESS_PER_FRAME, MIN_TIME, RequestIntercept, RequestTracker, Scaler, avgKey, bar, check, go, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -15,6 +15,10 @@
   GHOST_TIME = 250;
 
   ELEMENT_CHECK_INTERVAL = 100;
+
+  MAX_PROGRESS_PER_FRAME = 10;
+
+  EASE_FACTOR = 1.25;
 
   now = function() {
     var _ref;
@@ -311,7 +315,7 @@
       this.last = this.sinceLastUpdate = 0;
       this.rate = 0.03;
       this.catchup = 0;
-      this.progress = 0;
+      this.progress = this.lastProgress = 0;
       if (this.source != null) {
         this.progress = result(this.source, 'progress');
       }
@@ -338,10 +342,12 @@
       if (val > this.progress) {
         this.progress += this.catchup * frameTime;
       }
-      scaling = 1 - Math.pow(this.progress / 100, 2);
+      scaling = 1 - Math.pow(this.progress / 100, EASE_FACTOR);
       this.progress += scaling * this.rate * frameTime;
       this.progress = Math.max(0, this.progress);
       this.progress = Math.min(100, this.progress);
+      this.progress = Math.min(this.lastProgress + MAX_PROGRESS_PER_FRAME, this.progress);
+      this.lastProgress = this.progress;
       return this.progress;
     };
 

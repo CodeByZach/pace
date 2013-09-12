@@ -21,6 +21,14 @@ GHOST_TIME = 250
 # using the element monitor?
 ELEMENT_CHECK_INTERVAL = 100
 
+# Its easy for a bunch of the bar to be eaten in the first few frames
+# before we know how much there is to load.  This limits how much of
+# the bar can be used per frame
+MAX_PROGRESS_PER_FRAME = 10
+
+# This tweaks how the animation easing looks
+EASE_FACTOR = 1.25
+
 now = ->
   performance?.now?() ? +new Date
 
@@ -224,7 +232,7 @@ class Scaler
     @last = @sinceLastUpdate = 0
     @rate = 0.03
     @catchup = 0
-    @progress = 0
+    @progress = @lastProgress = 0
 
     if @source?
       @progress = result(@source, 'progress')
@@ -251,7 +259,7 @@ class Scaler
       # get the progress bar to reflect that new data
       @progress += @catchup * frameTime
 
-    scaling = (1 - Math.pow(@progress / 100, 2))
+    scaling = (1 - Math.pow(@progress / 100, EASE_FACTOR))
 
     # Based on the rate of the last update, we preemptively update
     # the progress bar, scaling it so it can never hit 100% until we
@@ -260,6 +268,9 @@ class Scaler
 
     @progress = Math.max(0, @progress)
     @progress = Math.min(100, @progress)
+
+    @progress = Math.min(@lastProgress + MAX_PROGRESS_PER_FRAME, @progress)
+    @lastProgress = @progress
 
     @progress
 
