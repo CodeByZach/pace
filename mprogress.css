@@ -1,0 +1,9 @@
+.mprogress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000000;
+
+  height: 3px;
+  background-color: #FFC01F;
+}
