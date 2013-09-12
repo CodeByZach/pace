@@ -1,0 +1,31 @@
+<head>
+  <style>
+    .mprogress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background-color: #FFC01F;
+    }
+  </style>
+
+  <script src="jquery.min.js"></script>
+  <script src="mprogress.js"></script>
+  <script>
+    function load(time){
+      $.ajax({
+        url: "http://localhost:5646/" + time,
+        complete: function(){
+          console.log('done', arguments);
+        }
+      });
+    };
+
+    load(20);
+    load(100);
+    load(500);
+    load(2000);
+    load(3000);
+  </script>
+</head>
+<body></body>

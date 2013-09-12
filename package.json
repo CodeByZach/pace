@@ -1,0 +1,19 @@
+{
+  "name": "mprogress",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Zack Bloom <zbloom@hubspot.com>",
+  "license": "BSD",
+  "devDependencies": {
+    "grunt-contrib-coffee": "~0.7.0",
+    "coffee-script": "~1.6.3",
+    "grunt-contrib-uglify": "~0.2.4",
+    "grunt-cli": "~0.1.9",
+    "grunt": "~0.4.1",
+    "grunt-contrib-watch": "~0.5.3"
+  }
+}
