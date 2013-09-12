@@ -6,7 +6,7 @@ $ = jQuery
 CATCHUP_TIME = 500
 
 # How quickly should the bar be moving before it has any progress
-# info from a new source
+# info from a new source in %/ms
 INITIAL_RATE = .03
 
 # What is the minimum amount of time the bar should be on the
