@@ -29,6 +29,14 @@ MAX_PROGRESS_PER_FRAME = 10
 # This tweaks how the animation easing looks
 EASE_FACTOR = 1.25
 
+# Loosely based off:
+# https://github.com/rstacruz/nprogress/blob/97d6dc9fd025e382bb9e9666e5956afab61158f0/nprogress.js#L30
+TEMPLATE = '<div class="bar"><div class="peg"></div></div><div class="spinner"></div>'
+
+# Easing speed (ms)
+EASE = 'ease'
+SPEED = 200
+
 now = ->
   performance?.now?() ? +new Date
 
@@ -56,6 +64,40 @@ avgKey = (arr, key, args...) ->
 
   sum / arr.length
 
+# Loosely based off NProgress.getPositioningCSS:
+# https://github.com/rstacruz/nprogress/blob/97d6dc9fd025e382bb9e9666e5956afab61158f0/nprogress.js#L214
+getPositioningCSS = ->
+  s = (document.body || document.documentElement).style
+
+  vendorPrefix = if s.WebkitTransform then 'Webkit'
+  else if s.MozTransform then 'Moz'
+  else if s.msTransform then 'ms'
+  else if s.OTransform then 'O'
+  else ''
+
+  if s[vendorPrefix + 'Perspective']
+    return 'translate3d'
+  else if s[vendorPrefix + 'Transform']
+    return 'translate'
+  else
+    return 'margin'
+
+# Loosely based off:
+# https://github.com/rstacruz/nprogress/blob/97d6dc9fd025e382bb9e9666e5956afab61158f0/nprogress.js#L261
+barPositionCSS = (progress) ->
+  positioningCSS = getPositioningCSS()
+  leftPercentage = "#{ Math.min(0, progress - 100) }%"
+  barCSS = transition: "all #{ SPEED }ms #{ EASE }"
+
+  if positioningCSS is 'translate3d'
+    barCSS.transform = "translate3d(#{ leftPercentage }, 0, 0)"
+  else if positioningCSS is 'translate'
+    barCSS.transform = "translate(#{ leftPercentage }, 0)"
+  else
+    barCSS['margin-left'] = leftPercentage
+
+  return barCSS
+
 class Bar
   constructor: ->
     @progress = 0
@@ -63,7 +105,8 @@ class Bar
   getElement: ->
     if not @el?
       @el = $('<div>')[0]
-      @el.className = 'mprogress-bar'
+      @el.className = 'mprogress'
+      @el.innerHTML = TEMPLATE
       $('body').prepend @el
 
     @el
@@ -80,7 +123,7 @@ class Bar
     if not $('body').length
       return false
 
-    @getElement().style.width = "#{ @progress }%"
+    $(@getElement()).find('.bar').css barPositionCSS @progress
 
   done: ->
     @progress >= 100
@@ -132,7 +175,7 @@ class AjaxMonitor
 
   watch: (request) ->
     tracker = new RequestTracker(request)
-    
+
     @elements.push tracker
 
 class RequestTracker
@@ -171,7 +214,7 @@ class ElementMonitor
 
     for set in selectors
       @elements.push new ElementTracker set
-    
+
 class ElementTracker
   constructor: (selectors) ->
     @progress = 0
@@ -225,7 +268,7 @@ class EventLagMonitor
 
       @progress = 100 * (3 / (avg + 3))
     , 50
-         
+
 class Scaler
   constructor: (@source) ->
     @last = @sinceLastUpdate = 0
@@ -329,7 +372,7 @@ go = ->
 do check = ->
   bar.render()
 
-  if not $('.mprogress-bar').length
+  if not $('.mprogress').length
     setTimeout check, 50
   else
     go()

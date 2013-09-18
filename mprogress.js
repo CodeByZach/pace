@@ -1,5 +1,5 @@
 (function() {
-  var $, AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, EASE_FACTOR, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MAX_PROGRESS_PER_FRAME, MIN_TIME, RequestIntercept, RequestTracker, Scaler, avgKey, bar, check, go, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
+  var $, AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, EASE, EASE_FACTOR, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MAX_PROGRESS_PER_FRAME, MIN_TIME, RequestIntercept, RequestTracker, SPEED, Scaler, TEMPLATE, avgKey, bar, barPositionCSS, check, getPositioningCSS, go, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -19,6 +19,12 @@
   MAX_PROGRESS_PER_FRAME = 10;
 
   EASE_FACTOR = 1.25;
+
+  TEMPLATE = '<div class="bar"><div class="peg"></div></div><div class="spinner"></div>';
+
+  EASE = 'ease';
+
+  SPEED = 200;
 
   now = function() {
     var _ref;
@@ -60,6 +66,36 @@
     return sum / arr.length;
   };
 
+  getPositioningCSS = function() {
+    var s, vendorPrefix;
+    s = (document.body || document.documentElement).style;
+    vendorPrefix = s.WebkitTransform ? 'Webkit' : s.MozTransform ? 'Moz' : s.msTransform ? 'ms' : s.OTransform ? 'O' : '';
+    if (s[vendorPrefix + 'Perspective']) {
+      return 'translate3d';
+    } else if (s[vendorPrefix + 'Transform']) {
+      return 'translate';
+    } else {
+      return 'margin';
+    }
+  };
+
+  barPositionCSS = function(progress) {
+    var barCSS, leftPercentage, positioningCSS;
+    positioningCSS = getPositioningCSS();
+    leftPercentage = "" + (Math.min(0, progress - 100)) + "%";
+    barCSS = {
+      transition: "all " + SPEED + "ms " + EASE
+    };
+    if (positioningCSS === 'translate3d') {
+      barCSS.transform = "translate3d(" + leftPercentage + ", 0, 0)";
+    } else if (positioningCSS === 'translate') {
+      barCSS.transform = "translate(" + leftPercentage + ", 0)";
+    } else {
+      barCSS['margin-left'] = leftPercentage;
+    }
+    return barCSS;
+  };
+
   Bar = (function() {
     function Bar() {
       this.progress = 0;
@@ -68,7 +104,8 @@
     Bar.prototype.getElement = function() {
       if (this.el == null) {
         this.el = $('<div>')[0];
-        this.el.className = 'mprogress-bar';
+        this.el.className = 'mprogress';
+        this.el.innerHTML = TEMPLATE;
         $('body').prepend(this.el);
       }
       return this.el;
@@ -87,7 +124,7 @@
       if (!$('body').length) {
         return false;
       }
-      return this.getElement().style.width = "" + this.progress + "%";
+      return $(this.getElement()).find('.bar').css(barPositionCSS(this.progress));
     };
 
     Bar.prototype.done = function() {
@@ -401,7 +438,7 @@
 
   (check = function() {
     bar.render();
-    if (!$('.mprogress-bar').length) {
+    if (!$('.mprogress').length) {
       return setTimeout(check, 50);
     } else {
       return go();
