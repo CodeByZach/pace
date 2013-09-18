@@ -1,30 +1,28 @@
 (function() {
-  var $, AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, EASE_FACTOR, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MAX_PROGRESS_PER_FRAME, MIN_TIME, RequestIntercept, RequestTracker, Scaler, avgKey, bar, check, go, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
-    __slice = [].slice,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
+  var $, AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, EASE, EASE_FACTOR, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MAX_PROGRESS_PER_FRAME, MIN_TIME, RequestIntercept, RequestTracker, SPEED, Scaler, TEMPLATE, avgKey, bar, barPositionCSS, check, getPositioningCSS, go, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest;
+  var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
+    for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
+    function ctor() { this.constructor = child; }
+    ctor.prototype = parent.prototype;
+    child.prototype = new ctor;
+    child.__super__ = parent.prototype;
+    return child;
+  }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   $ = jQuery;
-
   CATCHUP_TIME = 500;
-
   INITIAL_RATE = .03;
-
   MIN_TIME = 500;
-
   GHOST_TIME = 250;
-
   ELEMENT_CHECK_INTERVAL = 100;
-
   MAX_PROGRESS_PER_FRAME = 10;
-
   EASE_FACTOR = 1.25;
-
+  TEMPLATE = '<div class="bar"><div class="peg"></div></div><div class="spinner"></div>';
+  EASE = 'ease';
+  SPEED = 200;
   now = function() {
     var _ref;
-    return (_ref = typeof performance !== "undefined" && performance !== null ? typeof performance.now === "function" ? performance.now() : void 0 : void 0) != null ? _ref : +(new Date);
+    return (_ref = typeof performance !== "undefined" && performance !== null ? typeof performance.now === "function" ? performance.now() : void 0 : void 0) != null ? _ref : +new Date;
   };
-
   runAnimation = function(fn) {
     var last, tick;
     last = now();
@@ -38,7 +36,6 @@
     };
     return tick();
   };
-
   result = function() {
     var args, key, obj;
     obj = arguments[0], key = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
@@ -48,7 +45,6 @@
       return obj[key];
     }
   };
-
   avgKey = function() {
     var args, arr, item, key, sum, _i, _len;
     arr = arguments[0], key = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
@@ -59,50 +55,69 @@
     }
     return sum / arr.length;
   };
-
+  getPositioningCSS = function() {
+    var s, vendorPrefix;
+    s = (document.body || document.documentElement).style;
+    vendorPrefix = s.WebkitTransform ? 'Webkit' : s.MozTransform ? 'Moz' : s.msTransform ? 'ms' : s.OTransform ? 'O' : '';
+    if (s[vendorPrefix + 'Perspective']) {
+      return 'translate3d';
+    } else if (s[vendorPrefix + 'Transform']) {
+      return 'translate';
+    } else {
+      return 'margin';
+    }
+  };
+  barPositionCSS = function(progress) {
+    var barCSS, leftPercentage, positioningCSS;
+    positioningCSS = getPositioningCSS();
+    leftPercentage = "" + (Math.min(0, progress - 100)) + "%";
+    barCSS = {
+      transition: "all " + SPEED + "ms " + EASE
+    };
+    if (positioningCSS === 'translate3d') {
+      barCSS.transform = "translate3d(" + leftPercentage + ", 0, 0)";
+    } else if (positioningCSS === 'translate') {
+      barCSS.transform = "translate(" + leftPercentage + ", 0)";
+    } else {
+      barCSS['margin-left'] = leftPercentage;
+    }
+    return barCSS;
+  };
   Bar = (function() {
     function Bar() {
       this.progress = 0;
     }
-
     Bar.prototype.getElement = function() {
-      if (this.el == null) {
+      if (!(this.el != null)) {
         this.el = $('<div>')[0];
-        this.el.className = 'mprogress-bar';
+        this.el.className = 'mprogress';
+        this.el.innerHTML = TEMPLATE;
         $('body').prepend(this.el);
       }
       return this.el;
     };
-
     Bar.prototype.hide = function() {
       return this.getElement().style.display = 'none';
     };
-
     Bar.prototype.update = function(prog) {
       this.progress = prog;
       return this.render();
     };
-
     Bar.prototype.render = function() {
       if (!$('body').length) {
         return false;
       }
-      return this.getElement().style.width = "" + this.progress + "%";
+      return $(this.getElement()).find('.bar').css(barPositionCSS(this.progress));
     };
-
     Bar.prototype.done = function() {
       return this.progress >= 100;
     };
-
     return Bar;
-
   })();
-
   Events = (function() {
     function Events() {
       this.bindings = {};
     }
-
     Events.prototype.trigger = function(name, val) {
       var binding, _i, _len, _ref, _results;
       if (this.bindings[name] != null) {
@@ -115,24 +130,18 @@
         return _results;
       }
     };
-
     Events.prototype.on = function(name, fn) {
-      var _base;
-      if ((_base = this.bindings)[name] == null) {
+      var _base, _ref;
+      if ((_ref = (_base = this.bindings)[name]) == null) {
         _base[name] = [];
       }
       return this.bindings[name].push(fn);
     };
-
     return Events;
-
   })();
-
   _XMLHttpRequest = window.XMLHttpRequest;
-
-  RequestIntercept = (function(_super) {
-    __extends(RequestIntercept, _super);
-
+  RequestIntercept = (function() {
+    __extends(RequestIntercept, Events);
     function RequestIntercept() {
       var _intercept;
       RequestIntercept.__super__.constructor.apply(this, arguments);
@@ -152,42 +161,32 @@
         return req;
       };
     }
-
     return RequestIntercept;
-
-  })(Events);
-
+  })();
   intercept = new RequestIntercept;
-
   AjaxMonitor = (function() {
     function AjaxMonitor() {
-      var _this = this;
       this.elements = [];
-      intercept.on('request', function(_arg) {
+      intercept.on('request', __bind(function(_arg) {
         var request;
         request = _arg.request;
-        return _this.watch(request);
-      });
+        return this.watch(request);
+      }, this));
     }
-
     AjaxMonitor.prototype.watch = function(request) {
       var tracker;
       tracker = new RequestTracker(request);
       return this.elements.push(tracker);
     };
-
     return AjaxMonitor;
-
   })();
-
   RequestTracker = (function() {
     function RequestTracker(request) {
-      var size,
-        _this = this;
+      var size;
       this.progress = 0;
       size = null;
-      request.onprogress = function() {
-        var e, headers, name, val;
+      request.onprogress = __bind(function() {
+        var headers, name, val;
         try {
           headers = request.getAllResponseHeaders();
           for (name in headers) {
@@ -197,28 +196,25 @@
               break;
             }
           }
-        } catch (_error) {
-          e = _error;
+        } catch (e) {
+
         }
         if (size != null) {
           try {
-            return _this.progress = request.responseText.length / size;
-          } catch (_error) {
-            e = _error;
+            return this.progress = request.responseText.length / size;
+          } catch (e) {
+
           }
         } else {
-          return _this.progress = _this.progress + (100 - _this.progress) / 2;
+          return this.progress = this.progress + (100 - this.progress) / 2;
         }
-      };
-      request.onload = request.onerror = request.ontimeout = request.onabort = function() {
-        return _this.progress = 100;
-      };
+      }, this);
+      request.onload = request.onerror = request.ontimeout = request.onabort = __bind(function() {
+        return this.progress = 100;
+      }, this);
     }
-
     return RequestTracker;
-
   })();
-
   ElementMonitor = (function() {
     function ElementMonitor() {
       var selectors, set, _i, _len;
@@ -229,11 +225,8 @@
         this.elements.push(new ElementTracker(set));
       }
     }
-
     return ElementMonitor;
-
   })();
-
   ElementTracker = (function() {
     function ElementTracker(selectors) {
       this.progress = 0;
@@ -244,56 +237,44 @@
       }
       this.check();
     }
-
     ElementTracker.prototype.check = function() {
-      var _this = this;
       if ($(this.selector).length) {
         return this.done();
       } else {
-        return setTimeout((function() {
-          return _this.check();
-        }), ELEMENT_CHECK_INTERVAL);
+        return setTimeout((__bind(function() {
+          return this.check();
+        }, this)), ELEMENT_CHECK_INTERVAL);
       }
     };
-
     ElementTracker.prototype.done = function() {
       return this.progress = 100;
     };
-
     return ElementTracker;
-
   })();
-
   DocumentMonitor = (function() {
     DocumentMonitor.prototype.states = {
       loading: 0,
       interactive: 50,
       complete: 100
     };
-
     function DocumentMonitor() {
-      var _this = this;
       this.progress = 0;
-      document.onreadystatechange = function() {
-        if (_this.states[document.readyState] != null) {
-          return _this.progress = _this.states[document.readyState];
+      document.onreadystatechange = __bind(function() {
+        if (this.states[document.readyState] != null) {
+          return this.progress = this.states[document.readyState];
         }
-      };
+      }, this);
     }
-
     return DocumentMonitor;
-
   })();
-
   EventLagMonitor = (function() {
     function EventLagMonitor() {
-      var avg, last, points,
-        _this = this;
+      var avg, last, points;
       this.progress = 0;
       avg = 0;
       points = 0;
       last = now();
-      setInterval(function() {
+      setInterval(__bind(function() {
         var diff;
         diff = now() - last - 50;
         last = now();
@@ -301,14 +282,11 @@
         if (points++ > 20 && Math.abs(avg) < 3) {
           avg = 0;
         }
-        return _this.progress = 100 * (3 / (avg + 3));
-      }, 50);
+        return this.progress = 100 * (3 / (avg + 3));
+      }, this), 50);
     }
-
     return EventLagMonitor;
-
   })();
-
   Scaler = (function() {
     function Scaler(source) {
       this.source = source;
@@ -320,7 +298,6 @@
         this.progress = result(this.source, 'progress');
       }
     }
-
     Scaler.prototype.tick = function(frameTime, val) {
       var scaling;
       if (val == null) {
@@ -350,33 +327,27 @@
       this.lastProgress = this.progress;
       return this.progress;
     };
-
     return Scaler;
-
   })();
-
   sources = [new AjaxMonitor, new ElementMonitor('body'), new DocumentMonitor, new EventLagMonitor];
-
   scalers = [];
-
   bar = new Bar;
-
   go = function() {
     var uniScaler;
     bar.render();
     uniScaler = new Scaler;
     return runAnimation(function(frameTime, enqueueNextFrame) {
-      var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
+      var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, source, start, sum, _len, _len2, _ref, _ref2, _ref3;
       remaining = 100 - bar.progress;
       count = sum = 0;
       done = true;
-      for (i = _i = 0, _len = sources.length; _i < _len; i = ++_i) {
+      for (i = 0, _len = sources.length; i < _len; i++) {
         source = sources[i];
-        scalerList = scalers[i] != null ? scalers[i] : scalers[i] = [];
-        elements = (_ref = source.elements) != null ? _ref : [source];
-        for (j = _j = 0, _len1 = elements.length; _j < _len1; j = ++_j) {
+        scalerList = (_ref = scalers[i]) != null ? _ref : scalers[i] = [];
+        elements = (_ref2 = source.elements) != null ? _ref2 : [source];
+        for (j = 0, _len2 = elements.length; j < _len2; j++) {
           element = elements[j];
-          scaler = scalerList[j] != null ? scalerList[j] : scalerList[j] = new Scaler(element);
+          scaler = (_ref3 = scalerList[j]) != null ? _ref3 : scalerList[j] = new Scaler(element);
           done &= scaler.done;
           if (scaler.done) {
             continue;
@@ -398,14 +369,12 @@
       }
     });
   };
-
   (check = function() {
     bar.render();
-    if (!$('.mprogress-bar').length) {
+    if (!$('.mprogress').length) {
       return setTimeout(check, 50);
     } else {
       return go();
     }
   })();
-
 }).call(this);
