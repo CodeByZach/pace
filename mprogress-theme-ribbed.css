@@ -1,0 +1,47 @@
+.mprogress .bar {
+  overflow: hidden;
+  height: 5px;
+}
+
+.mprogress .peg {
+  width: 120%;
+  position: fixed;
+  left: -10%;
+
+  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAQCAYAAAB3AH1ZAAAAQ0lEQVR42uXNoQ0AIBTEUPZf4o96nKsiCEQFTZ7uupXkqE3lwfw9T+LOy52XNIc0hzSHNYc0hzSHNIc0hzSHNIc0xwb6PzfnUz+PRwAAAABJRU5ErkJggg==");
+  background-color: #29d;
+  height: 5px;
+
+  box-shadow: none;
+
+  -webkit-animation: mprogress-stripe-animation 500ms linear infinite;
+  -moz-animation: mprogress-stripe-animation 500ms linear infinite;
+  -ms-animation: mprogress-stripe-animation 500ms linear infinite;
+  -o-animation: mprogress-stripe-animation 500ms linear infinite;
+  animation: mprogress-stripe-animation 500ms linear infinite;
+}
+
+@-webkit-keyframes mprogress-stripe-animation {
+  0% { -webkit-transform: none; transform: none; }
+  100% { -webkit-transform: translate(-32px, 0); transform: translate(-32px, 0); }
+}
+@-moz-keyframes mprogress-stripe-animation {
+  0% { -moz-transform: none; transform: none; }
+  100% { -moz-transform: translate(-32px, 0); transform: translate(-32px, 0); }
+}
+@-o-keyframes mprogress-stripe-animation {
+  0% { -o-transform: none; transform: none; }
+  100% { -o-transform: translate(-32px, 0); transform: translate(-32px, 0); }
+}
+@-ms-keyframes mprogress-stripe-animation {
+  0% { -ms-transform: none; transform: none; }
+  100% { -ms-transform: translate(-32px, 0); transform: translate(-32px, 0); }
+}
+@keyframes mprogress-stripe-animation {
+  0% { transform: none; transform: none; }
+  100% { transform: translate(-32px, 0); transform: translate(-32px, 0); }
+}
+
+.mprogress .spinner {
+  top: 20px;
+}
