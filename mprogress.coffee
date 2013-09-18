@@ -206,7 +206,6 @@ class DocumentMonitor
       if @states[document.readyState]?
         @progress = @states[document.readyState]
 
-
 class EventLagMonitor
   constructor: ->
     @progress = 0
