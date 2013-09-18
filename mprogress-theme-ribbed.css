@@ -43,5 +43,5 @@
 }
 
 .mprogress .spinner {
-  top: 20px;
+  display: none;
 }
