@@ -3,7 +3,7 @@ pace
 
 Automatic page load progress bar
 
-Include pace.js and pace.css on your page (as early as is possible), and you're done!
+Include pace.js and the theme css of your choice on your page (as early as is possible), and you're done!
 
 If you use AMD or Browserify, require in pace.js and call `pace.start()` as early in
 the loading process as is possible.
