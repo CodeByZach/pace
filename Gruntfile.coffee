@@ -4,11 +4,11 @@ module.exports = (grunt) ->
     coffee:
       compile:
         files:
-          'mprogress.js': 'mprogress.coffee'
+          'pace.js': 'pace.coffee'
 
     watch:
       coffee:
-        files: ['mprogress.coffee']
+        files: ['pace.coffee']
         tasks: ["coffee", "uglify"]
 
     uglify:
@@ -16,8 +16,8 @@ module.exports = (grunt) ->
         banner: "/*! <%= pkg.name %> <%= pkg.version %> */\n"
 
       dist:
-        src: 'mprogress.js'
-        dest: 'mprogress.min.js'
+        src: 'pace.js'
+        dest: 'pace.min.js'
 
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-contrib-uglify'

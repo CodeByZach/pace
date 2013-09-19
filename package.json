@@ -1,13 +1,9 @@
 {
-  "name": "mprogress",
+  "name": "pace",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "Zack Bloom <zbloom@hubspot.com>",
-  "license": "BSD",
+  "license": "MIT",
   "devDependencies": {
     "grunt-contrib-coffee": "~0.7.0",
     "coffee-script": "~1.6.3",
