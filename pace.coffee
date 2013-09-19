@@ -248,14 +248,23 @@ class RequestTracker
 
       _onprogress?(arguments...)
 
-    _onreadystatechange = request.onreadystatechange
-    request.onreadystatechange = =>
-      if request.readyState in [0, 4]
-        @progress = 100
-      else if not request.onprogress? and request.readyState is 3
-        @progress = 50
+      for handler in ['onload', 'onabort', 'ontimeout', 'onerror']
+        do =>
+          fn = request[handler]
+          request[handler] = =>
+            @progress = 100
 
-      _onreadystatechange?(arguments...)
+            fn?(arguments...)
+
+    else
+      _onreadystatechange = request.onreadystatechange
+      request.onreadystatechange = =>
+        if request.readyState in [0, 4]
+          @progress = 100
+        else if request.readyState is 3
+          @progress = 50
+
+        _onreadystatechange?(arguments...)
 
 class ElementMonitor
   constructor: (options={}) ->

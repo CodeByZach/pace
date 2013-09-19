@@ -14,9 +14,7 @@
 
   <script>
     paceOptions = {
-      elements: {
-        selectors: ['.x']
-      }
+      elements: false
     };
   </script>
   <script src="pace.js"></script>
@@ -32,7 +30,6 @@
     load(500);
     load(2000);
     load(3000);
-
 
     setTimeout(function(){
       var el = document.createElement("div");

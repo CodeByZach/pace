@@ -263,7 +263,7 @@
 
   RequestTracker = (function() {
     function RequestTracker(request) {
-      var size, _onprogress, _onreadystatechange,
+      var handler, size, _fn, _i, _len, _onprogress, _onreadystatechange, _ref,
         _this = this;
       this.progress = 0;
       if (request.onprogress !== void 0) {
@@ -296,17 +296,31 @@
         if (typeof _onprogress === "function") {
           _onprogress.apply(null, arguments);
         }
-      }
-      _onreadystatechange = request.onreadystatechange;
-      request.onreadystatechange = function() {
-        var _ref;
-        if ((_ref = request.readyState) === 0 || _ref === 4) {
-          _this.progress = 100;
-        } else if ((request.onprogress == null) && request.readyState === 3) {
-          _this.progress = 50;
+        _ref = ['onload', 'onabort', 'ontimeout', 'onerror'];
+        _fn = function() {
+          var fn;
+          fn = request[handler];
+          return request[handler] = function() {
+            _this.progress = 100;
+            return typeof fn === "function" ? fn.apply(null, arguments) : void 0;
+          };
+        };
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          handler = _ref[_i];
+          _fn();
         }
-        return typeof _onreadystatechange === "function" ? _onreadystatechange.apply(null, arguments) : void 0;
-      };
+      } else {
+        _onreadystatechange = request.onreadystatechange;
+        request.onreadystatechange = function() {
+          var _ref1;
+          if ((_ref1 = request.readyState) === 0 || _ref1 === 4) {
+            _this.progress = 100;
+          } else if (request.readyState === 3) {
+            _this.progress = 50;
+          }
+          return typeof _onreadystatechange === "function" ? _onreadystatechange.apply(null, arguments) : void 0;
+        };
+      }
     }
 
     return RequestTracker;
