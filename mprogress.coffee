@@ -76,6 +76,11 @@ class Bar
 
     do @render
 
+  destroy: ->
+    @getElement().parentNode.removeChild(@getElement)
+
+    @el = undefined
+
   render: ->
     if not $('body').length
       return false
@@ -273,17 +278,50 @@ class Scaler
 
     @progress
 
-sources = [new AjaxMonitor, new ElementMonitor('body'), new DocumentMonitor, new EventLagMonitor]
-scalers = []
+sources = null
+scalers = null
+bar = null
+uniScaler = null
+animation = null
 
-bar = new Bar
+if window.pushState?
+  _pushState = window.pushState
+  window.pushState = ->
+    handlePageChange()
+
+    _pushState arguments...
+
+if window.replaceState?
+  _replaceState = window.replaceState
+  window.replaceState = ->
+    handlePageChange()
+
+    _replaceState arguments...
+
+do init = ->
+  sources = [new AjaxMonitor, new ElementMonitor('body'), new DocumentMonitor, new EventLagMonitor]
+  scalers = []
+
+  bar = new Bar
+  uniScaler = new Scaler
+
+reset = ->
+  bar.destroy()
+
+  if animation?
+    cancelAnimationFrame animation
+    animation = null
+
+  init()
+
+handlePageChange = ->
+  reset()
+  go()
 
 go = ->
   bar.render()
 
-  uniScaler = new Scaler
-
-  runAnimation (frameTime, enqueueNextFrame) ->
+  animation = runAnimation (frameTime, enqueueNextFrame) ->
     # Every source gives us a progress number from 0 - 100
     # It's up to us to figure out how to turn that into a smoothly moving bar
     #

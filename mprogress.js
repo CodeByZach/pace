@@ -1,5 +1,5 @@
 (function() {
-  var $, AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, EASE_FACTOR, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MAX_PROGRESS_PER_FRAME, MIN_TIME, RequestIntercept, RequestTracker, Scaler, avgKey, bar, check, go, intercept, now, result, runAnimation, scalers, sources, _XMLHttpRequest,
+  var $, AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, EASE_FACTOR, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MAX_PROGRESS_PER_FRAME, MIN_TIME, RequestIntercept, RequestTracker, Scaler, animation, avgKey, bar, check, go, handlePageChange, init, intercept, now, reset, result, runAnimation, scalers, sources, uniScaler, _XMLHttpRequest, _pushState, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -81,6 +81,11 @@
     Bar.prototype.update = function(prog) {
       this.progress = prog;
       return this.render();
+    };
+
+    Bar.prototype.destroy = function() {
+      this.getElement().parentNode.removeChild(this.getElement);
+      return this.el = void 0;
     };
 
     Bar.prototype.render = function() {
@@ -355,17 +360,56 @@
 
   })();
 
-  sources = [new AjaxMonitor, new ElementMonitor('body'), new DocumentMonitor, new EventLagMonitor];
+  sources = null;
 
-  scalers = [];
+  scalers = null;
 
-  bar = new Bar;
+  bar = null;
+
+  uniScaler = null;
+
+  animation = null;
+
+  if (window.pushState != null) {
+    _pushState = window.pushState;
+    window.pushState = function() {
+      handlePageChange();
+      return _pushState.apply(null, arguments);
+    };
+  }
+
+  if (window.replaceState != null) {
+    _replaceState = window.replaceState;
+    window.replaceState = function() {
+      handlePageChange();
+      return _replaceState.apply(null, arguments);
+    };
+  }
+
+  (init = function() {
+    sources = [new AjaxMonitor, new ElementMonitor('body'), new DocumentMonitor, new EventLagMonitor];
+    scalers = [];
+    bar = new Bar;
+    return uniScaler = new Scaler;
+  })();
+
+  reset = function() {
+    bar.destroy();
+    if (animation != null) {
+      cancelAnimationFrame(animation);
+      animation = null;
+    }
+    return init();
+  };
+
+  handlePageChange = function() {
+    reset();
+    return go();
+  };
 
   go = function() {
-    var uniScaler;
     bar.render();
-    uniScaler = new Scaler;
-    return runAnimation(function(frameTime, enqueueNextFrame) {
+    return animation = runAnimation(function(frameTime, enqueueNextFrame) {
       var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
       remaining = 100 - bar.progress;
       count = sum = 0;
