@@ -1,6 +1,6 @@
-mprogress
-=========
+pace
+====
 
-Automatic nprogress
+Automatic page load progress bar
 
-Include mprogress.js and mprogress.css on your page.
+Include pace.js and pace.css on your page.
