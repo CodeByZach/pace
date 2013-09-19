@@ -1,4 +1,4 @@
 title: "Pace"
 source: "*.js"
 examples: "**/*.md"
-assets: "{docs/themes/index.html,docs/themes/pace-theme-minimal.html,docs/themes/pace-theme-flash.html,docs/themes/pace-theme-barber-shop.html,docs/themes/pace-theme-mac-osx.html}"
+assets: "{docs/themes/index.html,pace-theme-minimal,pace-theme-flash.css,pace-theme-barber-shop.css,pace-theme-mac-osx.css,docs/themes/pace-theme-minimal.html,docs/themes/pace-theme-flash.html,docs/themes/pace-theme-barber-shop.html,docs/themes/pace-theme-mac-osx.html}"
