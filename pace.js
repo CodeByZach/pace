@@ -1,27 +1,40 @@
 (function() {
-  var AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, EASE_FACTOR, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MAX_PROGRESS_PER_FRAME, MIN_TIME, RequestIntercept, RequestTracker, Scaler, animation, avgKey, bar, check, go, handlePageChange, init, intercept, now, reset, result, runAnimation, scalers, sources, uniScaler, _XMLHttpRequest, _pushState, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, RequestIntercept, RequestTracker, SOURCE_KEYS, Scaler, animation, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, getOptionsFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _XMLHttpRequest, _pushState, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  CATCHUP_TIME = 500;
-
-  INITIAL_RATE = .03;
-
-  MIN_TIME = 500;
-
-  GHOST_TIME = 250;
-
-  ELEMENT_CHECK_INTERVAL = 100;
-
-  MAX_PROGRESS_PER_FRAME = 10;
-
-  EASE_FACTOR = 1.25;
+  defaultOptions = {
+    catchupTime: 500,
+    initialRate: .03,
+    minTime: 500,
+    ghostTime: 250,
+    maxProgressPerFrame: 10,
+    easeFactor: 1.25,
+    restartOnPushState: true,
+    elements: {
+      checkInterval: 100,
+      selectors: ['body']
+    }
+  };
 
   now = function() {
     var _ref;
     return (_ref = typeof performance !== "undefined" && performance !== null ? typeof performance.now === "function" ? performance.now() : void 0 : void 0) != null ? _ref : +(new Date);
   };
+
+  requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
+  cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+
+  if (requestAnimationFrame == null) {
+    requestAnimationFrame = function(fn) {
+      return setTimeout(fn, 50);
+    };
+    cancelAnimationFrame = function(id) {
+      return clearTimeout(id);
+    };
+  }
 
   runAnimation = function(fn) {
     var last, tick;
@@ -47,16 +60,47 @@
     }
   };
 
-  avgKey = function() {
-    var args, arr, item, key, sum, _i, _len;
-    arr = arguments[0], key = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
-    sum = 0;
-    for (_i = 0, _len = arr.length; _i < _len; _i++) {
-      item = arr[_i];
-      sum += result.apply(null, [item, key].concat(__slice.call(args)));
+  extend = function() {
+    var key, out, source, sources, val, _i, _len;
+    out = arguments[0], sources = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    for (_i = 0, _len = sources.length; _i < _len; _i++) {
+      source = sources[_i];
+      if (source) {
+        for (key in source) {
+          if (!__hasProp.call(source, key)) continue;
+          val = source[key];
+          if ((out[key] != null) && typeof out[key] === 'object' && (val != null) && typeof val === 'object') {
+            extend(out[key], val);
+          } else {
+            out[key] = val;
+          }
+        }
+      }
     }
-    return sum / arr.length;
+    return out;
   };
+
+  getOptionsFromDOM = function() {
+    var data, e, el;
+    el = document.querySelector('[data-pace-options]');
+    data = el.getAttribute('data-pace-options');
+    try {
+      return JSON.parse(data);
+    } catch (_error) {
+      e = _error;
+      return console.error("Error parsing inline pace options", e);
+    }
+  };
+
+  if (window.Pace == null) {
+    window.Pace = {};
+  }
+
+  if (Pace.options == null) {
+    Pace.options = {};
+  }
+
+  options = extend(typeof Pace !== "undefined" && Pace !== null ? Pace.options : void 0, getOptionsFromDOM(), defaultOptions);
 
   Bar = (function() {
     function Bar() {
@@ -190,36 +234,49 @@
 
   RequestTracker = (function() {
     function RequestTracker(request) {
-      var size,
+      var size, _onprogress, _onreadystatechange,
         _this = this;
       this.progress = 0;
-      size = null;
-      request.onprogress = function() {
-        var e, headers, name, val;
-        try {
-          headers = request.getAllResponseHeaders();
-          for (name in headers) {
-            val = headers[name];
-            if (name.toLowerCase() === 'content-length') {
-              size = +val;
-              break;
-            }
-          }
-        } catch (_error) {
-          e = _error;
-        }
-        if (size != null) {
+      if (request.onprogress !== void 0) {
+        size = null;
+        _onprogress = request.onprogress;
+        request.onprogress = function() {
+          var e, headers, name, val;
           try {
-            return _this.progress = request.responseText.length / size;
+            headers = request.getAllResponseHeaders();
+            for (name in headers) {
+              val = headers[name];
+              if (name.toLowerCase() === 'content-length') {
+                size = +val;
+                break;
+              }
+            }
           } catch (_error) {
             e = _error;
           }
-        } else {
-          return _this.progress = _this.progress + (100 - _this.progress) / 2;
+          if (size != null) {
+            try {
+              return _this.progress = request.responseText.length / size;
+            } catch (_error) {
+              e = _error;
+            }
+          } else {
+            return _this.progress = _this.progress + (100 - _this.progress) / 2;
+          }
+        };
+        if (typeof _onprogress === "function") {
+          _onprogress.apply(null, arguments);
         }
-      };
-      request.onload = request.onerror = request.ontimeout = request.onabort = function() {
-        return _this.progress = 100;
+      }
+      _onreadystatechange = request.onreadystatechange;
+      request.onreadystatechange = function() {
+        var _ref;
+        if ((_ref = request.readyState) === 0 || _ref === 4) {
+          _this.progress = 100;
+        } else if ((request.onprogress == null) && request.readyState === 3) {
+          _this.progress = 50;
+        }
+        return typeof _onreadystatechange === "function" ? _onreadystatechange.apply(null, arguments) : void 0;
       };
     }
 
@@ -228,13 +285,19 @@
   })();
 
   ElementMonitor = (function() {
-    function ElementMonitor() {
-      var selectors, set, _i, _len;
-      selectors = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    function ElementMonitor(options) {
+      var selector, _i, _len, _ref;
+      if (options == null) {
+        options = {};
+      }
       this.elements = [];
-      for (_i = 0, _len = selectors.length; _i < _len; _i++) {
-        set = selectors[_i];
-        this.elements.push(new ElementTracker(set));
+      if (options.selectors == null) {
+        options.selectors = [];
+      }
+      _ref = options.selectors;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        selector = _ref[_i];
+        this.elements.push(new ElementTracker(selector));
       }
     }
 
@@ -243,13 +306,9 @@
   })();
 
   ElementTracker = (function() {
-    function ElementTracker(selectors) {
+    function ElementTracker(selector) {
+      this.selector = selector;
       this.progress = 0;
-      if (typeof selectors === 'string') {
-        this.selector = selectors;
-      } else {
-        this.selector = selectors.join(',');
-      }
       this.check();
     }
 
@@ -260,7 +319,7 @@
       } else {
         return setTimeout((function() {
           return _this.check();
-        }), ELEMENT_CHECK_INTERVAL);
+        }), options.elements.checkInterval);
       }
     };
 
@@ -280,12 +339,15 @@
     };
 
     function DocumentMonitor() {
-      var _this = this;
+      var _onreadystatechange,
+        _this = this;
       this.progress = 0;
+      _onreadystatechange = document.onreadystatechange;
       document.onreadystatechange = function() {
         if (_this.states[document.readyState] != null) {
-          return _this.progress = _this.states[document.readyState];
+          _this.progress = _this.states[document.readyState];
         }
+        return typeof _onreadystatechange === "function" ? _onreadystatechange.apply(null, arguments) : void 0;
       };
     }
 
@@ -321,7 +383,7 @@
     function Scaler(source) {
       this.source = source;
       this.last = this.sinceLastUpdate = 0;
-      this.rate = 0.03;
+      this.rate = options.initialRate;
       this.catchup = 0;
       this.progress = this.lastProgress = 0;
       if (this.source != null) {
@@ -343,18 +405,18 @@
         if (this.sinceLastUpdate) {
           this.rate = (val - this.last) / this.sinceLastUpdate;
         }
-        this.catchup = (val - this.progress) / CATCHUP_TIME;
+        this.catchup = (val - this.progress) / options.catchupTime;
         this.sinceLastUpdate = 0;
         this.last = val;
       }
       if (val > this.progress) {
         this.progress += this.catchup * frameTime;
       }
-      scaling = 1 - Math.pow(this.progress / 100, EASE_FACTOR);
+      scaling = 1 - Math.pow(this.progress / 100, options.easeFactor);
       this.progress += scaling * this.rate * frameTime;
+      this.progress = Math.min(this.lastProgress + options.maxProgressPerFrame, this.progress);
       this.progress = Math.max(0, this.progress);
       this.progress = Math.min(100, this.progress);
-      this.progress = Math.min(this.lastProgress + MAX_PROGRESS_PER_FRAME, this.progress);
       this.lastProgress = this.progress;
       return this.progress;
     };
@@ -373,10 +435,18 @@
 
   animation = null;
 
+  cancelAnimation = null;
+
+  handlePushState = function() {
+    if (options.restartOnPushState) {
+      return Pace.restart();
+    }
+  };
+
   if (window.pushState != null) {
     _pushState = window.pushState;
     window.pushState = function() {
-      handlePageChange();
+      handlePushState();
       return _pushState.apply(null, arguments);
     };
   }
@@ -384,34 +454,53 @@
   if (window.replaceState != null) {
     _replaceState = window.replaceState;
     window.replaceState = function() {
-      handlePageChange();
+      handlePushState();
       return _replaceState.apply(null, arguments);
     };
   }
 
+  SOURCE_KEYS = {
+    ajax: AjaxMonitor,
+    elements: ElementMonitor,
+    document: DocumentMonitor,
+    eventLag: EventLagMonitor
+  };
+
   (init = function() {
-    sources = [new AjaxMonitor, new ElementMonitor('body'), new DocumentMonitor, new EventLagMonitor];
-    scalers = [];
+    var type, _i, _len, _ref, _ref1;
+    sources = (_ref = options.extraSources) != null ? _ref : [];
+    _ref1 = ['ajax', 'elements', 'document', 'eventLag'];
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+      type = _ref1[_i];
+      if (options[type] !== false) {
+        sources.push(new ELEMENT_KEYS[type](options[type]));
+      }
+    }
     bar = new Bar;
+    scalers = [];
     return uniScaler = new Scaler;
   })();
 
-  reset = function() {
+  Pace.stop = function() {
     bar.destroy();
+    cancelAnimation = true;
     if (animation != null) {
-      cancelAnimationFrame(animation);
+      if (typeof cancelAnimationFrame === "function") {
+        cancelAnimationFrame(animation);
+      }
       animation = null;
     }
     return init();
   };
 
-  handlePageChange = function() {
-    reset();
-    return go();
+  Pace.restart = function() {
+    Pace.stop();
+    return Pace.go();
   };
 
-  go = function() {
+  Page.go = function() {
     bar.render();
+    cancelAnimation = false;
     return animation = runAnimation(function(frameTime, enqueueNextFrame) {
       var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
       remaining = 100 - bar.progress;
@@ -435,24 +524,35 @@
       avg = sum / count;
       bar.update(uniScaler.tick(frameTime, avg));
       start = now();
-      if (bar.done() || done) {
+      if (bar.done() || done || cancelAnimation) {
         bar.update(100);
         return setTimeout(function() {
           return bar.finish();
-        }, Math.max(GHOST_TIME, Math.min(MIN_TIME, now() - start)));
+        }, Math.max(options.ghostTime, Math.min(options.minTime, now() - start)));
       } else {
         return enqueueNextFrame();
       }
     });
   };
 
-  (check = function() {
+  Pace.start = function(_options) {
+    extend(options, _options);
     bar.render();
     if (!document.querySelector('.pace')) {
-      return setTimeout(check, 50);
+      return setTimeout(Pace.start, 50);
     } else {
-      return go();
+      return Pace.go();
     }
-  })();
+  };
+
+  if (typeof define === 'function' && define.amd) {
+    define(function() {
+      return Pace;
+    });
+  } else if (typeof exports === 'object') {
+    module.exports = Pace;
+  } else {
+    Pace.start();
+  }
 
 }).call(this);

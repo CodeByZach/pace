@@ -15,10 +15,6 @@ defaultOptions =
   # update before disappearing
   ghostTime: 250
 
-  # How frequently in ms should we check for the elements being tested for
-  # using the element monitor?
-  elementCheckInterval: 100
-
   # Its easy for a bunch of the bar to be eaten in the first few frames
   # before we know how much there is to load.  This limits how much of
   # the bar can be used per frame
@@ -26,6 +22,18 @@ defaultOptions =
 
   # This tweaks the animation easing
   easeFactor: 1.25
+
+  # Should we restart the browser when pushState or replaceState is called?  (Generally
+  # means ajax navigation has occured)
+  restartOnPushState: true
+
+  elements:
+    # How frequently in ms should we check for the elements being tested for
+    # using the element monitor?
+    checkInterval: 100
+    
+    # What elements should we wait for before deciding the page is fully loaded (not required)
+    selectors: ['body']
 
 now = ->
   performance?.now?() ? +new Date
@@ -62,7 +70,10 @@ result = (obj, key, args...) ->
 extend = (out, sources...) ->
   for source in sources when source
     for own key, val of source
-      out[key] = val
+      if out[key]? and typeof out[key] is 'object' and val? and typeof val is 'object'
+        extend(out[key], val)
+      else
+        out[key] = val
   out
 
 getOptionsFromDOM = ->
@@ -217,29 +228,28 @@ class RequestTracker
       _onreadystatechange?(arguments...)
 
 class ElementMonitor
-  constructor: (selectors...) ->
+  constructor: (options={}) ->
     @elements = []
 
-    for set in selectors
-      @elements.push new ElementTracker set
+    options.selectors ?= []
+    for selector in options.selectors
+      @elements.push new ElementTracker selector
     
 class ElementTracker
-  constructor: (@selectors) ->
+  constructor: (@selector) ->
     @progress = 0
-
-    if typeof @selectors is 'string'
-      @selectors = [@selectors]
 
     @check()
 
   check: ->
-    matches = document.querySelectorAll(@selectors.join(','))
-
-    if matches.length
-      @progress = 100 * matches.length / @selectors.length
+    if document.querySelector(@selector)
+      @done()
     else
       setTimeout (=> @check()),
-        options.elementCheckInterval
+        options.elements.checkInterval
+
+  done: ->
+    @progress = 100
 
 class DocumentMonitor
   states:
@@ -316,10 +326,11 @@ class Scaler
     # know it's done.
     @progress += scaling * @rate * frameTime
 
+    @progress = Math.min(@lastProgress + options.maxProgressPerFrame, @progress)
+
     @progress = Math.max(0, @progress)
     @progress = Math.min(100, @progress)
 
-    @progress = Math.min(@lastProgress + options.maxProgressPerFrame, @progress)
     @lastProgress = @progress
 
     @progress
@@ -331,24 +342,38 @@ uniScaler = null
 animation = null
 cancelAnimation = null
 
+handlePushState = ->
+  if options.restartOnPushState
+    Pace.restart()
+
 # We reset the bar whenever it looks like an ajax navigation has occured.
 if window.pushState?
   _pushState = window.pushState
   window.pushState = ->
-    handlePageChange()
+    handlePushState()
 
     _pushState arguments...
 
 if window.replaceState?
   _replaceState = window.replaceState
   window.replaceState = ->
-    handlePageChange()
+    handlePushState()
 
     _replaceState arguments...
 
+SOURCE_KEYS =
+  ajax: AjaxMonitor
+  elements: ElementMonitor
+  document: DocumentMonitor
+  eventLag: EventLagMonitor
+
 do init = ->
-  sources = [new AjaxMonitor, new ElementMonitor('body'), new DocumentMonitor, new EventLagMonitor]
-  
+  sources = options.extraSources ? []
+
+  for type in ['ajax', 'elements', 'document', 'eventLag']
+    if options[type] isnt false
+      sources.push new ELEMENT_KEYS[type](options[type])
+
   bar = new Bar
 
   # Each source of progress data has it's own scaler to smooth its output
@@ -358,7 +383,7 @@ do init = ->
   # remove sources
   uniScaler = new Scaler
 
-Pace.reset = ->
+Pace.stop = ->
   bar.destroy()
 
   # Not all browsers support cancelAnimationFrame
@@ -370,8 +395,8 @@ Pace.reset = ->
 
   init()
 
-handlePageChange = ->
-  Pace.reset()
+Pace.restart = ->
+  Pace.stop()
   Pace.go()
 
 Page.go = ->
@@ -421,7 +446,9 @@ Page.go = ->
     else
       enqueueNextFrame()
 
-Pace.start = ->
+Pace.start = (_options) ->
+  extend options, _options
+
   bar.render()
 
   # It's usually possible to render a bit before the document declares itself ready
