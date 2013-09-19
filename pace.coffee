@@ -107,7 +107,7 @@ class Bar
   getElement: ->
     if not @el?
       @el = document.createElement 'div'
-      @el.className = "pace pace-theme-#{ options.theme }"
+      @el.className = "pace pace-active pace-theme-#{ options.theme }"
 
       @el.innerHTML = '''
       <div class="pace-progress">
@@ -124,7 +124,10 @@ class Bar
     @el
 
   finish: ->
-    @getElement().className += ' pace-done'
+    el = @getElement()
+
+    el.className = el.className.replace 'pace-active', ''
+    el.className += ' pace-inactive'
 
   update: (prog) ->
     @progress = prog
