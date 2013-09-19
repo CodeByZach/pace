@@ -1,10 +1,8 @@
 (function() {
-  var $, AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, EASE_FACTOR, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MAX_PROGRESS_PER_FRAME, MIN_TIME, RequestIntercept, RequestTracker, Scaler, animation, avgKey, bar, check, go, handlePageChange, init, intercept, now, reset, result, runAnimation, scalers, sources, uniScaler, _XMLHttpRequest, _pushState, _replaceState,
+  var AjaxMonitor, Bar, CATCHUP_TIME, DocumentMonitor, EASE_FACTOR, ELEMENT_CHECK_INTERVAL, ElementMonitor, ElementTracker, EventLagMonitor, Events, GHOST_TIME, INITIAL_RATE, MAX_PROGRESS_PER_FRAME, MIN_TIME, RequestIntercept, RequestTracker, Scaler, animation, avgKey, bar, check, go, handlePageChange, init, intercept, now, reset, result, runAnimation, scalers, sources, uniScaler, _XMLHttpRequest, _pushState, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  $ = jQuery;
 
   CATCHUP_TIME = 500;
 
@@ -67,9 +65,14 @@
 
     Bar.prototype.getElement = function() {
       if (this.el == null) {
-        this.el = $('<div>')[0];
-        this.el.className = 'mprogress-bar';
-        $('body').prepend(this.el);
+        this.el = document.createElement('div');
+        this.el.className = 'pace';
+        this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
+        if (document.body.firstChild != null) {
+          document.body.insertBefore(this.el, document.body.firstChild);
+        } else {
+          document.body.appendChild(this.el);
+        }
       }
       return this.el;
     };
@@ -89,7 +92,7 @@
     };
 
     Bar.prototype.render = function() {
-      if (!$('body').length) {
+      if (document.body == null) {
         return false;
       }
       return this.getElement().style.width = "" + this.progress + "%";
@@ -252,7 +255,7 @@
 
     ElementTracker.prototype.check = function() {
       var _this = this;
-      if ($(this.selector).length) {
+      if (document.querySelector(this.selector)) {
         return this.done();
       } else {
         return setTimeout((function() {
@@ -445,7 +448,7 @@
 
   (check = function() {
     bar.render();
-    if (!$('.mprogress-bar').length) {
+    if (!document.querySelector('.pace')) {
       return setTimeout(check, 50);
     } else {
       return go();

@@ -1,6 +1,3 @@
-$ = jQuery
-# Track ajax requests, we want a clean event for their progress
-
 # How long should it take for the bar to animate to a new
 # point after receiving it
 CATCHUP_TIME = 500
@@ -62,9 +59,19 @@ class Bar
 
   getElement: ->
     if not @el?
-      @el = $('<div>')[0]
-      @el.className = 'mprogress-bar'
-      $('body').prepend @el
+      @el = document.createElement 'div'
+      @el.className = 'pace'
+
+      @el.innerHTML = '''
+      <div class="pace-progress">
+        <div class="pace-progress-inner"></div>
+      </div>
+      <div class="pace-activity"></div>'''
+
+      if document.body.firstChild?
+        document.body.insertBefore @el, document.body.firstChild
+      else
+        document.body.appendChild @el
 
     @el
 
@@ -82,7 +89,7 @@ class Bar
     @el = undefined
 
   render: ->
-    if not $('body').length
+    if not document.body?
       return false
 
     @getElement().style.width = "#{ @progress }%"
@@ -189,7 +196,7 @@ class ElementTracker
     @check()
 
   check: ->
-    if $(@selector).length
+    if document.querySelector(@selector)
       @done()
     else
       setTimeout (=> @check()),
@@ -367,7 +374,7 @@ go = ->
 do check = ->
   bar.render()
 
-  if not $('.mprogress-bar').length
+  if not document.querySelector('.pace')
     setTimeout check, 50
   else
     go()
