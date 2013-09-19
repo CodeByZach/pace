@@ -20,7 +20,9 @@ You can set `Pace.options` before bringing in the file:
 Pace = {
   options: {
     // Disable the 'elements' source
-    elements: false
+    elements: false,
+
+    theme: 'barber-shop'
   }
 }
 ```
@@ -39,6 +41,19 @@ define(['pace'], function(pace){
     document: false
   });
 });
+```
+
+Themes
+------
+
+Pace includes a bunch of themes to get you started.  Specify the theme of your choice as
+an option, and include the appropriate css file.
+
+You can specify the theme as an option, but to keep things simple, we also support
+specifying it as a seperate data attribute:
+
+```html
+<script data-pace-theme='barber-shop' src='pace.js'></script>
 ```
 
 Collectors

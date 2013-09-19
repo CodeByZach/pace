@@ -78,10 +78,15 @@ extend = (out, sources...) ->
         out[key] = val
   out
 
-getOptionsFromDOM = ->
-  el = document.querySelector '[data-pace-options]'
-  data = el.getAttribute 'data-pace-options'
+getFromDOM = (key='options', json=true) ->
+  el = document.querySelector "[data-pace-#{ key }]"
+
+  return unless el
+
+  data = el.getAttribute "data-pace-#{ key }"
   
+  return data if not json
+
   try
     return JSON.parse data
   catch e
@@ -90,7 +95,10 @@ getOptionsFromDOM = ->
 window.Pace ?= {}
 Pace.options ?= {}
 
-options = extend Pace?.options, getOptionsFromDOM(), defaultOptions
+options = extend Pace?.options, getFromDOM(), defaultOptions
+
+if domTheme = getFromDOM('theme', false)
+  options.theme = domTheme
 
 class Bar
   constructor: ->
