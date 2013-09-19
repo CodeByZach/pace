@@ -14,16 +14,14 @@ Configuration
 Pace is fully automatic, no configuration is necessary.  If you do need to make some tweaks, here's
 how:
 
-You can set `Pace.options` before bringing in the file:
+You can set `window.paceOptions` before bringing in the file:
 
 ```javascript
-Pace = {
-  options: {
-    // Disable the 'elements' source
-    elements: false,
+paceOptions = {
+  // Disable the 'elements' source
+  elements: false,
 
-    theme: 'barber-shop'
-  }
+  theme: 'barber-shop'
 }
 ```
 
@@ -80,19 +78,17 @@ Pace includes four default collectors:
 They can each be configured or disabled through configuration options of the same name.
 
 ```javascript
-Pace = {
-  options: {
-    ajax: false, // disabled
-    document: false, // disabled
-    eventLag: false, // disabled
-    elements: {
-      sources: ['.my-page']
-    }
+paceOptions = {
+  ajax: false, // disabled
+  document: false, // disabled
+  eventLag: false, // disabled
+  elements: {
+    sources: ['.my-page']
   }
-}
+};
 ```
 
-Add your own instances to `options.extraSources` to add more sources.  Each source should either
+Add your own instances to `paceOptions.extraSources` to add more sources.  Each source should either
 have a `.progress` property, or a `.elements` property which is a list of objects with
 `.progress` properties.  Pace will automatically handle all scaling to make the progress
 changes look smooth to the user.
@@ -104,10 +100,8 @@ Most users want the progress bar to automatically restart when a pushState event
 (generally means ajax navigation is occuring).  You can disable this:
 
 ```javascript
-Pace = {
-  options: {
-    restartOnPushState: false
-  }
+paceOptions: {
+  restartOnPushState: false
 }
 ```
 
