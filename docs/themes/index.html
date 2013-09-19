@@ -1,4 +1,5 @@
 <head>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   <style>
     body {
       margin: 0px;
@@ -45,23 +46,43 @@
   <div class="page">
     <h1>Pace</h1>
     <h2>Themes</h2>
-    <div class="themes">
-      <div class="theme">
-        <h3>Minimal</h3>
-        <div class="browser"><iframe src="pace-theme-minimal.html"></iframe></div>
-      </div>
-      <div class="theme">
-        <h3>Flash</h3>
-        <div class="browser"><iframe src="pace-theme-flash.html"></iframe></div>
-      </div>
-      <div class="theme">
-        <h3>Barber Shop</h3>
-        <div class="browser"><iframe src="pace-theme-barber-shop.html"></iframe></div>
-      </div>
-      <div class="theme">
-        <h3>Mac OSX</h3>
-        <div class="browser"><iframe src="pace-theme-mac-osx.html"></iframe></div>
-      </div>
-    </div>
+    <div class="themes"></div>
+    <script>
+      (function(){
+        var themes = [{
+          name: 'minimal',
+          title: 'Minimal',
+          description: 'The smallest file size and simplest'
+        }, {
+          name: 'flash',
+          title: 'Flash',
+          description: 'Inspired by Google Chrome on iOS'
+        }, {
+          name: 'barber-shop',
+          title: 'Barber Shop',
+          description: 'Inspired by Lea Verou'
+        }, {
+          name: 'mac-osx',
+          title: 'Mac OSX',
+          description: 'Inspired by the native OSX progress styles'
+        }, {
+          name: 'fill-left',
+          title: 'Fill Left',
+          description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
+        }];
+
+        $.each(themes, function(i, theme){
+          $('.themes').append('<div class="theme">'+
+            '<h3>' + theme.title + '</h3>' +
+            '<p>' + theme.description + '</p>' +
+            '<div class="browser"><iframe data-theme="' + theme.name + '" src="pace-theme-template.html"></iframe></div>' +
+          '</div>');
+        });
+
+        $('iframe').load(function(){
+          $(this).contents().find('body').append('<link rel="stylesheet" href="/pace/pace-theme-' + $(this).data('theme') + '.css" />');
+        });
+      })();
+    </script>
   </div>
 </body>
