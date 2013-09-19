@@ -7,17 +7,24 @@
       height: 3px;
       background-color: #FFC01F;
     }
+    .pace-inactive {
+      display: none;
+    }
   </style>
 
+  <script>
+    paceOptions = {
+      elements: {
+        selectors: ['.x']
+      }
+    };
+  </script>
   <script src="pace.js"></script>
   <script>
     function load(time){
-      $.ajax({
-        url: "http://localhost:5646/" + time,
-        complete: function(){
-          console.log('done', arguments);
-        }
-      });
+      var x = new XMLHttpRequest()
+      x.open('GET', "http://localhost:5646/" + time, true);
+      x.send();
     };
 
     load(20);
@@ -28,8 +35,10 @@
 
 
     setTimeout(function(){
-      $('body').append($('<div class="x"></div>'));
-    }, 4000);
+      var el = document.createElement("div");
+      el.className = 'x';
+      document.body.appendChild(el);
+    }, 10000);
 
   </script>
 </head>

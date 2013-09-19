@@ -1,5 +1,5 @@
 (function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, RequestIntercept, RequestTracker, SOURCE_KEYS, Scaler, animation, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, getOptionsFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _XMLHttpRequest, _pushState, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, RequestIntercept, RequestTracker, SOURCE_KEYS, Scaler, animation, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, domTheme, extend, getFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _XMLHttpRequest, _pushState, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -81,10 +81,22 @@
     return out;
   };
 
-  getOptionsFromDOM = function() {
+  getFromDOM = function(key, json) {
     var data, e, el;
-    el = document.querySelector('[data-pace-options]');
-    data = el.getAttribute('data-pace-options');
+    if (key == null) {
+      key = 'options';
+    }
+    if (json == null) {
+      json = true;
+    }
+    el = document.querySelector("[data-pace-" + key + "]");
+    if (!el) {
+      return;
+    }
+    data = el.getAttribute("data-pace-" + key);
+    if (!json) {
+      return data;
+    }
     try {
       return JSON.parse(data);
     } catch (_error) {
@@ -97,11 +109,11 @@
     window.Pace = {};
   }
 
-  if (Pace.options == null) {
-    Pace.options = {};
-  }
+  options = Pace.options = extend(defaultOptions, window.paceOptions, getFromDOM());
 
-  options = extend(typeof Pace !== "undefined" && Pace !== null ? Pace.options : void 0, getOptionsFromDOM(), defaultOptions);
+  if (domTheme = getFromDOM('theme', false)) {
+    options.theme = domTheme;
+  }
 
   Bar = (function() {
     function Bar() {
@@ -111,7 +123,7 @@
     Bar.prototype.getElement = function() {
       if (this.el == null) {
         this.el = document.createElement('div');
-        this.el.className = "pace pace-theme-" + options.theme;
+        this.el.className = "pace pace-active pace-theme-" + options.theme;
         this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
         if (document.body.firstChild != null) {
           document.body.insertBefore(this.el, document.body.firstChild);
@@ -123,7 +135,10 @@
     };
 
     Bar.prototype.finish = function() {
-      return this.getElement().className += ' pace-done';
+      var el;
+      el = this.getElement();
+      el.className = el.className.replace('pace-active', '');
+      return el.className += ' pace-inactive';
     };
 
     Bar.prototype.update = function(prog) {
@@ -137,12 +152,23 @@
     };
 
     Bar.prototype.render = function() {
+      var el, progressStr;
       if (document.body == null) {
         return false;
       }
-      return $(this.getElement()).find('.pace-progress').css({
-        width: "" + this.progress + "%"
-      });
+      el = this.getElement();
+      el.children[0].style.width = "" + this.progress + "%";
+      if (!this.lastRenderedProgress || this.lastRenderedProgress | 0 !== this.progress | 0) {
+        el.setAttribute('data-progress-text', "" + (this.progress | 0) + "%");
+        if (this.progress >= 100) {
+          progressStr = '99';
+        } else {
+          progressStr = this.progress < 10 ? "0" : "";
+          progressStr += this.progress | 0;
+        }
+        el.setAttribute('data-progress', "" + progressStr);
+      }
+      return this.lastRenderedProgress = this.progress;
     };
 
     Bar.prototype.done = function() {
@@ -476,7 +502,7 @@
     for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
       type = _ref1[_i];
       if (options[type] !== false) {
-        sources.push(new ELEMENT_KEYS[type](options[type]));
+        sources.push(new SOURCE_KEYS[type](options[type]));
       }
     }
     bar = new Bar;
@@ -501,7 +527,7 @@
     return Pace.go();
   };
 
-  Page.go = function() {
+  Pace.go = function() {
     bar.render();
     cancelAnimation = false;
     return animation = runAnimation(function(frameTime, enqueueNextFrame) {

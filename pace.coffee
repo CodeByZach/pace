@@ -93,9 +93,8 @@ getFromDOM = (key='options', json=true) ->
     console.error "Error parsing inline pace options", e
 
 window.Pace ?= {}
-Pace.options ?= {}
 
-options = extend Pace?.options, getFromDOM(), defaultOptions
+options = Pace.options = extend defaultOptions, window.paceOptions, getFromDOM()
 
 if domTheme = getFromDOM('theme', false)
   options.theme = domTheme
@@ -403,7 +402,7 @@ do init = ->
 
   for type in ['ajax', 'elements', 'document', 'eventLag']
     if options[type] isnt false
-      sources.push new ELEMENT_KEYS[type](options[type])
+      sources.push new SOURCE_KEYS[type](options[type])
 
   bar = new Bar
 
@@ -430,7 +429,7 @@ Pace.restart = ->
   Pace.stop()
   Pace.go()
 
-Page.go = ->
+Pace.go = ->
   bar.render()
 
   cancelAnimation = false
