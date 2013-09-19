@@ -58,7 +58,7 @@ Pace includes four default collectors:
 
   Checks the document readyState
 
-- EventLag
+- Event Lag
 
   Checks for event loop lag signaling that javascript is being executed
 
@@ -117,3 +117,21 @@ whenever `pushState` or `replaceState` is called by default.
 - `Pace.stop`
 
 Hide the progress bar and stop updating it.
+
+Dependencies
+------------
+
+None!
+
+Support
+-------
+
+Pace is designed to support IE8+ (standards mode), FF 3.5+, Chrome, Safari 4+, Opera 10.5+, and all modern
+mobile browsers.  If you run into a compatibility issue, or can make a case for supporting something else,
+please create an issue.
+
+Issues
+------
+
+We have obviously not tested this on every website.  If you run into an issue, or find a way the automatic
+detection could be better, please create an Issue.  If you can include a test case, that's even better.
