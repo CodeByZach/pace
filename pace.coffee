@@ -132,7 +132,7 @@ class Bar
     if not document.body?
       return false
 
-    @getElement().style.width = "#{ @progress }%"
+    $(@getElement()).find('.pace-progress').css width: "#{ @progress }%"
 
   done: ->
     @progress >= 100
@@ -184,7 +184,7 @@ class AjaxMonitor
 
   watch: (request) ->
     tracker = new RequestTracker(request)
-    
+
     @elements.push tracker
 
 class RequestTracker
@@ -288,7 +288,7 @@ class EventLagMonitor
 
       @progress = 100 * (3 / (avg + 3))
     , 50
-         
+
 class Scaler
   constructor: (@source) ->
     @last = @sinceLastUpdate = 0

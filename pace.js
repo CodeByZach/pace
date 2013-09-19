@@ -139,7 +139,9 @@
       if (document.body == null) {
         return false;
       }
-      return this.getElement().style.width = "" + this.progress + "%";
+      return $(this.getElement()).find('.pace-progress').css({
+        width: "" + this.progress + "%"
+      });
     };
 
     Bar.prototype.done = function() {
