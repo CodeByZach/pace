@@ -6,6 +6,10 @@
   user-select: none;
 }
 
+.pace-inactive {
+  display: none;
+}
+
 .pace .pace-progress {
   background-color: #78c0f0;
   position: fixed;

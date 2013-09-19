@@ -6,3 +6,7 @@
   left: 0;
   height: 2px;
 }
+
+.pace-inactive {
+  display: none;
+}
