@@ -6,7 +6,7 @@
   user-select: none;
 }
 
-.pace .pace-activity {
+.pace .pace-progress {
   display: block;
   position: fixed;
   z-index: 100;
@@ -21,7 +21,7 @@
   pointer-events: none;
 }
 
-.pace.pace-active .pace-activity {
+.pace.pace-active .pace-progress {
   -webkit-transform: translateY(0);
   transform: translateY(0);
 }
