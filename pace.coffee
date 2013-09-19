@@ -144,7 +144,7 @@ class AjaxMonitor
 
   watch: (request) ->
     tracker = new RequestTracker(request)
-    
+
     @elements.push tracker
 
 class RequestTracker
@@ -183,7 +183,7 @@ class ElementMonitor
 
     for set in selectors
       @elements.push new ElementTracker set
-    
+
 class ElementTracker
   constructor: (selectors) ->
     @progress = 0
@@ -237,7 +237,7 @@ class EventLagMonitor
 
       @progress = 100 * (3 / (avg + 3))
     , 50
-         
+
 class Scaler
   constructor: (@source) ->
     @last = @sinceLastUpdate = 0
