@@ -1,30 +1,31 @@
-# How long should it take for the bar to animate to a new
-# point after receiving it
-CATCHUP_TIME = 500
+defaultOptions =
+  # How long should it take for the bar to animate to a new
+  # point after receiving it
+  catchupTime: 500
 
-# How quickly should the bar be moving before it has any progress
-# info from a new source in %/ms
-INITIAL_RATE = .03
+  # How quickly should the bar be moving before it has any progress
+  # info from a new source in %/ms
+  initialRate: .03
 
-# What is the minimum amount of time the bar should be on the
-# screen
-MIN_TIME = 500
+  # What is the minimum amount of time the bar should be on the
+  # screen
+  minTime: 500
 
-# What is the minimum amount of time the bar should sit after the last
-# update before disappearing
-GHOST_TIME = 250
+  # What is the minimum amount of time the bar should sit after the last
+  # update before disappearing
+  ghostTime: 250
 
-# How frequently in ms should we check for the elements being tested for
-# using the element monitor?
-ELEMENT_CHECK_INTERVAL = 100
+  # How frequently in ms should we check for the elements being tested for
+  # using the element monitor?
+  elementCheckInterval: 100
 
-# Its easy for a bunch of the bar to be eaten in the first few frames
-# before we know how much there is to load.  This limits how much of
-# the bar can be used per frame
-MAX_PROGRESS_PER_FRAME = 10
+  # Its easy for a bunch of the bar to be eaten in the first few frames
+  # before we know how much there is to load.  This limits how much of
+  # the bar can be used per frame
+  maxProgressPerFrame: 10
 
-# This tweaks how the animation easing looks
-EASE_FACTOR = 1.25
+  # This tweaks the animation easing
+  easeFactor: 1.25
 
 now = ->
   performance?.now?() ? +new Date
@@ -58,6 +59,26 @@ result = (obj, key, args...) ->
   else
     obj[key]
 
+extend = (out, sources...) ->
+  for source in sources when source
+    for own key, val of source
+      out[key] = val
+  out
+
+getOptionsFromDOM = ->
+  el = document.querySelector '[data-pace-options]'
+  data = el.getAttribute 'data-pace-options'
+  
+  try
+    return JSON.parse data
+  catch e
+    console.error "Error parsing inline pace options", e
+
+window.Pace ?= {}
+Pace.options ?= {}
+
+options = extend Pace?.options, getOptionsFromDOM(), defaultOptions
+
 class Bar
   constructor: ->
     @progress = 0
@@ -71,7 +92,8 @@ class Bar
       <div class="pace-progress">
         <div class="pace-progress-inner"></div>
       </div>
-      <div class="pace-activity"></div>'''
+      <div class="pace-activity"></div>
+      '''
 
       if document.body.firstChild?
         document.body.insertBefore @el, document.body.firstChild
@@ -173,7 +195,7 @@ class RequestTracker
         catch e
 
         if size?
-          # This is not perfect, as size is in bytes, length is in chars
+          # This is not perfect as size is in bytes, length is in chars
           try
             @progress = request.responseText.length / size
           catch e
@@ -217,7 +239,7 @@ class ElementTracker
       @progress = 100 * matches.length / @selectors.length
     else
       setTimeout (=> @check()),
-        ELEMENT_CHECK_INTERVAL
+        options.elementCheckInterval
 
 class DocumentMonitor
   states:
@@ -258,7 +280,7 @@ class EventLagMonitor
 class Scaler
   constructor: (@source) ->
     @last = @sinceLastUpdate = 0
-    @rate = 0.03
+    @rate = options.initialRate
     @catchup = 0
     @progress = @lastProgress = 0
 
@@ -277,17 +299,17 @@ class Scaler
       if @sinceLastUpdate
         @rate = (val - @last) / @sinceLastUpdate
 
-      @catchup = (val - @progress) / CATCHUP_TIME
+      @catchup = (val - @progress) / options.catchupTime
 
       @sinceLastUpdate = 0
       @last = val
 
     if val > @progress
-      # After we've got a datapoint, we have CATCHUP_TIME to
+      # After we've got a datapoint, we have catchupTime to
       # get the progress bar to reflect that new data
       @progress += @catchup * frameTime
 
-    scaling = (1 - Math.pow(@progress / 100, EASE_FACTOR))
+    scaling = (1 - Math.pow(@progress / 100, options.easeFactor))
 
     # Based on the rate of the last update, we preemptively update
     # the progress bar, scaling it so it can never hit 100% until we
@@ -297,7 +319,7 @@ class Scaler
     @progress = Math.max(0, @progress)
     @progress = Math.min(100, @progress)
 
-    @progress = Math.min(@lastProgress + MAX_PROGRESS_PER_FRAME, @progress)
+    @progress = Math.min(@lastProgress + options.maxProgressPerFrame, @progress)
     @lastProgress = @progress
 
     @progress
@@ -336,7 +358,7 @@ do init = ->
   # remove sources
   uniScaler = new Scaler
 
-reset = ->
+Pace.reset = ->
   bar.destroy()
 
   # Not all browsers support cancelAnimationFrame
@@ -349,10 +371,10 @@ reset = ->
   init()
 
 handlePageChange = ->
-  reset()
-  go()
+  Pace.reset()
+  Pace.go()
 
-go = ->
+Page.go = ->
   bar.render()
 
   cancelAnimation = false
@@ -395,16 +417,25 @@ go = ->
 
       setTimeout ->
         bar.finish()
-      , Math.max(GHOST_TIME, Math.min(MIN_TIME, now() - start))
+      , Math.max(options.ghostTime, Math.min(options.minTime, now() - start))
     else
       enqueueNextFrame()
 
-do check = ->
+Pace.start = ->
   bar.render()
 
   # It's usually possible to render a bit before the document declares itself ready
   if not document.querySelector('.pace')
-    setTimeout check, 50
+    setTimeout Pace.start, 50
   else
-    go()
+    Pace.go()
 
+if typeof define is 'function' and define.amd
+  # AMD
+  define -> Pace
+else if typeof exports is 'object'
+  # CommonJS
+  module.exports = Pace
+else
+  # Global
+  Pace.start()
