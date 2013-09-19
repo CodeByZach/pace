@@ -10,14 +10,21 @@
   position: fixed;
   top: 0;
   right: 0;
+  height: 5rem;
+  width: 5rem;
 }
 
 .pace .pace-progress:after {
-  font-size: 5em;
-  line-height: 5em;
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  content: attr(data-progress);
   font-family: "Helvetica Neue", sans-serif;
   font-weight: 100;
+  font-size: 5rem;
+  line-height: 1;
+  text-align: right;
   color: #444;
   color: rgba(0, 0, 0, 0.2);
-  content: attr(data-progress);
 }
