@@ -1,7 +1,7 @@
 {
   "name": "pace",
   "version": "0.1.0",
-  "description": "",
+  "description": "Automatic page load progress bar",
   "author": "Zack Bloom <zbloom@hubspot.com>",
   "license": "MIT",
   "devDependencies": {
