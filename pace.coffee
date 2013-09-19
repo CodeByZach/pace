@@ -29,6 +29,18 @@ EASE_FACTOR = 1.25
 now = ->
   performance?.now?() ? +new Date
 
+requestAnimationFrame = window.requestAnimationFrame or window.mozRequestAnimationFrame or
+                        window.webkitRequestAnimationFrame or window.msRequestAnimationFrame
+
+cancelAnimationFrame = window.cancelAnimationFrame or window.mozCancelAnimationFrame
+
+if not requestAnimationFrame?
+  requestAnimationFrame = (fn) ->
+    setTimeout fn, 50
+
+  cancelAnimationFrame = (id) ->
+    clearTimeout id
+
 runAnimation = (fn) ->
   last = now()
   tick = ->
@@ -45,13 +57,6 @@ result = (obj, key, args...) ->
     obj[key](args...)
   else
     obj[key]
-
-avgKey = (arr, key, args...) ->
-  sum = 0
-  for item in arr
-    sum += result(item, key, args...)
-
-  sum / arr.length
 
 class Bar
   constructor: ->
@@ -151,31 +156,43 @@ class RequestTracker
   constructor: (request) ->
     @progress = 0
 
-    size = null
-    request.onprogress = =>
-      try
-        headers = request.getAllResponseHeaders()
-
-        for name, val of headers
-          if name.toLowerCase() is 'content-length'
-            size = +val
-            break
-
-      catch e
-
-      if size?
-        # This is not perfect, as size is in bytes, length is in chars
+    if request.onprogress isnt undefined
+      # It will be null, not undefined, on browsers which don't support it
+      
+      size = null
+      _onprogress = request.onprogress
+      request.onprogress = =>
         try
-          @progress = request.responseText.length / size
-        catch e
-      else
-        # If it's chunked encoding, we have no way of knowing the total length of the
-        # response, all we can do is incrememnt the progress with backoff such that we
-        # never hit 100% until it's done.
-        @progress = @progress + (100 - @progress) / 2
+          headers = request.getAllResponseHeaders()
 
-    request.onload = request.onerror = request.ontimeout = request.onabort = =>
-      @progress = 100
+          for name, val of headers
+            if name.toLowerCase() is 'content-length'
+              size = +val
+              break
+
+        catch e
+
+        if size?
+          # This is not perfect, as size is in bytes, length is in chars
+          try
+            @progress = request.responseText.length / size
+          catch e
+        else
+          # If it's chunked encoding, we have no way of knowing the total length of the
+          # response, all we can do is increment the progress with backoff such that we
+          # never hit 100% until it's done.
+          @progress = @progress + (100 - @progress) / 2
+
+      _onprogress?(arguments...)
+
+    _onreadystatechange = request.onreadystatechange
+    request.onreadystatechange = =>
+      if request.readyState in [0, 4]
+        @progress = 100
+      else if not request.onprogress? and request.readyState is 3
+        @progress = 50
+
+      _onreadystatechange?(arguments...)
 
 class ElementMonitor
   constructor: (selectors...) ->
@@ -185,25 +202,22 @@ class ElementMonitor
       @elements.push new ElementTracker set
     
 class ElementTracker
-  constructor: (selectors) ->
+  constructor: (@selectors) ->
     @progress = 0
 
-    if typeof selectors is 'string'
-      @selector = selectors
-    else
-      @selector = selectors.join(',')
+    if typeof @selectors is 'string'
+      @selectors = [@selectors]
 
     @check()
 
   check: ->
-    if document.querySelector(@selector)
-      @done()
+    matches = document.querySelectorAll(@selectors.join(','))
+
+    if matches.length
+      @progress = 100 * matches.length / @selectors.length
     else
       setTimeout (=> @check()),
         ELEMENT_CHECK_INTERVAL
-
-  done: ->
-    @progress = 100
 
 class DocumentMonitor
   states:
@@ -214,9 +228,12 @@ class DocumentMonitor
   constructor: ->
     @progress = 0
 
+    _onreadystatechange = document.onreadystatechange
     document.onreadystatechange = =>
       if @states[document.readyState]?
         @progress = @states[document.readyState]
+
+      _onreadystatechange?(arguments...)
 
 class EventLagMonitor
   constructor: ->
@@ -290,7 +307,9 @@ scalers = null
 bar = null
 uniScaler = null
 animation = null
+cancelAnimation = null
 
+# We reset the bar whenever it looks like an ajax navigation has occured.
 if window.pushState?
   _pushState = window.pushState
   window.pushState = ->
@@ -307,16 +326,24 @@ if window.replaceState?
 
 do init = ->
   sources = [new AjaxMonitor, new ElementMonitor('body'), new DocumentMonitor, new EventLagMonitor]
+  
+  bar = new Bar
+
+  # Each source of progress data has it's own scaler to smooth its output
   scalers = []
 
-  bar = new Bar
+  # We have an extra scaler for the final output to keep things looking nice as we add and
+  # remove sources
   uniScaler = new Scaler
 
 reset = ->
   bar.destroy()
 
+  # Not all browsers support cancelAnimationFrame
+  cancelAnimation = true
+
   if animation?
-    cancelAnimationFrame animation
+    cancelAnimationFrame? animation
     animation = null
 
   init()
@@ -328,6 +355,7 @@ handlePageChange = ->
 go = ->
   bar.render()
 
+  cancelAnimation = false
   animation = runAnimation (frameTime, enqueueNextFrame) ->
     # Every source gives us a progress number from 0 - 100
     # It's up to us to figure out how to turn that into a smoothly moving bar
@@ -362,7 +390,7 @@ go = ->
     bar.update uniScaler.tick(frameTime, avg)
 
     start = now()
-    if bar.done() or done
+    if bar.done() or done or cancelAnimation
       bar.update 100
 
       setTimeout ->
@@ -374,6 +402,7 @@ go = ->
 do check = ->
   bar.render()
 
+  # It's usually possible to render a bit before the document declares itself ready
   if not document.querySelector('.pace')
     setTimeout check, 50
   else
