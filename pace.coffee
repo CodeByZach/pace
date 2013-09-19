@@ -140,7 +140,25 @@ class Bar
     if not document.body?
       return false
 
-    @getElement().children[0].style.width = "#{ @progress }%"
+    el = @getElement()
+      
+    el.children[0].style.width = "#{ @progress }%"
+
+    if not @lastRenderedProgress or @lastRenderedProgress|0 != @progress|0
+      # The whole-part of the number has changed
+      
+      el.setAttribute 'data-progress-text', "#{ @progress|0 }%"
+
+      if @progress >= 100
+        # We cap it at 99 so we can use prefix-based attribute selectors
+        progressStr = '99'
+      else
+        progressStr = if @progress < 10 then "0" else ""
+        progressStr += @progress|0
+
+      el.setAttribute 'data-progress', "#{ progressStr }"
+
+    @lastRenderedProgress = @progress
 
   done: ->
     @progress >= 100
