@@ -75,8 +75,8 @@ class Bar
 
     @el
 
-  hide: ->
-    @getElement().style.display = 'none'
+  finish: ->
+    @getElement().className += ' pace-done'
 
   update: (prog) ->
     @progress = prog
@@ -84,7 +84,7 @@ class Bar
     do @render
 
   destroy: ->
-    @getElement().parentNode.removeChild(@getElement)
+    @getElement().parentNode.removeChild(@getElement())
 
     @el = undefined
 
@@ -366,7 +366,7 @@ go = ->
       bar.update 100
 
       setTimeout ->
-        bar.hide()
+        bar.finish()
       , Math.max(GHOST_TIME, Math.min(MIN_TIME, now() - start))
     else
       enqueueNextFrame()

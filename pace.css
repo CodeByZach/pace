@@ -7,3 +7,7 @@
   height: 3px;
   background-color: #FFC01F;
 }
+
+.pace-done {
+  display: none;
+}

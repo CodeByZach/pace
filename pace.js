@@ -77,8 +77,8 @@
       return this.el;
     };
 
-    Bar.prototype.hide = function() {
-      return this.getElement().style.display = 'none';
+    Bar.prototype.finish = function() {
+      return this.getElement().className += ' pace-done';
     };
 
     Bar.prototype.update = function(prog) {
@@ -87,7 +87,7 @@
     };
 
     Bar.prototype.destroy = function() {
-      this.getElement().parentNode.removeChild(this.getElement);
+      this.getElement().parentNode.removeChild(this.getElement());
       return this.el = void 0;
     };
 
@@ -438,7 +438,7 @@
       if (bar.done() || done) {
         bar.update(100);
         return setTimeout(function() {
-          return bar.hide();
+          return bar.finish();
         }, Math.max(GHOST_TIME, Math.min(MIN_TIME, now() - start)));
       } else {
         return enqueueNextFrame();
