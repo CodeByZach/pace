@@ -73,6 +73,10 @@
           name: 'big-counter',
           title: 'Big Counter',
           description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
+        }, {
+          name: 'corner-indicator',
+          title: 'Corner Indicator',
+          description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
         }];
 
         $.each(themes, function(i, theme){
@@ -85,6 +89,8 @@
 
         $('iframe').load(function(){
           $(this).contents().find('body').append('<link rel="stylesheet" href="/pace/pace-theme-' + $(this).data('theme') + '.css" />');
+
+          $(this).contents().find('.pace').addClass('pace-active');
         });
       })();
     </script>
