@@ -1,5 +1,5 @@
 (function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, RequestIntercept, RequestTracker, SOURCE_KEYS, Scaler, animation, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, domTheme, extend, getFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _XMLHttpRequest, _pushState, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, RequestIntercept, RequestTracker, SOURCE_KEYS, Scaler, animation, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, domTheme, extend, getFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _XDomainRequest, _XMLHttpRequest, _pushState, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -101,7 +101,7 @@
       return JSON.parse(data);
     } catch (_error) {
       e = _error;
-      return console.error("Error parsing inline pace options", e);
+      return typeof console !== "undefined" && console !== null ? console.error("Error parsing inline pace options", e) : void 0;
     }
   };
 
@@ -211,27 +211,41 @@
 
   _XMLHttpRequest = window.XMLHttpRequest;
 
+  _XDomainRequest = window.XDomainRequest;
+
   RequestIntercept = (function(_super) {
     __extends(RequestIntercept, _super);
 
     function RequestIntercept() {
-      var _intercept;
+      var monitor,
+        _this = this;
       RequestIntercept.__super__.constructor.apply(this, arguments);
-      _intercept = this;
-      window.XMLHttpRequest = function() {
-        var req, _open;
-        req = new _XMLHttpRequest;
+      monitor = function(req) {
+        var _open;
         _open = req.open;
-        req.open = function(type, url, async) {
-          _intercept.trigger('request', {
+        return req.open = function(type, url, async) {
+          _this.trigger('request', {
             type: type,
             url: url,
             request: req
           });
           return _open.apply(req, arguments);
         };
+      };
+      window.XMLHttpRequest = function() {
+        var req;
+        req = new _XMLHttpRequest;
+        monitor(req);
         return req;
       };
+      if (_XDomainRequest != null) {
+        window.XDomainRequest = function() {
+          var req;
+          req = new _XDomainRequest;
+          monitor(req);
+          return req;
+        };
+      }
     }
 
     return RequestIntercept;

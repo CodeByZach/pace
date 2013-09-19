@@ -90,7 +90,7 @@ getFromDOM = (key='options', json=true) ->
   try
     return JSON.parse data
   catch e
-    console.error "Error parsing inline pace options", e
+    console?.error "Error parsing inline pace options", e
 
 window.Pace ?= {}
 
@@ -184,22 +184,32 @@ class Events
 
 # We should only ever instantiate one of these
 _XMLHttpRequest = window.XMLHttpRequest
+_XDomainRequest = window.XDomainRequest
 class RequestIntercept extends Events
   constructor: ->
     super
 
-    _intercept = @
+    monitor = (req) =>
+      _open = req.open
+      req.open = (type, url, async) =>
+        @trigger 'request', {type, url, request: req}
+
+        _open.apply req, arguments
 
     window.XMLHttpRequest = ->
       req = new _XMLHttpRequest
 
-      _open = req.open
-      req.open = (type, url, async) ->
-        _intercept.trigger 'request', {type, url, request: req}
-
-        _open.apply req, arguments
+      monitor req
 
       req
+
+    if _XDomainRequest?
+      window.XDomainRequest = ->
+        req = new _XDomainRequest
+
+        monitor req
+
+        req
 
 intercept = new RequestIntercept
 
