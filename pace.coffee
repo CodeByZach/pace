@@ -132,7 +132,7 @@ class Bar
     if not document.body?
       return false
 
-    $(@getElement()).find('.pace-progress').css width: "#{ @progress }%"
+    @getElement().children[0].style.width = "#{ @progress }%"
 
   done: ->
     @progress >= 100
