@@ -22,6 +22,11 @@
                 color: #000;
             }
 
+            a, a:hover, a:active {
+                color: #29d;
+                text-decoration: none
+            }
+
             body {
                 font-family: "proxima-nova", "Helvetica Neue", sans-serif;
             }
@@ -233,7 +238,6 @@
             .themes {
                 overflow: hidden;
                 text-align: center;
-                padding-bottom: 60px;
             }
             .theme {
                 width: 46%;
@@ -326,7 +330,6 @@
             }
 
             .themes a, .themes a:hover, .themes a:active {
-                color: #29d;
                 text-decoration: none;
                 font-size: .7rem;
                 text-transform: uppercase;
@@ -336,6 +339,7 @@
             .button {
                 padding: 0.5rem 1rem;
                 background: #29d;
+                padding: 0.5rem 1rem;
                 color: #fff;
                 cursor: pointer;
                 font-size: 1rem;
@@ -368,13 +372,20 @@
                 <p><a class="button" href="https://raw.github.com/HubSpot/pace/v0.4.1/pace.min.js">Pace.js</a></p>
                 <br/>
                 <h2>What is Pace?</h2>
-                <p style="text-align: left">Include pace.js and the theme css of your choice, and you're done. No need to hook into any of your code, progress is
-                detected automatically.</p>
+                <p style="text-align: left">Include pace.js and the theme css of your choice, and you get a beautiful progress indicator for your page load and ajax navigation.
+                No need to hook into any of your code, progress is detected automatically.</p>
+                <br/>
                 <h2>Themes</h2>
                 <input type="color" value="#2299dd"></input>
                 <div class="themes"></div>
-                <p class="themes-pitch">Send us your themes! <a href="https://github.com/HubSpot/pace">Fork us on GitHub</a></p>
-                <p><a class="button" href="https://github.hubspot.com/pace/">Documentation</a></p>
+                <br/>
+                <p>Submit a theme! <a href="https://github.com/HubSpot/pace">Fork us on GitHub</a></p>
+                <br/>
+                <p><a class="button" href="http://github.hubspot.com/pace/">Documentation</a></p>
+                <br/>
+                <p style="font-size: 0.6rem"><a href="http://dev.hubspot.com">HubSpot</a></p>
+                <br/>
+                <br/>
                 <script>
                     $(function(){
                         var themes = [{
