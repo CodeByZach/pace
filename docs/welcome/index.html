@@ -496,7 +496,7 @@
                                 var color = $(this).val();
                                 updateColor(color);
 
-                                var css = '.section.colored, a.download-src-link { background: ' + color + '; } a, a:hover, a:active { color: ' + color + '; }';
+                                var css = '.section.colored, a.button { background: ' + color + '; } a, a:hover, a:active { color: ' + color + '; }';
                                 if ($('html').hasClass('ie8-and-less')) {
                                     $('#app-colors').get(0).styleSheet.cssText = css
                                 } else {
