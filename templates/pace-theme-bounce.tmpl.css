@@ -31,7 +31,7 @@
   width: 140px;
   height: 140px;
   border-radius: 70px;
-  background: #29d;
+  background: `args.color || "#29d"`;
   position: absolute;
   top: 0;
   z-index: 11;
