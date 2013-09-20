@@ -112,8 +112,7 @@
                 position: absolute;
                 width: 29rem;
                 max-width: 100%;
-                height: 28rem;
-                z-index: 50;
+                height: 100%;
                 z-index: 1;
             }
             .header h1 {
@@ -128,15 +127,14 @@
                 text-transform: uppercase;
                 letter-spacing: .1em;
             }
-            .header .title {
-                position: relative;
-                width: 100%;
-            }
             .header .title h1 {
                 position: absolute;
+                margin: auto;
                 top: 0;
                 left: 0;
                 right: 0;
+                bottom: 0;
+                height: 1.4em;
                 text-align: center;
             }
             .header .title .title1 {
@@ -158,6 +156,9 @@
                 height: 100%;
                 padding-top: 2rem;
                 padding-bottom: 2rem;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
             }
 
             .section.blue {
@@ -189,10 +190,6 @@
                 width: 100%;
                 text-align: center;
                 font-size: 2rem;
-            }
-
-            .up-arrow {
-                margin: 35px 0;
             }
 
             .down-arrow {
@@ -235,7 +232,7 @@
                 background: #e0e0e0;
                 border: 4px solid #e0e0e0;
                 width: 100%;
-                height: 160px;
+                height: 7rem;
                 padding-top: 20px;
                 margin: 0 0 10px;
                 -webkit-box-sizing: border-box;
@@ -280,7 +277,7 @@
                 font-size: 16px;
                 line-height: 37px;
                 color: #fcfcfc;
-                color: rgba(255, 255, 255, 0.8);
+                color: rgba(255, 255, 255, 1);
                 font-weight: 800;
                 text-transform: uppercase;
                 letter-spacing: 2px;
@@ -290,14 +287,16 @@
                 box-sizing: border-box;
             }
             input[type="color"]:active::after {
-                color: #ccc;
-            }
-            input[type="color"]:active::before {
                 color: rgba(255, 255, 255, 0.4);
             }
 
             .themes h3 {
+                margin-top: 1.5em;
                 margin-bottom: 0;
+            }
+
+            .themes h3 + p {
+                margin-top: 0;
             }
 
             .page {
@@ -314,6 +313,17 @@
                 text-transform: uppercase;
                 letter-spacing: .1em;
             }
+
+            a.download-src-link {
+                padding: 0.5rem 1rem;
+                background: #29d;
+                color: #fff;
+                cursor: pointer;
+                font-size: 1rem;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+                text-decoration: none;
+            }
         </style>
 
         <div class="section blue">
@@ -329,115 +339,132 @@
         <div class="section">
             <div class="page">
                 <div class="up-arrow">⇪</div>
+                <h2>Download</h2>
+                <p><a class="download-src-link" href="/pace/pace.js">Pace.js</a></p>
+                <br/>
                 <h2>Themes</h2>
                 <input type="color" value="#2299dd"></input>
                 <div class="themes"></div>
                 <script>
-                  $(function(){
-                    var themes = [{
-                      name: 'minimal',
-                      title: 'Minimal',
-                      description: 'The smallest file size and simplest'
-                    }, {
-                      name: 'flash',
-                      title: 'Flash',
-                      description: 'Inspired by Google Chrome on iOS'
-                    }, {
-                      name: 'barber-shop',
-                      title: 'Barber Shop',
-                      description: 'Inspired by Lea Verou'
-                    }, {
-                      name: 'mac-osx',
-                      title: 'Mac OSX',
-                      description: 'Inspired by the native OSX progress styles'
-                    }, {
-                      name: 'fill-left',
-                      title: 'Fill Left',
-                      description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
-                    }, {
-                      name: 'flat-top',
-                      title: 'Flat Top',
-                      description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
-                    }, {
-                      name: 'big-counter',
-                      title: 'Big Counter',
-                      description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
-                    }, {
-                      name: 'corner-indicator',
-                      title: 'Corner Indicator',
-                      description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
-                    }, {
-                      name: 'bounce',
-                      title: 'Bounce',
-                      description: 'Inspired by <a href="http://tympanus.net/Tutorials/CSS3BouncingBall/" rel="nofollow" target="_blank">Codedrops</a>'
-                    }];
+                    $(function(){
+                        var themes = [{
+                            name: 'minimal',
+                            title: 'Minimal',
+                            description: 'The smallest file size and simplest'
+                        }, {
+                            name: 'flash',
+                            title: 'Flash',
+                            description: 'Inspired by Google Chrome on iOS'
+                        }, {
+                            name: 'barber-shop',
+                            title: 'Barber Shop',
+                            description: 'Inspired by Lea Verou'
+                        }, {
+                            name: 'mac-osx',
+                            title: 'Mac OSX',
+                            description: 'Inspired by the native OSX progress styles'
+                        }, {
+                            name: 'fill-left',
+                            title: 'Fill Left',
+                            description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
+                        }, {
+                            name: 'flat-top',
+                            title: 'Flat Top',
+                            description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
+                        }, {
+                            name: 'big-counter',
+                            title: 'Big Counter',
+                            description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
+                        }, {
+                            name: 'corner-indicator',
+                            title: 'Corner Indicator',
+                            description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
+                        }, {
+                            name: 'bounce',
+                            title: 'Bounce',
+                            description: 'Inspired by <a href="http://tympanus.net/Tutorials/CSS3BouncingBall/" rel="nofollow" target="_blank">Codedrops</a>'
+                        }];
 
-                    $.each(themes, function(i, theme){
-                      $('.themes').append('<div class="theme ' + (i % 2 == 0 ? 'even' : 'odd') + '">'+
-                        '<h3>' + theme.title + '</h3>' +
-                        '<p><a href="#" class="download-link" data-theme="' + theme.name + '">download</a></p>'+
-                        '<div class="browser"><iframe data-theme="' + theme.name + '" src="../themes/pace-theme-template.html"></iframe></div>' +
-                      '</div>');
+                        var init = function() {
+                            $.each(themes, function(i, theme){
+                                $('.themes').append('<div class="theme ' + (i % 2 === 0 ? 'even' : 'odd') + '">'+
+                                    '<h3>' + theme.title + '</h3>' +
+                                    '<p><a href="#" class="download-link" data-theme="' + theme.name + '">download</a></p>'+
+                                    '<div class="browser"><iframe data-theme="' + theme.name + '" src="../themes/pace-theme-template.html"></iframe></div>' +
+                                '</div>');
+                            });
+
+                            var $color = $('input[type="color"]');
+
+                            var cssCache = {};
+                            var initFrame = function(frame, color){
+                                if ($color.val() != '#2299dd')
+                                    color = $color.val();
+
+                                var $styleEl = $('<style>')
+                                $(frame).contents().find('body').append($styleEl);
+
+                                var context = {};
+                                if (color)
+                                    context.color = color;
+
+                                var themeName = $(frame).data('theme')
+                                loadTheme(themeName, function(theme){
+                                    body = compileTheme(theme, context);
+
+                                    cssCache[themeName] = body;
+
+                                    $styleEl.html(body);
+                                });
+
+                                $(frame).contents().find('.pace').addClass('pace-active');
+                            };
+
+                            var updateColor = function(color){
+                                $('iframe').each(function(){
+                                    initFrame(this, color);
+                                });
+                            };
+
+                            var downloadTheme = function(theme){
+                                location.href = 'data:text/css,' + encodeURIComponent(cssCache[theme]);
+                            };
+
+                            $('iframe').load(function(){
+                                var _this = this;
+
+                                // For some strange reason, the Color library we depend on defines itself
+                                // asyncronously
+                                setTimeout(function(){
+                                    initFrame(_this);
+                                }, 0);
+                            });
+
+                            $color.on('change keyup', function(){
+                                updateColor($(this).val());
+                            });
+
+                            $('a.download-link').click(function(e){
+                                e.preventDefault();
+
+                                var theme = $(this).data('theme');
+
+                                downloadTheme(theme);
+                            });
+                        };
+
+                        var initTimeout = setTimeout(function(){
+                            init();
+                        }, 3000);
+
+                        var scrollOnce = function() {
+                            clearTimeout(initTimeout);
+                            init();
+                            $(window).unbind('scroll', scrollOnce);
+                        };
+
+                        $(window).bind('scroll', scrollOnce);
                     });
-
-                    var $color = $('input[type="color"]');
-
-                    var cssCache = {};
-                    var initFrame = function(frame, color){
-                      if ($color.val() != '#2299dd')
-                        color = $color.val();
-
-                      var $styleEl = $('<style>')
-                      $(frame).contents().find('body').append($styleEl);
-
-                      var context = {};
-                      if (color)
-                        context.color = color;
-
-                      var themeName = $(frame).data('theme')
-                      loadTheme(themeName, function(theme){
-                        body = compileTheme(theme, context);
-
-                        cssCache[themeName] = body;
-
-                        $styleEl.html(body);
-                      });
-
-                      $(frame).contents().find('.pace').addClass('pace-active');
-                    };
-
-                    var updateColor = function(color){
-                      $('iframe').each(function(){
-                        initFrame(this, color);
-                      });
-                    };
-
-                    var downloadTheme = function(theme){
-                      location.href = 'data:text/css,' + encodeURIComponent(cssCache[theme]);
-                    };
-
-                    $('iframe').load(function(){
-                      var _this = this;
-
-                      // For some strange reason, the Color library we depend on defines itself
-                      // asyncronously
-                      setTimeout(function(){
-                        initFrame(_this);
-                      }, 0);
-                    });
-
-                    $color.on('change keyup', function(){
-                      updateColor($(this).val());
-                    });
-
-                    $('a.download-link').click(function(e){
-                      e.preventDefault();
-
-                      var theme = $(this).data('theme');
-
-                      downloadTheme(theme);
-                    });
-                  });
                 </script>
             </div>
         </div>
