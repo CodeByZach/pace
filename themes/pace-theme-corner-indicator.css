@@ -31,7 +31,7 @@
 .pace .pace-activity::before,
 .pace .pace-activity::after {
     position: absolute;
-    bottom: 24px;
+    bottom: 30px;
     left: 50%;
     display: block;
     border: 5px solid #fff;
@@ -40,7 +40,7 @@
 }
 
 .pace .pace-activity::before {
-    margin-left: -46px;
+    margin-left: -40px;
     width: 80px;
     height: 80px;
     border-right-color: rgba(0, 0, 0, .2);
@@ -50,8 +50,8 @@
 }
 
 .pace .pace-activity::after {
-    bottom: 45px;
-    margin-left: -26px;
+    bottom: 50px;
+    margin-left: -20px;
     width: 40px;
     height: 40px;
     border-top-color: rgba(0, 0, 0, .2);

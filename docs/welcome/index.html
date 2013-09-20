@@ -11,6 +11,7 @@
         <title>pace.js</title>
         <link rel="icon" href="http://static.hubspot.com/favicon.ico">
         <script type="text/javascript" src="//use.typekit.net/jbn8qxr.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
         <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
         <script src="/pace/docs/lib/color.js"></script>
@@ -282,6 +283,7 @@
             input[type="color"] {
                 width: 15rem;
                 height: 2.3rem;
+                font-size: 1rem;
                 position: relative;
                 font-family: inherit;
                 cursor: pointer;
@@ -362,6 +364,9 @@
             .block {
                 padding: 10px 0;
             }
+            .color-label {
+                display: none;
+            }
         </style>
 
         <div class="section colored">
@@ -387,7 +392,8 @@
                 <p><a class="button" href="https://raw.github.com/HubSpot/pace/v0.4.2/pace.min.js">Pace.js</a></p>
                 <br/>
                 <h2>Themes</h2>
-                <input type="color" value="#2299dd"></input>
+                <label class="color-label" for="color-select">Enter a color:</label>
+                <input type="color" value="#2299dd" id="color-select"></input>
                 <div class="themes"></div>
                 <p class="block">Submit a theme! <a href="https://github.com/HubSpot/pace">Fork us on GitHub</a></p>
                 <p class="block"><a class="button" href="http://github.hubspot.com/pace/">Documentation</a></p>
@@ -397,6 +403,9 @@
                 <br/>
                 <script>
                     $(function(){
+                        if (!Modernizr.inputtypes.color)
+                            $('.color-label').show();
+
                         var themes = [{
                             name: 'minimal',
                             title: 'Minimal',
