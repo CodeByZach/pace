@@ -50,7 +50,7 @@ include the appropriate css file.
 Collectors
 ----------
 
-Pace includes four default collectors:
+Collectors are the bits of code which gather progress information.  Pace includes four default collectors:
 
 - Ajax
 
