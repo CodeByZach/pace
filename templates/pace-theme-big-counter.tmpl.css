@@ -27,5 +27,5 @@
   line-height: 1;
   text-align: right;
   color: `args.color || "#444"`;
-  color: rgba(0, 0, 0, 0.2);
+  color: `args.color || "rgba(0, 0, 0, 0.2)"`;
 }
