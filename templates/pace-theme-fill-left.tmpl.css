@@ -7,7 +7,7 @@
 }
 
 .pace .pace-progress {
-  background-color: `args.color || "rgba(0, 0, 0, 0.2)"`;
+  background-color: `Color(args.color).clearer(0.8).rgbString() || "rgba(0, 0, 0, 0.2)"`;
   position: fixed;
   z-index: -1;
   top: 0;
