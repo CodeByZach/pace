@@ -17,7 +17,6 @@ compileTheme = (body, args={}) ->
       # It matters that args is in the context
       Color = window.Color
       val = eval(code)
-      console.log(val)
 
     val
 

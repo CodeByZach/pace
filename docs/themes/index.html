@@ -52,7 +52,7 @@
     <input type="color" value="#2299dd"></input>
     <div class="themes"></div>
     <script>
-      (function(){
+      $(function(){
         var themes = [{
           name: 'minimal',
           title: 'Minimal',
@@ -96,8 +96,13 @@
           '</div>');
         });
 
+        var $color = $('input[type="color"]');
+        
         var cssCache = {};
         var initFrame = function(frame, color){
+          if ($color.val() != '#2299dd')
+            color = $color.val();
+
           var $styleEl = $('<style>')
           $(frame).contents().find('body').append($styleEl);
 
@@ -137,7 +142,7 @@
           }, 0);
         });
 
-        $('input[type="color"]').change(function(){
+        $color.change(function(){
           updateColor($(this).val());
         });
 
@@ -148,7 +153,7 @@
 
           downloadTheme(theme);
         });
-      })();
+      });
     </script>
   </div>
 </body>

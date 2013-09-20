@@ -27,7 +27,6 @@
       } else {
         Color = window.Color;
         val = eval(code);
-        console.log(val);
       }
       return val;
     });
