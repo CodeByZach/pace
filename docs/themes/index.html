@@ -152,6 +152,7 @@
         var $color = $('input[type="color"]');
 
         var cssCache = {};
+        var themeCache = {};
         var initFrame = function(frame, color){
           if ($color.val() != '#2299dd')
             color = $color.val();
@@ -164,13 +165,20 @@
             context.color = color;
 
           var themeName = $(frame).data('theme')
-          loadTheme(themeName, function(theme){
+          var next = function(theme){
+            themeCache[themeName] = theme;
+
             body = compileTheme(theme, context);
 
             cssCache[themeName] = body;
 
             $styleEl.html(body);
-          });
+          };
+
+          if (themeCache[themeName])
+            next(themeCache[themeName]);
+          else
+            loadTheme(themeName, next);
 
           $(frame).contents().find('.pace').addClass('pace-active');
         };
