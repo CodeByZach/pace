@@ -525,13 +525,13 @@
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       type = _ref[_i];
       if (options[type] !== false) {
-        sources.push(SOURCE_KEYS[type](options[type]));
+        sources.push(new SOURCE_KEYS[type](options[type]));
       }
     }
     _ref2 = (_ref1 = options.extraSources) != null ? _ref1 : [];
     for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
       source = _ref2[_j];
-      sources.push(source(options));
+      sources.push(new source(options));
     }
     bar = new Bar;
     scalers = [];

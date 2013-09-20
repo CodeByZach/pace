@@ -416,10 +416,10 @@ do init = ->
 
   for type in ['ajax', 'elements', 'document', 'eventLag']
     if options[type] isnt false
-      sources.push SOURCE_KEYS[type](options[type])
+      sources.push new SOURCE_KEYS[type](options[type])
 
   for source in options.extraSources ? []
-    sources.push source(options)
+    sources.push new source(options)
 
   bar = new Bar
 
