@@ -1,5 +1,10 @@
 (function() {
-  var compileTheme, loadTheme;
+  var Color, compileTheme, loadTheme, vm;
+
+  if (typeof module !== "undefined" && module !== null) {
+    vm = require('vm');
+    Color = require('color');
+  }
 
   loadTheme = function(name, cb) {
     return $.ajax({
@@ -8,15 +13,21 @@
     });
   };
 
-  compileTheme = function(body, vars) {
-    if (vars == null) {
-      vars = {};
+  compileTheme = function(body, args) {
+    if (args == null) {
+      args = {};
     }
-    return body.replace(/\{\{\s*([^\} \|]+)(?:\|"([^"]+)")?\s*\}\}/g, function(match, varName, def) {
+    return body.replace(/`([\s\S]*?)`/gm, function(match, code) {
       var val;
-      val = vars[varName] || def;
-      if (val == null) {
-        throw "Theme Template Error: " + varName + " not provided";
+      if (typeof module !== "undefined" && module !== null) {
+        val = vm.runInNewContext(code, {
+          args: args,
+          Color: Color
+        });
+      } else {
+        Color = window.Color;
+        val = eval(code);
+        console.log(val);
       }
       return val;
     });

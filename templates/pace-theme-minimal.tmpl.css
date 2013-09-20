@@ -1,5 +1,5 @@
 .pace .pace-progress {
-  background: {{ color|"#29d" }};
+  background: `args.color || "#29d"`;
   position: fixed;
   z-index: 100;
   top: 0;

@@ -1,14 +1,23 @@
+if module?
+  vm = require('vm')
+
+  # Used by the eval'd code
+  Color = require('color')
+
 loadTheme = (name, cb) ->
   $.ajax
     url: "/pace/templates/pace-theme-#{ name }.tmpl.css"
     success: cb
 
-compileTheme = (body, vars={}) ->
-  body.replace /\{\{\s*([^\} \|]+)(?:\|"([^"]+)")?\s*\}\}/g, (match, varName, def) ->
-    val = vars[varName] or def
-
-    if not val?
-      throw "Theme Template Error: #{ varName } not provided"
+compileTheme = (body, args={}) ->
+  body.replace /`([\s\S]*?)`/gm, (match, code) ->
+    if module?
+      val = vm.runInNewContext code, {args, Color}
+    else
+      # It matters that args is in the context
+      Color = window.Color
+      val = eval(code)
+      console.log(val)
 
     val
 

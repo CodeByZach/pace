@@ -1,5 +1,6 @@
 <head>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="/pace/docs/lib/color.js"></script>
   <script src="/pace/docs/lib/themes.js"></script>
   <style>
     body {
@@ -126,7 +127,15 @@
           location.href = 'data:text/css,' + encodeURIComponent(cssCache[theme]);
         };
 
-        $('iframe').load(function(){ initFrame(this); });
+        $('iframe').load(function(){
+          var _this = this;
+
+          // For some strange reason, the Color library we depend on defines itself
+          // asyncronously
+          setTimeout(function(){
+            initFrame(_this);
+          }, 0);
+        });
 
         $('input[type="color"]').change(function(){
           updateColor($(this).val());

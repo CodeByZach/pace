@@ -26,6 +26,6 @@
   font-size: 5rem;
   line-height: 1;
   text-align: right;
-  color: {{ color|"#444" }};
+  color: `args.color || "#444"`;
   color: rgba(0, 0, 0, 0.2);
 }
