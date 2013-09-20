@@ -1,4 +1,4 @@
 title: "Pace"
-source: "*.js"
+source: "pace.js"
 examples: "**/*.md"
 assets: "{templates/*,pace-theme-*.css,docs/themes/*,docs/lib/*}"
