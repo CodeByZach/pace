@@ -519,14 +519,19 @@
   };
 
   (init = function() {
-    var type, _i, _len, _ref, _ref1;
-    sources = (_ref = options.extraSources) != null ? _ref : [];
-    _ref1 = ['ajax', 'elements', 'document', 'eventLag'];
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      type = _ref1[_i];
+    var source, type, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+    sources = [];
+    _ref = ['ajax', 'elements', 'document', 'eventLag'];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      type = _ref[_i];
       if (options[type] !== false) {
-        sources.push(new SOURCE_KEYS[type](options[type]));
+        sources.push(SOURCE_KEYS[type](options[type]));
       }
+    }
+    _ref2 = (_ref1 = options.extraSources) != null ? _ref1 : [];
+    for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+      source = _ref2[_j];
+      sources.push(source(options));
     }
     bar = new Bar;
     scalers = [];

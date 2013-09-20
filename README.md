@@ -11,8 +11,9 @@ the loading process as is possible.
 Configuration
 -------------
 
-Pace is fully automatic, no configuration is necessary.  If you do need to make some tweaks, here's
-how:
+Pace is fully automatic, no configuration is necessary to get started.
+
+If you would like to make some tweaks, here's how:
 
 You can set `window.paceOptions` before bringing in the file:
 
@@ -80,7 +81,7 @@ paceOptions = {
 };
 ```
 
-Add your own instances to `paceOptions.extraSources` to add more sources.  Each source should either
+Add your own classes to `paceOptions.extraSources` to add more sources.  Each source should either
 have a `.progress` property, or a `.elements` property which is a list of objects with
 `.progress` properties.  Pace will automatically handle all scaling to make the progress
 changes look smooth to the user.

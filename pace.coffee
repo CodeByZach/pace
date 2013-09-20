@@ -412,11 +412,14 @@ SOURCE_KEYS =
   eventLag: EventLagMonitor
 
 do init = ->
-  sources = options.extraSources ? []
+  sources = []
 
   for type in ['ajax', 'elements', 'document', 'eventLag']
     if options[type] isnt false
-      sources.push new SOURCE_KEYS[type](options[type])
+      sources.push SOURCE_KEYS[type](options[type])
+
+  for source in options.extraSources ? []
+    sources.push source(options)
 
   bar = new Bar
 
