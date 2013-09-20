@@ -16,7 +16,7 @@
         <script src="/pace/docs/lib/color.js"></script>
         <script src="/pace/docs/lib/themes.js"></script>
         <script src="/pace/pace.js"></script>
-        <link href="/pace/themes/pace-theme-flash.css" rel="stylesheet" />
+        <link href="/pace/docs/resources/flash-white.css" rel="stylesheet" />
     </head>
     <body>
         <style id="app-colors">
@@ -186,8 +186,8 @@
             .section {
                 position: relative;
                 height: 100%;
-                padding-top: 2rem;
-                padding-bottom: 2rem;
+                padding-top: 1rem;
+                padding-bottom: 1rem;
                 -webkit-box-sizing: border-box;
                 -moz-box-sizing: border-box;
                 box-sizing: border-box;
@@ -336,7 +336,7 @@
             .page {
                 text-align: center;
                 max-width: 28rem;
-                padding; 0 10px;
+                padding: 0 10px;
                 margin: 0 auto;
             }
 
@@ -359,6 +359,9 @@
             .themes-pitch {
                 padding: 15px;
             }
+            .block {
+                padding: 10px 0;
+            }
         </style>
 
         <div class="section colored">
@@ -376,21 +379,18 @@
 
         <div class="section">
             <div class="page">
-                <div class="up-arrow">⇪</div>
-                <h2>Download</h2>
-                <p><a class="button" href="https://raw.github.com/HubSpot/pace/v0.4.2/pace.min.js">Pace.js</a></p>
-                <br/>
                 <h2>What is Pace?</h2>
                 <p style="text-align: left">Include pace.js and the theme css of your choice, and you get a beautiful progress indicator for your page load and ajax navigation.</p>
                 <p style="text-align: left">No need to hook into any of your code, progress is detected automatically.</p>
                 <br/>
+                <h2>Download</h2>
+                <p><a class="button" href="https://raw.github.com/HubSpot/pace/v0.4.2/pace.min.js">Pace.js</a></p>
+                <br/>
                 <h2>Themes</h2>
                 <input type="color" value="#2299dd"></input>
                 <div class="themes"></div>
-                <br/>
-                <p>Submit a theme! <a href="https://github.com/HubSpot/pace">Fork us on GitHub</a></p>
-                <br/>
-                <p><a class="button" href="http://github.hubspot.com/pace/">Documentation</a></p>
+                <p class="block">Submit a theme! <a href="https://github.com/HubSpot/pace">Fork us on GitHub</a></p>
+                <p class="block"><a class="button" href="http://github.hubspot.com/pace/">Documentation</a></p>
                 <br/>
                 <p style="font-size: 0.6rem"><a href="http://dev.hubspot.com">HubSpot</a></p>
                 <br/>

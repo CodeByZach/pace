@@ -76,7 +76,7 @@ paceOptions = {
   document: false, // disabled
   eventLag: false, // disabled
   elements: {
-    sources: ['.my-page']
+    selectors: ['.my-page']
   }
 };
 ```
