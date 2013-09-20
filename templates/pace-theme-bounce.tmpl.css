@@ -57,11 +57,11 @@
   -ms-transform: scaleY(.3);
   -o-transform: scaleY(.3);
   transform: scaleY(.3);
-  -webkit-animation: pace-compress 1s infinite;
-  -moz-animation: pace-compress 1s infinite;
-  -o-animation: pace-compress 1s infinite;
-  -ms-animation: pace-compress 1s infinite;
-  animation: pace-compress 1s infinite;
+  -webkit-animation: pace-compress .5s infinite alternate;
+  -moz-animation: pace-compress .5s infinite alternate;
+  -o-animation: pace-compress .5s infinite alternate;
+  -ms-animation: pace-compress .5s infinite alternate;
+  animation: pace-compress .5s infinite alternate;
 }
 
 @-webkit-keyframes pace-bounce {
@@ -171,7 +171,7 @@
     border-radius: 30px / 40px;
     -webkit-animation-timing-function: ease-in;
   }
-  50% {
+  100% {
     bottom: 30px;
     margin-left: -10px;
     width: 20px;
@@ -180,16 +180,6 @@
     box-shadow: 0 0 20px 35px rgba(20, 20, 20, .3);
     border-radius: 20px / 20px;
     -webkit-animation-timing-function: ease-out;
-  }
-  100% {
-    bottom: 0;
-    margin-left: -30px;
-    width: 60px;
-    height: 75px;
-    background: rgba(20, 20, 20, .1);
-    box-shadow: 0 0 20px 35px rgba(20, 20, 20, .1);
-    border-radius: 30px / 40px;
-    -webkit-animation-timing-function: ease-in;
   }
 }
 
@@ -204,7 +194,7 @@
     border-radius: 30px / 40px;
     -moz-animation-timing-function: ease-in;
   }
-  50% {
+  100% {
     bottom: 30px;
     margin-left: -10px;
     width: 20px;
@@ -213,16 +203,6 @@
     box-shadow: 0 0 20px 35px rgba(20, 20, 20, .3);
     border-radius: 20px / 20px;
     -moz-animation-timing-function: ease-out;
-  }
-  100% {
-    bottom: 0;
-    margin-left: -30px;
-    width: 60px;
-    height: 75px;
-    background: rgba(20, 20, 20, .1);
-    box-shadow: 0 0 20px 35px rgba(20, 20, 20, .1);
-    border-radius: 30px / 40px;
-    -moz-animation-timing-function: ease-in;
   }
 }
 
@@ -237,7 +217,7 @@
     border-radius: 30px / 40px;
     animation-timing-function: ease-in;
   }
-  50% {
+  100% {
     bottom: 30px;
     margin-left: -10px;
     width: 20px;
@@ -246,15 +226,5 @@
     box-shadow: 0 0 20px 35px rgba(20, 20, 20, .3);
     border-radius: 20px / 20px;
     animation-timing-function: ease-out;
-  }
-  100% {
-    bottom: 0;
-    margin-left: -30px;
-    width: 60px;
-    height: 75px;
-    background: rgba(20, 20, 20, .1);
-    box-shadow: 0 0 20px 35px rgba(20, 20, 20, .1);
-    border-radius: 30px / 40px;
-    animation-timing-function: ease-in;
   }
 }
