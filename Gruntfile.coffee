@@ -13,7 +13,7 @@ module.exports = (grunt) ->
       for file in files
         body = ThemeUtils.compileTheme fs.readFileSync(file).toString()
 
-        body = "// This is a compiled file, you should be editing the file in templates/\n" + body
+        body = "/* This is a compiled file, you should be editing the file in the templates directory */\n" + body
 
         name = Path.basename file
         name = name.replace '.tmpl', ''
