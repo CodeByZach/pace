@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html>
+<!--[if lt IE 7]> <html class="no-js ie6 ie9-and-less ie8-and-less ie7-and-less" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 ie9-and-less ie8-and-less ie7-and-less" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 ie9-and-less ie8-and-less" lang="en"> <![endif]-->
+<!--[if IE 9]>    <html class="no-js ie9 ie9-and-less" lang="en"> <![endif]-->
+<!--[if gt IE 9]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="chrome=1">
@@ -15,6 +19,15 @@
         <link href="/pace/pace-theme-flash.css" rel="stylesheet" />
     </head>
     <body>
+        <style id="app-colors">
+            .section.colored, a.download-src-link {
+                background: #29d;
+            }
+
+            a, a:hover, a:active {
+                color: #29d;
+            }
+        </style>
         <style>
             html, body {
                 margin: 0;
@@ -23,7 +36,6 @@
             }
 
             a, a:hover, a:active {
-                color: #29d;
                 text-decoration: none
             }
 
@@ -181,16 +193,15 @@
                 box-sizing: border-box;
             }
 
-            .section.blue {
-                background: #29d;
+            .section.colored {
                 color: #fff;
             }
 
-            .section.blue .header .title .title2 {
+            .section.colored .header .title .title2 {
                 color: #fff;
             }
 
-            .section.blue .header .subtitle {
+            .section.colored .header .subtitle {
                 color: #fff;
             }
 
@@ -227,7 +238,7 @@
                 bottom: 30px;
             }
 
-            .section.blue .down-arrow {
+            .section.colored .down-arrow {
                 color: rgba(255, 255, 255, .5);
             }
 
@@ -352,7 +363,7 @@
             }
         </style>
 
-        <div class="section blue">
+        <div class="section colored">
             <div class="header">
                 <div class="title">
                     <h1 class="title1"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
@@ -482,7 +493,15 @@
                             });
 
                             $color.on('change keyup', function(){
-                                updateColor($(this).val());
+                                var color = $(this).val();
+                                updateColor(color);
+
+                                var css = '.section.colored, a.download-src-link { background: ' + color + '; } a, a:hover, a:active { color: ' + color + '; }';
+                                if ($('html').hasClass('ie8-and-less')) {
+                                    $('#app-colors').get(0).styleSheet.cssText = css
+                                } else {
+                                    $('#app-colors').html(css);
+                                }
                             });
 
                             $('a.download-link').click(function(e){
