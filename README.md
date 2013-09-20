@@ -1,6 +1,3 @@
-<script src="https://rawgithub.com/HubSpot/pace/v0.4.0/pace.min.js"></script>
-<link type="text/css" href="https://rawgithub.com/HubSpot/pace/v0.4.0/themes/pace-theme-barber-shop.css"></link>
-
 pace
 ====
 
