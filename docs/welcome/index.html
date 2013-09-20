@@ -454,13 +454,14 @@
                         };
 
                         var initTimeout = setTimeout(function(){
+                            $(window).unbind('scroll', scrollOnce);
                             init();
                         }, 3000);
 
                         var scrollOnce = function() {
+                            $(window).unbind('scroll', scrollOnce);
                             clearTimeout(initTimeout);
                             init();
-                            $(window).unbind('scroll', scrollOnce);
                         };
 
                         $(window).bind('scroll', scrollOnce);
