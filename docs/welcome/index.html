@@ -8,7 +8,7 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-        <title>pace.js</title>
+        <title>PACE — Automatic page load progress bars</title>
         <link rel="icon" href="http://static.hubspot.com/favicon.ico">
         <script type="text/javascript" src="//use.typekit.net/jbn8qxr.js"></script>
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
@@ -25,7 +25,7 @@
                 background: #29d;
             }
 
-            a, a:hover, a:active {
+            a, a:hover, a:active, .header .title .title2:before {
                 color: #29d;
             }
         </style>
@@ -178,6 +178,32 @@
                 display: block;
                 position: absolute;
                 top: 0;
+            }
+            .header .title .title2:before {
+                position: absolute;
+                top: 16.5%;
+                bottom: 34%;
+                left: 2%;
+                right: 2%;
+                content: "Progress, Automatically. Certain to Entertain.";
+                font-size: 1rem;
+                line-height: 1.3em;
+                padding: 1rem 15rem 1rem 1rem;
+                background: #fff;
+                opacity: 0;
+                text-align: left;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+                -webkit-transform: translateY(-15px);
+                -webkit-transition: all .3s;
+                -moz-transition: all .3s;
+                transition: all .3s;
+                z-index: 10;
+            }
+            .header .title .title2:hover:before {
+                opacity: 1;
+                -webkit-transform: translateY(0px);
             }
             .header .title .char1 { left: .5%; width: 22%; }
             .header .title .char2 { left: 25%; width: 22%; }
@@ -503,7 +529,7 @@
                                 var color = $(this).val();
                                 updateColor(color);
 
-                                var css = '.section.colored, a.button { background: ' + color + '; } a, a:hover, a:active { color: ' + color + '; }';
+                                var css = '.section.colored, a.button { background: ' + color + '; } a, a:hover, a:active, .header .title .title2:before { color: ' + color + '; }';
                                 if ($('html').hasClass('ie8-and-less')) {
                                     $('#app-colors').get(0).styleSheet.cssText = css
                                 } else {
