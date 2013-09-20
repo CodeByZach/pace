@@ -1,9 +1,14 @@
+// This is a compiled file, you should be editing the file in templates/
 .pace {
   -webkit-pointer-events: none;
   pointer-events: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
+}
+
+.pace-inactive {
+  display: none;
 }
 
 .pace .pace-progress {
@@ -39,8 +44,8 @@
   width: 14px;
   height: 14px;
   border: solid 2px transparent;
-  border-top-color: {{ color|"#29d" }};
-  border-left-color: {{ color|"#29d" }};
+  border-top-color: #29d;
+  border-left-color: #29d;
   border-radius: 10px;
   -webkit-animation: pace-spinner 400ms linear infinite;
   -moz-animation: pace-spinner 400ms linear infinite;

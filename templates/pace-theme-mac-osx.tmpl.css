@@ -1,9 +1,14 @@
+// This is a compiled file, you should be editing the file in templates/
 .pace {
   -webkit-pointer-events: none;
   pointer-events: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
+}
+
+.pace-inactive {
+  display: none;
 }
 
 .pace .pace-progress {
