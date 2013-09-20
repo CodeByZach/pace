@@ -195,7 +195,7 @@
           }, 0);
         });
 
-        $color.change(function(){
+        $color.on('change keyup', function(){
           updateColor($(this).val());
         });
 
