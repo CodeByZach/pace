@@ -43,19 +43,53 @@
       box-shadow: 0 -1px #aaa;
     }
     input[type="color"] {
-      width: 750px;
-      height: 40px;
+      margin-left: -10px;
+      width: 100%;
+      height: 50px;
       position: relative;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    input[type="color"]::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 3px;
+      right: 3px;
+      height: 100%;
+      border-radius: 8px;
+      border: 6px solid #fff;
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box;
+      -webkit-box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.6);
+      -moz-box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.6);
+      box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.6);
     }
     input[type="color"]::after {
       content: "Choose a color";
+      display: block;
       text-align: center;
-      width: 100%;
       position: absolute;
-      top: 10px;
+      top: 0;
+      left: -2px;
+      right: -2px;
+      height: 100%;
       font-size: 16px;
-      color: #FCFCFC;
-      text-shadow: 0 0 1px #CCC;
+      line-height: 37px;
+      color: #fcfcfc;
+      text-shadow: 0 1px rgba(0, 0, 0, 0.5);
+      border: 6px solid #fff;
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box;
+    }
+    input[type="color"]:active::after {
+      color: #ccc;
+    }
+    input[type="color"]:active::before {
+      background: rgba(0, 0, 0, 0.2);
     }
   </style>
 </head>
@@ -116,7 +150,7 @@
         });
 
         var $color = $('input[type="color"]');
-        
+
         var cssCache = {};
         var initFrame = function(frame, color){
           if ($color.val() != '#2299dd')
@@ -128,7 +162,7 @@
           var context = {};
           if (color)
             context.color = color;
-            
+
           var themeName = $(frame).data('theme')
           loadTheme(themeName, function(theme){
             body = compileTheme(theme, context);
