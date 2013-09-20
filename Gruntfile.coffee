@@ -46,7 +46,7 @@ module.exports = (grunt) ->
 
     themes:
       src: 'templates/*.tmpl.css'
-      dest: '.'
+      dest: 'themes'
 
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
