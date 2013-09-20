@@ -1,5 +1,6 @@
 <head>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="/pace/docs/lib/themes.js"></script>
   <style>
     body {
       margin: 0px;
@@ -92,7 +93,14 @@
         });
 
         $('iframe').load(function(){
-          $(this).contents().find('body').append('<link rel="stylesheet" href="/pace/pace-theme-' + $(this).data('theme') + '.css" />');
+          var $styleEl = $('<style>')
+          $(this).contents().find('body').append($styleEl);
+
+          loadTheme($(this).data('theme'), function(theme){
+            body = compileTheme(theme, {color: 'red'});
+
+            $styleEl.html(body);
+          });
 
           $(this).contents().find('.pace').addClass('pace-active');
         });
