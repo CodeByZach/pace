@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <title>pace.js</title>
+        <link rel="icon" href="http://static.hubspot.com/favicon.ico">
+        <script type="text/javascript" src="//use.typekit.net/jbn8qxr.js"></script>
+        <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+        <script src="/pace/pace.js"></script>
+        <link href="/pace/pace-theme-flash.css" rel="stylesheet" />
+    </head>
+    <body>
+        <style>
+            html, body {
+                margin: 0;
+                height: 100%;
+            }
+
+            body {
+                font-family: "proxima-nova", "Helvetica Neue", sans-serif;
+            }
+
+            @media (max-width: 1700px) { html { font-size: 188%; } }
+            @media (max-width: 1680px) { html { font-size: 186%; } }
+            @media (max-width: 1660px) { html { font-size: 184%; } }
+            @media (max-width: 1640px) { html { font-size: 182%; } }
+            @media (max-width: 1620px) { html { font-size: 180%; } }
+            @media (max-width: 1600px) { html { font-size: 178%; } }
+            @media (max-width: 1580px) { html { font-size: 176%; } }
+            @media (max-width: 1560px) { html { font-size: 174%; } }
+            @media (max-width: 1540px) { html { font-size: 172%; } }
+            @media (max-width: 1520px) { html { font-size: 170%; } }
+            @media (max-width: 1500px) { html { font-size: 168%; } }
+            @media (max-width: 1480px) { html { font-size: 166%; } }
+            @media (max-width: 1460px) { html { font-size: 164%; } }
+            @media (max-width: 1440px) { html { font-size: 162%; } }
+            @media (max-width: 1420px) { html { font-size: 160%; } }
+            @media (max-width: 1400px) { html { font-size: 158%; } }
+            @media (max-width: 1380px) { html { font-size: 156%; } }
+            @media (max-width: 1360px) { html { font-size: 154%; } }
+            @media (max-width: 1340px) { html { font-size: 152%; } }
+            @media (max-width: 1320px) { html { font-size: 150%; } }
+            @media (max-width: 1300px) { html { font-size: 148%; } }
+            @media (max-width: 1280px) { html { font-size: 146%; } }
+            @media (max-width: 1260px) { html { font-size: 144%; } }
+            @media (max-width: 1240px) { html { font-size: 142%; } }
+            @media (max-width: 1220px) { html { font-size: 140%; } }
+            @media (max-width: 1200px) { html { font-size: 138%; } }
+            @media (max-width: 1180px) { html { font-size: 136%; } }
+            @media (max-width: 1160px) { html { font-size: 134%; } }
+            @media (max-width: 1140px) { html { font-size: 132%; } }
+            @media (max-width: 1120px) { html { font-size: 130%; } }
+            @media (max-width: 1100px) { html { font-size: 128%; } }
+            @media (max-width: 1080px) { html { font-size: 126%; } }
+            @media (max-width: 1060px) { html { font-size: 124%; } }
+            @media (max-width: 1040px) { html { font-size: 122%; } }
+            @media (max-width: 1020px) { html { font-size: 120%; } }
+            @media (max-width: 1000px) { html { font-size: 118%; } }
+            @media (max-width: 980px) { html { font-size: 116%; } }
+            @media (max-width: 960px) { html { font-size: 114%; } }
+            @media (max-width: 940px) { html { font-size: 112%; } }
+            @media (max-width: 920px) { html { font-size: 110%; } }
+            @media (max-width: 900px) { html { font-size: 108%; } }
+            @media (max-width: 880px) { html { font-size: 106%; } }
+            @media (max-width: 860px) { html { font-size: 104%; } }
+            @media (max-width: 840px) { html { font-size: 102%; } }
+            @media (max-width: 820px) { html { font-size: 100%; } }
+            @media (max-width: 800px) { html { font-size: 98%; } }
+            @media (max-width: 780px) { html { font-size: 96%; } }
+            @media (max-width: 760px) { html { font-size: 94%; } }
+            @media (max-width: 740px) { html { font-size: 92%; } }
+            @media (max-width: 720px) { html { font-size: 90%; } }
+            @media (max-width: 700px) { html { font-size: 88%; } }
+            @media (max-width: 680px) { html { font-size: 86%; } }
+            @media (max-width: 660px) { html { font-size: 84%; } }
+            @media (max-width: 640px) { html { font-size: 82%; } }
+            @media (max-width: 620px) { html { font-size: 80%; } }
+            @media (max-width: 600px) { html { font-size: 78%; } }
+            @media (max-width: 580px) { html { font-size: 76%; } }
+            @media (max-width: 560px) { html { font-size: 74%; } }
+            @media (max-width: 540px) { html { font-size: 72%; } }
+            @media (max-width: 520px) { html { font-size: 70%; } }
+            @media (max-width: 500px) { html { font-size: 68%; } }
+            @media (max-width: 480px) { html { font-size: 66%; } }
+            @media (max-width: 460px) { html { font-size: 64%; } }
+            @media (max-width: 440px) { html { font-size: 62%; } }
+            @media (max-width: 420px) { html { font-size: 60%; } }
+            @media (max-width: 400px) { html { font-size: 58%; } }
+            @media (max-width: 380px) { html { font-size: 56%; } }
+            @media (max-width: 360px) { html { font-size: 54%; } }
+            @media (max-width: 340px) { html { font-size: 52%; } }
+            @media (max-width: 320px) { html { font-size: 50%; } }
+
+            .page {
+                color: #000;
+                -webkit-transition: opacity 1s;
+                -moz-transition: opacity 1s;
+                -o-transition: opacity 1s;
+                transition: opacity 1s;
+                text-align: center;
+                margin: auto;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                position: absolute;
+                width: 29rem;
+                max-width: 100%;
+                height: 28rem;
+                z-index: 50;
+                z-index: 1;
+            }
+            .page h1 {
+                font-size: 10rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+            .page .title {
+                position: relative;
+                width: 100%;
+            }
+            .page .title h1 {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                text-align: center;
+            }
+            .page .title .title1 {
+                color: #eee;
+                color: rgba(0, 0, 0, 0.1);
+            }
+            .page .title .title2 {
+                color: #000;
+            }
+            .page .title span {
+                display: block;
+                position: absolute;
+                top: 0;
+            }
+            .page .title .char1 { left: .5%; }
+            .page .title .char2 { left: 25%; }
+            .page .title .char3 { left: 51%; }
+            .page .title .char4 { left: 79.5%; }
+
+            .section {
+                position: relative;
+                height: 100%;
+            }
+
+            .section.blue {
+                background: #29d;
+                color: #fff;
+            }
+
+            .section.blue .page .title .title2 {
+                color: #fff;
+            }
+
+            .page .title .title2 span {
+                width: 0px;
+                -webkit-transition: width 2s linear;
+                -moz-transition: width 2s linear;
+                -ms-transition: width 2s linear;
+                -o-transition: width 2s linear;
+                transition: width 2s linear;
+                overflow: hidden;
+            }
+
+            .page-loaded .page .title .title2 span {
+                width: .33em;
+            }
+        </style>
+
+        <div class="section blue">
+            <div class="page">
+                <div class="title">
+                    <h1 class="title1"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
+                    <h1 class="title2"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="page">
+                <div class="title">
+                    <h1 class="title1"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
+                    <h1 class="title2"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
+                </div>
+            </div>
+        </div>
+
+        <script>document.body.className = 'page-loaded';</script>
+
+        <!-- Share -->
+
+        <style>
+            #retweet_button {
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                width: 100px;
+                margin-left: -90px;
+                -webkit-filter: grayscale(1) contrast(1.3);
+                z-index: 3;
+            }
+            #retweet_button:hover {
+                -webkit-filter: none;
+            }
+            #github_stars {
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                width: 100px;
+                margin-left: 36px;
+                -webkit-filter: grayscale(1) contrast(1.3);
+                z-index: 3;
+            }
+            #github_stars:hover {
+                -webkit-filter: none;
+            }
+        </style>
+        <div id="retweet_button">
+            <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://github.hubspot.com/pace/docs/welcome" data-text="pace.js" data-count="horizontal" data-via="HubSpotDev">Tweet</a>
+            <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+        </div>
+        <div id="github_stars">
+            <iframe src="http://ghbtns.com/github-btn.html?user=HubSpot&amp;repo=vex&amp;type=watch&amp;count=true&amp;size=small" allowtransparency="true" frameborder="0" scrolling="0" width="200" height="20"></iframe>
+        </div>
+
+        <!-- Start of Async HubSpot Analytics Code -->
+        <script type="text/javascript">
+            (function(d,s,i,r) {
+                if (d.getElementById(i)){return;}
+                var n=d.createElement(s),e=d.getElementsByTagName(s)[0];
+                n.id=i;n.src='//js.hubspot.com/analytics/'+(Math.ceil(new Date()/r)*r)+'/51294.js';
+                e.parentNode.insertBefore(n, e);
+            })(document,"script","hs-analytics",300000);
+        </script>
+        <!-- End of Async HubSpot Analytics Code -->
+
+        <!-- Force 3d acceleration always and forever :) -->
+        <div style="-webkit-transform: translateZ(0)"></div>
+    </body>
+</html>
