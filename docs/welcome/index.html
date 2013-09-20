@@ -9,6 +9,8 @@
         <script type="text/javascript" src="//use.typekit.net/jbn8qxr.js"></script>
         <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+        <script src="/pace/docs/lib/color.js"></script>
+        <script src="/pace/docs/lib/themes.js"></script>
         <script src="/pace/pace.js"></script>
         <link href="/pace/pace-theme-flash.css" rel="stylesheet" />
     </head>
@@ -17,6 +19,7 @@
             html, body {
                 margin: 0;
                 height: 100%;
+                color: #000;
             }
 
             body {
@@ -94,7 +97,7 @@
             @media (max-width: 340px) { html { font-size: 52%; } }
             @media (max-width: 320px) { html { font-size: 50%; } }
 
-            .page {
+            .header {
                 color: #000;
                 -webkit-transition: opacity 1s;
                 -moz-transition: opacity 1s;
@@ -113,43 +116,48 @@
                 z-index: 50;
                 z-index: 1;
             }
-            .page h1 {
+            .header h1 {
                 font-size: 10rem;
                 font-weight: 800;
                 text-transform: uppercase;
-                letter-spacing: 0.05em;
+                letter-spacing: .05em;
             }
-            .page .title {
+            .header h2 {
+                font-size: 5rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+            }
+            .header .title {
                 position: relative;
                 width: 100%;
             }
-            .page .title h1 {
+            .header .title h1 {
                 position: absolute;
                 top: 0;
                 left: 0;
                 right: 0;
                 text-align: center;
             }
-            .page .title .title1 {
+            .header .title .title1 {
                 color: #eee;
-                color: rgba(0, 0, 0, 0.1);
+                color: rgba(0, 0, 0, .1);
             }
-            .page .title .title2 {
-                color: #000;
-            }
-            .page .title span {
+            .header .title span {
                 display: block;
                 position: absolute;
                 top: 0;
             }
-            .page .title .char1 { left: .5%; }
-            .page .title .char2 { left: 25%; }
-            .page .title .char3 { left: 51%; }
-            .page .title .char4 { left: 79.5%; }
+            .header .title .char1 { left: .5%; width: 22%; }
+            .header .title .char2 { left: 25%; width: 22%; }
+            .header .title .char3 { left: 51%; width: 22%; }
+            .header .title .char4 { left: 79.5%; width: 22%; }
 
             .section {
                 position: relative;
                 height: 100%;
+                padding-top: 2rem;
+                padding-bottom: 2rem;
             }
 
             .section.blue {
@@ -157,11 +165,11 @@
                 color: #fff;
             }
 
-            .section.blue .page .title .title2 {
+            .section.blue .header .title .title2 {
                 color: #fff;
             }
 
-            .page .title .title2 span {
+            .header .title .title2 span {
                 width: 0px;
                 -webkit-transition: width 2s linear;
                 -moz-transition: width 2s linear;
@@ -171,26 +179,266 @@
                 overflow: hidden;
             }
 
-            .page-loaded .page .title .title2 span {
-                width: .33em;
+            .page-loaded .header .title .title2 .char1 { width: 21%; }
+            .page-loaded .header .title .title2 .char2 { width: 24%; }
+            .page-loaded .header .title .title2 .char3 { width: 24%; }
+            .page-loaded .header .title .title2 .char4 { width: 21%; }
+
+
+            .up-arrow, .down-arrow {
+                width: 100%;
+                text-align: center;
+                font-size: 2rem;
+            }
+
+            .up-arrow {
+                margin: 35px 0;
+            }
+
+            .down-arrow {
+                position: absolute;
+                left: 0;
+                -webkit-transform: rotate(180deg);
+                -moz-transform: rotate(180deg);
+                -ms-transform: rotate(180deg);
+                -o-transform: rotate(180deg);
+                transform: rotate(180deg);
+                bottom: 30px;
+            }
+
+            .section.blue .down-arrow {
+                color: rgba(255, 255, 255, .5);
+            }
+
+
+            h2 {
+                text-align: center;
+            }
+            .themes {
+                overflow: hidden;
+                text-align: center;
+                padding-bottom: 60px;
+            }
+            .theme {
+                width: 46%;
+            }
+            .theme.even {
+                text-align: center;
+                float: left;
+                clear: both;
+            }
+            .theme.odd {
+                text-align: center;
+                float: right;
+            }
+            .browser {
+                background: #e0e0e0;
+                border: 4px solid #e0e0e0;
+                width: 100%;
+                height: 160px;
+                padding-top: 20px;
+                margin: 0 0 10px;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            .browser iframe {
+                border: 0;
+                background: #fff;
+                height: 100%;
+                width: 100%;
+            }
+            input[type="color"] {
+                width: 50%;
+                height: 50px;
+                position: relative;
+                font-family: inherit;
+                cursor: pointer;
+            }
+            input[type="color"]::before {
+                content: " ";
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 3px;
+                right: 3px;
+                height: 100%;
+                border: 6px solid #fff;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            input[type="color"]::after {
+                content: "Choose a color";
+                display: block;
+                text-align: center;
+                position: absolute;
+                top: 0;
+                left: -2px;
+                right: -2px;
+                height: 100%;
+                font-size: 16px;
+                line-height: 37px;
+                color: #fcfcfc;
+                color: rgba(255, 255, 255, 0.8);
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                border: 6px solid #fff;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            input[type="color"]:active::after {
+                color: #ccc;
+            }
+            input[type="color"]:active::before {
+                color: rgba(255, 255, 255, 0.4);
+            }
+
+            .themes h3 {
+                margin-bottom: 0;
+            }
+
+            .page {
+                text-align: center;
+                max-width: 28rem;
+                padding; 0 10px;
+                margin: 0 auto;
+            }
+
+            .themes a, .themes a:hover, .themes a:active {
+                color: #29d;
+                text-decoration: none;
+                font-size: .7rem;
+                text-transform: uppercase;
+                letter-spacing: .1em;
             }
         </style>
 
         <div class="section blue">
-            <div class="page">
+            <div class="header">
                 <div class="title">
                     <h1 class="title1"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
                     <h1 class="title2"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
                 </div>
             </div>
+            <div class="down-arrow">⇪</div>
         </div>
 
         <div class="section">
             <div class="page">
-                <div class="title">
-                    <h1 class="title1"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
-                    <h1 class="title2"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
-                </div>
+                <div class="up-arrow">⇪</div>
+                <h2>Themes</h2>
+                <input type="color" value="#2299dd"></input>
+                <div class="themes"></div>
+                <script>
+                  $(function(){
+                    var themes = [{
+                      name: 'minimal',
+                      title: 'Minimal',
+                      description: 'The smallest file size and simplest'
+                    }, {
+                      name: 'flash',
+                      title: 'Flash',
+                      description: 'Inspired by Google Chrome on iOS'
+                    }, {
+                      name: 'barber-shop',
+                      title: 'Barber Shop',
+                      description: 'Inspired by Lea Verou'
+                    }, {
+                      name: 'mac-osx',
+                      title: 'Mac OSX',
+                      description: 'Inspired by the native OSX progress styles'
+                    }, {
+                      name: 'fill-left',
+                      title: 'Fill Left',
+                      description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
+                    }, {
+                      name: 'flat-top',
+                      title: 'Flat Top',
+                      description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
+                    }, {
+                      name: 'big-counter',
+                      title: 'Big Counter',
+                      description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
+                    }, {
+                      name: 'corner-indicator',
+                      title: 'Corner Indicator',
+                      description: 'Inspired by <a href="http://tympanus.net/Development/CreativeLoadingEffects/" rel="nofollow" target="_blank">Codedrops</a>'
+                    }, {
+                      name: 'bounce',
+                      title: 'Bounce',
+                      description: 'Inspired by <a href="http://tympanus.net/Tutorials/CSS3BouncingBall/" rel="nofollow" target="_blank">Codedrops</a>'
+                    }];
+
+                    $.each(themes, function(i, theme){
+                      $('.themes').append('<div class="theme ' + (i % 2 == 0 ? 'even' : 'odd') + '">'+
+                        '<h3>' + theme.title + '</h3>' +
+                        '<p><a href="#" class="download-link" data-theme="' + theme.name + '">download</a></p>'+
+                        '<div class="browser"><iframe data-theme="' + theme.name + '" src="../themes/pace-theme-template.html"></iframe></div>' +
+                      '</div>');
+                    });
+
+                    var $color = $('input[type="color"]');
+
+                    var cssCache = {};
+                    var initFrame = function(frame, color){
+                      if ($color.val() != '#2299dd')
+                        color = $color.val();
+
+                      var $styleEl = $('<style>')
+                      $(frame).contents().find('body').append($styleEl);
+
+                      var context = {};
+                      if (color)
+                        context.color = color;
+
+                      var themeName = $(frame).data('theme')
+                      loadTheme(themeName, function(theme){
+                        body = compileTheme(theme, context);
+
+                        cssCache[themeName] = body;
+
+                        $styleEl.html(body);
+                      });
+
+                      $(frame).contents().find('.pace').addClass('pace-active');
+                    };
+
+                    var updateColor = function(color){
+                      $('iframe').each(function(){
+                        initFrame(this, color);
+                      });
+                    };
+
+                    var downloadTheme = function(theme){
+                      location.href = 'data:text/css,' + encodeURIComponent(cssCache[theme]);
+                    };
+
+                    $('iframe').load(function(){
+                      var _this = this;
+
+                      // For some strange reason, the Color library we depend on defines itself
+                      // asyncronously
+                      setTimeout(function(){
+                        initFrame(_this);
+                      }, 0);
+                    });
+
+                    $color.on('change keyup', function(){
+                      updateColor($(this).val());
+                    });
+
+                    $('a.download-link').click(function(e){
+                      e.preventDefault();
+
+                      var theme = $(this).data('theme');
+
+                      downloadTheme(theme);
+                    });
+                  });
+                </script>
             </div>
         </div>
 
@@ -202,9 +450,8 @@
             #retweet_button {
                 position: fixed;
                 bottom: 30px;
-                left: 50%;
+                left: 30px;
                 width: 100px;
-                margin-left: -90px;
                 -webkit-filter: grayscale(1) contrast(1.3);
                 z-index: 3;
             }
@@ -214,9 +461,8 @@
             #github_stars {
                 position: fixed;
                 bottom: 30px;
-                left: 50%;
+                left: 130px;
                 width: 100px;
-                margin-left: 36px;
                 -webkit-filter: grayscale(1) contrast(1.3);
                 z-index: 3;
             }
@@ -229,7 +475,7 @@
             <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
         </div>
         <div id="github_stars">
-            <iframe src="http://ghbtns.com/github-btn.html?user=HubSpot&amp;repo=vex&amp;type=watch&amp;count=true&amp;size=small" allowtransparency="true" frameborder="0" scrolling="0" width="200" height="20"></iframe>
+            <iframe src="http://ghbtns.com/github-btn.html?user=HubSpot&amp;repo=pace&amp;type=watch&amp;count=true&amp;size=small" allowtransparency="true" frameborder="0" scrolling="0" width="200" height="20"></iframe>
         </div>
 
         <!-- Start of Async HubSpot Analytics Code -->
