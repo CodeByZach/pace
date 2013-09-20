@@ -1,6 +1,4 @@
 defaultOptions =
-  theme: 'plain'
-
   # How long should it take for the bar to animate to a new
   # point after receiving it
   catchupTime: 500
@@ -96,9 +94,6 @@ window.Pace ?= {}
 
 options = Pace.options = extend defaultOptions, window.paceOptions, getFromDOM()
 
-if domTheme = getFromDOM('theme', false)
-  options.theme = domTheme
-
 class Bar
   constructor: ->
     @progress = 0
@@ -106,7 +101,7 @@ class Bar
   getElement: ->
     if not @el?
       @el = document.createElement 'div'
-      @el.className = "pace pace-active pace-theme-#{ options.theme }"
+      @el.className = "pace pace-active"
 
       @el.innerHTML = '''
       <div class="pace-progress">
