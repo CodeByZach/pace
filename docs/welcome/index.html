@@ -564,6 +564,16 @@
             #github_stars:hover {
                 -webkit-filter: none;
             }
+            .hn-share-iframe {
+                position: fixed;
+                bottom: 36px;
+                left: 225px;
+                -webkit-filter: grayscale(1) contrast(1.3);
+                z-index: 3;
+            }
+            .hn-share-iframe:hover {
+                -webkit-filter: none;
+            }
         </style>
         <div id="retweet_button">
             <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://github.hubspot.com/pace/docs/welcome" data-text="pace.js - Add an automatic page load progress bar to your site" data-count="horizontal" data-via="HubSpotDev">Tweet</a>
@@ -572,6 +582,16 @@
         <div id="github_stars">
             <iframe src="http://ghbtns.com/github-btn.html?user=HubSpot&amp;repo=pace&amp;type=watch&amp;count=true&amp;size=small" allowtransparency="true" frameborder="0" scrolling="0" width="200" height="20"></iframe>
         </div>
+        <a href="http://news.ycombinator.com/submit" class="hn-share-button" data-title="Show HN: Pace / Automatic page load progress bars" data-url="http://github.hubspot.com/pace/docs/welcome/?hn=1">Vote on HN</a>
+
+        <script>
+            (function(d, t) {
+                var g = d.createElement(t),
+                    s = d.getElementsByTagName(t)[0];
+                g.src = '//hnbutton.appspot.com/static/hn.min.js';
+                s.parentNode.insertBefore(g, s);
+            }(document, 'script'));
+        </script>
 
         <!-- Start of Async HubSpot Analytics Code -->
         <script type="text/javascript">
