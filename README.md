@@ -90,6 +90,27 @@ have a `.progress` property, or a `.elements` property which is a list of object
 `.progress` properties.  Pace will automatically handle all scaling to make the progress
 changes look smooth to the user.
 
+Elements
+--------
+
+Elements being rendered to the screen is one way for us to decide that the page has been
+rendered.  If you would like to use that source of information (not required at all),
+specify one or more selectors.  You can comma seperate the selectors to propertly handle
+error states, where the progress bar should disappear, but the element were looking for
+may never apper:
+
+```javascript
+paceOptions = {
+  elements: {
+    selectors: ['.timeline,.timeline-error', '.user-profile,.profile-error']
+  }
+}
+```
+
+Pace will consider the elements test successful when each selector matches something.  For
+this example, when either `.timeline` or `.timeline-error` exist, and either `.user-profile`
+or `.profile-error` exit.
+
 Restart Rules
 -------------
 
@@ -104,7 +125,7 @@ paceOptions: {
 
 You can always trigger a restart manually by calling `Pace.restart()`
 
-See [the source](pace.coffee) for a full list of all options.
+See [the source](https://github.com/HubSpot/pace/blob/master/pace.coffee) for a full list of all options.
 
 API
 ---
