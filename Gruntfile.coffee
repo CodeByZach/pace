@@ -33,8 +33,8 @@ module.exports = (grunt) ->
 
     watch:
       coffee:
-        files: ['pace.coffee', 'docs/lib/themes.coffee']
-        tasks: ["coffee", "uglify"]
+        files: ['pace.coffee', 'docs/lib/themes.coffee', 'templates/*']
+        tasks: ["coffee", "uglify", "themes"]
 
     uglify:
       options:
@@ -52,4 +52,4 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-contrib-coffee'
 
-  grunt.registerTask 'default', ['coffee', 'uglify']
+  grunt.registerTask 'default', ['coffee', 'uglify', 'themes']

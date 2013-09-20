@@ -12,7 +12,7 @@
     if (vars == null) {
       vars = {};
     }
-    return body.replace(/\{\{\s*([^\} \|]+)(?:\|"([^\} ]+)")?\s*\}\}/g, function(match, varName, def) {
+    return body.replace(/\{\{\s*([^\} \|]+)(?:\|"([^"]+)")?\s*\}\}/g, function(match, varName, def) {
       var val;
       val = vars[varName] || def;
       if (val == null) {

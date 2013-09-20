@@ -39,8 +39,8 @@
   width: 14px;
   height: 14px;
   border: solid 2px transparent;
-  border-top-color: #29d;
-  border-left-color: #29d;
+  border-top-color: {{ color|"#29d" }};
+  border-left-color: {{ color|"#29d" }};
   border-radius: 10px;
   -webkit-animation: pace-spinner 400ms linear infinite;
   -moz-animation: pace-spinner 400ms linear infinite;

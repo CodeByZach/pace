@@ -48,6 +48,7 @@
     <h1>Pace</h1>
     <h2>Themes</h2>
     <div class="themes"></div>
+    <input type="color"></input>
     <script>
       (function(){
         var themes = [{
@@ -92,17 +93,33 @@
           '</div>');
         });
 
-        $('iframe').load(function(){
+        var initFrame = function(frame, color){
           var $styleEl = $('<style>')
-          $(this).contents().find('body').append($styleEl);
+          $(frame).contents().find('body').append($styleEl);
 
-          loadTheme($(this).data('theme'), function(theme){
-            body = compileTheme(theme, {color: 'red'});
+          var context = {};
+          if (color)
+            context.color = color;
+
+          loadTheme($(frame).data('theme'), function(theme){
+            body = compileTheme(theme, context);
 
             $styleEl.html(body);
           });
 
-          $(this).contents().find('.pace').addClass('pace-active');
+          $(frame).contents().find('.pace').addClass('pace-active');
+        };
+
+        var updateColor = function(color){
+          $('iframe').each(function(){
+            initFrame(this, color);
+          });
+        };
+
+        $('iframe').load(function(){ initFrame(this); });
+
+        $('input[type="color"]').change(function(){
+          updateColor($(this).val());
         });
       })();
     </script>

@@ -13,7 +13,7 @@
   top: 0;
   left: 0;
   height: 12px;
-  background: #29d;
+  background: {{ color|"#29d" }};
   -webkit-transition: -webkit-transform 0.3s;
   transition: transform 0.3s;
   -webkit-transform: translateY(-50px);

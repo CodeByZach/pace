@@ -4,7 +4,7 @@ loadTheme = (name, cb) ->
     success: cb
 
 compileTheme = (body, vars={}) ->
-  body.replace /\{\{\s*([^\} \|]+)(?:\|"([^\} ]+)")?\s*\}\}/g, (match, varName, def) ->
+  body.replace /\{\{\s*([^\} \|]+)(?:\|"([^"]+)")?\s*\}\}/g, (match, varName, def) ->
     val = vars[varName] or def
 
     if not val?
