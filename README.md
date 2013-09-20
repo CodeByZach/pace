@@ -161,3 +161,13 @@ Issues
 
 We have obviously not tested this on every website.  If you run into an issue, or find a way the automatic
 detection could be better, please create an Issue.  If you can include a test case, that's even better.
+
+Credits
+-------
+
+[HubSpot](http://dev.hubspot.com)
+
+Javascript by [Zack Bloom](http://twitter.com/zackbloom)
+CSS by [Adam Schwartz](http://twitter.com/adamfschwartz)
+
+Themes inspired by [Mary Lou](http://tympanus.net/codrops/2013/09/18/creative-loading-effects/)
