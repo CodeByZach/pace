@@ -109,7 +109,7 @@ paceOptions = {
 
 Pace will consider the elements test successful when each selector matches something.  For
 this example, when either `.timeline` or `.timeline-error` exist, and either `.user-profile`
-or `.profile-error` exit.
+or `.profile-error` exist.
 
 Restart Rules
 -------------
