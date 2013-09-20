@@ -1,8 +1,6 @@
 pace
 ====
 
-Automatic page load progress bar
-
 Include [pace.js](https://raw.github.com/HubSpot/pace/v0.4.0/pace.min.js) and the 
 [theme](http://github.hubspot.com/pace/docs/themes/) css of your choice on your page
 (as early as is possible), and you're done!
