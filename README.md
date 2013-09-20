@@ -1,9 +1,14 @@
+<script src="https://rawgithub.com/HubSpot/pace/v0.4.0/pace.min.js"></script>
+<link type="text/css" href="https://rawgithub.com/HubSpot/pace/v0.4.0/themes/pace-theme-barber-shop.css"></link>
+
 pace
 ====
 
 Automatic page load progress bar
 
-Include pace.js and the theme css of your choice on your page (as early as is possible), and you're done!
+Include [pace.js](https://raw.github.com/HubSpot/pace/v0.4.0/pace.min.js) and the 
+[theme](http://github.hubspot.com/pace/docs/themes/) css of your choice on your page
+(as early as is possible), and you're done!
 
 If you use AMD or Browserify, require in pace.js and call `pace.start()` as early in
 the loading process as is possible.
@@ -42,8 +47,9 @@ define(['pace'], function(pace){
 Themes
 ------
 
-Pace includes a bunch of themes to get you started.  Specify the theme of your choice as
-an option, and include the appropriate css file.
+Pace includes a bunch of [themes](http://github.hubspot.com/pace/docs/themes/)
+to get you started.  Specify the theme of your choice as an option, and
+include the appropriate css file.
 
 Collectors
 ----------
@@ -105,18 +111,12 @@ API
 
 Pace exposes the following methods:
 
-- `Pace.start`
+- `Pace.start`: Show the progress bar and start updating.  Called automatically if you don't use AMD or CommonJS.
 
-Show the progress bar and start updating.  Called automatically if you don't use AMD or CommonJS.
-
-- `Pace.restart`
-
-Show the progress bar if it's hidden and start reporting the progress from scratch.  Called automatically
+- `Pace.restart`: Show the progress bar if it's hidden and start reporting the progress from scratch.  Called automatically
 whenever `pushState` or `replaceState` is called by default.
 
-- `Pace.stop`
-
-Hide the progress bar and stop updating it.
+- `Pace.stop`: Hide the progress bar and stop updating it.
 
 Dependencies
 ------------
@@ -129,6 +129,11 @@ Support
 Pace is designed to support IE8+ (standards mode), FF 3.5+, Chrome, Safari 4+, Opera 10.5+, and all modern
 mobile browsers.  If you run into a compatibility issue, or can make a case for supporting something else,
 please create an issue.
+
+Size
+----
+
+pace.js is 4kb minified and gzipped.  The themes vary between 0.5 and 4kb.
 
 Issues
 ------
