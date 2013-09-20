@@ -14,7 +14,6 @@
   -webkit-transition: all 2s linear 0s;
   -moz-transition: all 2s linear 0s;
   transition: all 2s linear 0s;
-  cursor: pointer;
 }
 
 .pace.pace-active {
@@ -24,7 +23,6 @@
   -o-transform: scale(.25);
   transform: scale(.25);
   opacity: 1;
-  cursor: pointer;
 }
 
 .pace .pace-activity {
@@ -40,7 +38,6 @@
   -o-animation: pace-bounce 1s infinite;
   -ms-animation: pace-bounce 1s infinite;
   animation: pace-bounce 1s infinite;
-  cursor: pointer;
 }
 
 .pace .pace-progress {
