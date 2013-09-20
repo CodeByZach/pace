@@ -333,7 +333,7 @@
                 letter-spacing: 2px;
             }
 
-            a.download-src-link {
+            .button {
                 padding: 0.5rem 1rem;
                 background: #29d;
                 color: #fff;
@@ -342,6 +342,9 @@
                 text-transform: uppercase;
                 letter-spacing: .1em;
                 text-decoration: none;
+            }
+            .themes-pitch {
+                padding: 15px;
             }
         </style>
 
@@ -352,7 +355,7 @@
                     <h1 class="title2"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
                 </div>
                 <div class="subtitle">
-                    <h3>Loading has never been this easy.</h3>
+                    <h3>Automatic page load progress bar</h3>
                 </div>
             </div>
             <div class="down-arrow">⇪</div>
@@ -362,18 +365,16 @@
             <div class="page">
                 <div class="up-arrow">⇪</div>
                 <h2>Download</h2>
-                <p><a class="download-src-link" href="https://raw.github.com/HubSpot/pace/v0.4.1/pace.min.js">Pace.js</a></p>
+                <p><a class="button" href="https://raw.github.com/HubSpot/pace/v0.4.1/pace.min.js">Pace.js</a></p>
                 <br/>
                 <h2>What is Pace?</h2>
-                <p style="text-align: left">Pace is an automatic page load progress bar. Include pace.js and the theme css of your choice, and you're done. Pace does all of the work for you. See themes below.</p>
+                <p style="text-align: left">Include pace.js and the theme css of your choice, and you're done. No need to hook into any of your code, progress is
+                detected automatically.</p>
                 <h2>Themes</h2>
                 <input type="color" value="#2299dd"></input>
                 <div class="themes"></div>
-                <br/>
-                <p>Want to submit a theme?</p>
-                <p><a href="https://github.com/HubSpot/pace">Fork us on GitHub</a></p>
-                <h2>Documentation</h2>
-                <p>Check out the <a href="http://github.hubspot.com/pace/">Pace Documentation</a>.</p>
+                <p class="themes-pitch">Send us your themes! <a href="https://github.com/HubSpot/pace">Fork us on GitHub</a></p>
+                <p><a class="button" href="https://github.hubspot.com/pace/">Documentation</a></p>
                 <script>
                     $(function(){
                         var themes = [{
