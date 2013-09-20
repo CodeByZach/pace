@@ -22,6 +22,11 @@
                 color: #000;
             }
 
+            a, a:hover, a:active {
+                color: #29d;
+                text-decoration: none
+            }
+
             body {
                 font-family: "proxima-nova", "Helvetica Neue", sans-serif;
             }
@@ -233,7 +238,6 @@
             .themes {
                 overflow: hidden;
                 text-align: center;
-                padding-bottom: 60px;
             }
             .theme {
                 width: 46%;
@@ -326,7 +330,6 @@
             }
 
             .themes a, .themes a:hover, .themes a:active {
-                color: #29d;
                 text-decoration: none;
                 font-size: .7rem;
                 text-transform: uppercase;
@@ -334,8 +337,8 @@
             }
 
             a.download-src-link {
-                padding: 0.5rem 1rem;
                 background: #29d;
+                padding: 0.5rem 1rem;
                 color: #fff;
                 cursor: pointer;
                 font-size: 1rem;
@@ -366,14 +369,20 @@
                 <br/>
                 <h2>What is Pace?</h2>
                 <p style="text-align: left">Pace is an automatic page load progress bar. Include pace.js and the theme css of your choice, and you're done. Pace does all of the work for you. See themes below.</p>
+                <br/>
                 <h2>Themes</h2>
                 <input type="color" value="#2299dd"></input>
                 <div class="themes"></div>
                 <br/>
                 <p>Want to submit a theme?</p>
                 <p><a href="https://github.com/HubSpot/pace">Fork us on GitHub</a></p>
+                <br/>
                 <h2>Documentation</h2>
                 <p>Check out the <a href="http://github.hubspot.com/pace/">Pace Documentation</a>.</p>
+                <br/>
+                <p style="font-size: 0.6rem"><a href="http://dev.hubspot.com">HubSpot</a></p>
+                <br/>
+                <br/>
                 <script>
                     $(function(){
                         var themes = [{
