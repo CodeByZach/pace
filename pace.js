@@ -495,19 +495,19 @@
     }
   };
 
-  if (window.pushState != null) {
-    _pushState = window.pushState;
-    window.pushState = function() {
+  if (window.history.pushState != null) {
+    _pushState = window.history.pushState;
+    window.history.pushState = function() {
       handlePushState();
-      return _pushState.apply(null, arguments);
+      return _pushState.apply(window.history, arguments);
     };
   }
 
-  if (window.replaceState != null) {
-    _replaceState = window.replaceState;
-    window.replaceState = function() {
+  if (window.history.replaceState != null) {
+    _replaceState = window.history.replaceState;
+    window.history.replaceState = function() {
       handlePushState();
-      return _replaceState.apply(null, arguments);
+      return _replaceState.apply(window.history, arguments);
     };
   }
 
