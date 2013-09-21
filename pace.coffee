@@ -391,19 +391,19 @@ handlePushState = ->
     Pace.restart()
 
 # We reset the bar whenever it looks like an ajax navigation has occured.
-if window.pushState?
-  _pushState = window.pushState
-  window.pushState = ->
+if window.history.pushState?
+  _pushState = window.history.pushState
+  window.history.pushState = ->
     handlePushState()
 
-    _pushState arguments...
+    _pushState.apply window.history, arguments
 
-if window.replaceState?
-  _replaceState = window.replaceState
-  window.replaceState = ->
+if window.history.replaceState?
+  _replaceState = window.history.replaceState
+  window.history.replaceState = ->
     handlePushState()
 
-    _replaceState arguments...
+    _replaceState.apply window.history, arguments
 
 SOURCE_KEYS =
   ajax: AjaxMonitor
