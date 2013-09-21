@@ -475,7 +475,7 @@
                                 $('.themes').append('<div class="theme ' + (i % 2 === 0 ? 'even' : 'odd') + '">'+
                                     '<h3>' + theme.title + '</h3>' +
                                     '<p><a href="#" class="download-link" data-theme="' + theme.name + '">download</a></p>'+
-                                    '<div class="browser"><iframe data-theme="' + theme.name + '" src="../themes/pace-theme-template.html"></iframe></div>' +
+                                    '<div class="browser"><iframe data-theme="' + theme.name + '"></iframe></div>' +
                                 '</div>');
                             });
 
@@ -515,8 +515,17 @@
                                 location.href = 'data:text/css,' + encodeURIComponent(cssCache[theme]);
                             };
 
-                            $('iframe').load(function(){
+                            $('iframe').each(function(){
                                 var _this = this;
+
+                                $(this).contents().find('body').append('' +
+                                    '<div class="pace">' +
+                                        '<div class="pace-progress" data-progress="50%" style="width: 50%;">' +
+                                            '<div class="pace-progress-inner"></div>' +
+                                        '</div>' +
+                                        '<div class="pace-activity"></div>' +
+                                    '</div>' +
+                                '')
 
                                 // For some strange reason, the Color library we depend on defines itself
                                 // asyncronously
