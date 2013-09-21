@@ -5,7 +5,7 @@
   position: fixed;
   top: -90px;
   right: -20px;
-  z-index: 100;
+  z-index: 2000;
   -webkit-transform: scale(0);
   -moz-transform: scale(0);
   -ms-transform: scale(0);
@@ -33,7 +33,7 @@
   background: #29d;
   position: absolute;
   top: 0;
-  z-index: 11;
+  z-index: 1911;
   -webkit-animation: pace-bounce 1s infinite;
   -moz-animation: pace-bounce 1s infinite;
   -o-animation: pace-bounce 1s infinite;
@@ -46,7 +46,7 @@
   display: block;
   left: 50%;
   bottom: 0;
-  z-index: 10;
+  z-index: 1910;
   margin-left: -30px;
   width: 60px;
   height: 75px;

@@ -9,7 +9,7 @@
 .pace .pace-activity {
   display: block;
   position: fixed;
-  z-index: 100;
+  z-index: 2000;
   top: 0;
   right: 0;
   width: 300px;
