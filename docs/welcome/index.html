@@ -475,7 +475,7 @@
                                 $('.themes').append('<div class="theme ' + (i % 2 === 0 ? 'even' : 'odd') + '">'+
                                     '<h3>' + theme.title + '</h3>' +
                                     '<p><a href="#" class="download-link" data-theme="' + theme.name + '">download</a></p>'+
-                                    '<div class="browser"><iframe data-theme="' + theme.name + '" src="../themes/pace-theme-template.html"></iframe></div>' +
+                                    '<div class="browser"><iframe data-theme="' + theme.name + '"></iframe></div>' +
                                 '</div>');
                             });
 
@@ -515,8 +515,17 @@
                                 location.href = 'data:text/css,' + encodeURIComponent(cssCache[theme]);
                             };
 
-                            $('iframe').load(function(){
+                            $('iframe').each(function(){
                                 var _this = this;
+
+                                $(this).contents().find('body').append('' +
+                                    '<div class="pace">' +
+                                        '<div class="pace-progress" data-progress="50%" style="width: 50%;">' +
+                                            '<div class="pace-progress-inner"></div>' +
+                                        '</div>' +
+                                        '<div class="pace-activity"></div>' +
+                                    '</div>' +
+                                '')
 
                                 // For some strange reason, the Color library we depend on defines itself
                                 // asyncronously
@@ -590,14 +599,14 @@
             #github_stars:hover {
                 -webkit-filter: none;
             }
-            .hn-share-iframe {
+            .hn-share-button-wrapper {
                 position: fixed;
-                bottom: 36px;
-                left: 225px;
+                bottom: 29px;
+                left: 227px;
                 -webkit-filter: grayscale(1) contrast(1.3);
                 z-index: 3;
             }
-            .hn-share-iframe:hover {
+            .hn-share-button-wrapper:hover {
                 -webkit-filter: none;
             }
         </style>
@@ -608,8 +617,9 @@
         <div id="github_stars">
             <iframe src="http://ghbtns.com/github-btn.html?user=HubSpot&amp;repo=pace&amp;type=watch&amp;count=true&amp;size=small" allowtransparency="true" frameborder="0" scrolling="0" width="200" height="20"></iframe>
         </div>
-        <a href="http://news.ycombinator.com/submit" class="hn-share-button" data-title="Automatically Add Loading Bars to Your Website" data-url="http://github.hubspot.com/pace/docs/welcome/?hn">Vote on HN</a>
-
+        <div class="hn-share-button-wrapper">
+            <a href="http://news.ycombinator.com/submit" class="hn-share-button" data-title="Automatically Add Loading Bars to Your Website" data-url="http://github.hubspot.com/pace/docs/welcome/?hn">Vote on HN</a>
+        </div>
         <script>
             (function(d, t) {
                 var g = d.createElement(t),
