@@ -181,3 +181,5 @@ Javascript by [Zack Bloom](http://twitter.com/zackbloom)
 CSS by [Adam Schwartz](http://twitter.com/adamfschwartz)
 
 Themes inspired by [Mary Lou](http://tympanus.net/codrops/2013/09/18/creative-loading-effects/)
+
+Project inspired by [nprogress](http://ricostacruz.com/nprogress/)
