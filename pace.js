@@ -15,6 +15,9 @@
     elements: {
       checkInterval: 100,
       selectors: ['body']
+    },
+    eventLag: {
+      minSamples: 10
     }
   };
 
@@ -420,7 +423,7 @@
         diff = now() - last - 50;
         last = now();
         avg = avg + (diff - avg) / 15;
-        if (points++ > 20 && Math.abs(avg) < 3) {
+        if (points++ > options.eventLag.minSamples && Math.abs(avg) < 3) {
           avg = 0;
         }
         return _this.progress = 100 * (3 / (avg + 3));

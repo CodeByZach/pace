@@ -34,6 +34,12 @@ defaultOptions =
     
     # What elements should we wait for before deciding the page is fully loaded (not required)
     selectors: ['body']
+    
+  eventLag:
+    # When we first start measuring event lag, not much is going on in the browser yet, so it's
+    # not uncommon for the numbers to be abnormally low for the first few samples.  This configures
+    # how many samples we need before we consider a low number to mean completion.
+    minSamples: 10
 
 now = ->
   performance?.now?() ? +new Date
@@ -325,7 +331,7 @@ class EventLagMonitor
 
       avg = avg + (diff - avg)/15
 
-      if points++ > 20 and Math.abs(avg) < 3
+      if points++ > options.eventLag.minSamples and Math.abs(avg) < 3
         avg = 0
 
       @progress = 100 * (3 / (avg + 3))
