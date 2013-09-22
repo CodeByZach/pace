@@ -1,7 +1,7 @@
 pace
 ====
 
-Include [pace.js](https://raw.github.com/HubSpot/pace/v0.4.3/pace.min.js) and the 
+Include [pace.js](https://raw.github.com/HubSpot/pace/v0.4.3/pace.min.js) and the
 [theme](http://github.hubspot.com/pace/docs/welcome/) css of your choice on your page
 (as early as is possible), and you're done!
 
@@ -71,7 +71,7 @@ Collectors are the bits of code which gather progress information.  Pace include
   Monitors all ajax requests on the page
 
 - Elements
-  
+
   Checks for the existance of specific elements on the page
 
 - Document
