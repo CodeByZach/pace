@@ -57,7 +57,7 @@ define(['pace'], function(pace){
 Themes
 ------
 
-Pace includes a bunch of [themes](http://github.hubspot.com/pace/docs/themes/)
+Pace includes a bunch of [themes](http://github.hubspot.com/pace/docs/welcome/)
 to get you started.  Just include the appropriate css file.  Send us a PR with
 any interesting themes you create.
 
