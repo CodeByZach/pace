@@ -13,4 +13,9 @@
   top: 0;
   left: 0;
   bottom: 0;
+
+  -webkit-transition: width 1s;
+  -moz-transition: width 1s;
+  -o-transition: width 1s;
+  transition: width 1s;
 }
