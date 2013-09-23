@@ -419,6 +419,7 @@ if window.history.replaceState?
 
     _replaceState.apply window.history, arguments
 
+firstLoad = true
 if options.restartOnBackboneRoute
   # Bind in a timeout, as it's possible Backbone hasen't been
   # included yet
@@ -427,6 +428,11 @@ if options.restartOnBackboneRoute
    
     Backbone.history.on 'route', (router, name) ->
       return unless rule = options.restartOnBackboneRoute
+
+      if firstLoad
+        # We don't want to do anything on the initial route
+        firstLoad = false
+        return
 
       if typeof rule is 'object'
         # It's an array of route names
