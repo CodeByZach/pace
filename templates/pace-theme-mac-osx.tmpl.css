@@ -20,14 +20,21 @@
   left: 0;
   height: 12px;
   overflow: hidden;
+
   -webkit-border-radius: 0 0 4px 0;
   -moz-border-radius: 0 0 4px 0;
   -o-border-radius: 0 0 4px 0;
   border-radius: 0 0 4px 0;
+
   -webkit-box-shadow: inset -1px 0 rgba(0, 0, 0, 0.3), inset 0 -1px rgba(0, 0, 0, 0.3), inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, 0.3);
   -moz-box-shadow: inset -1px 0 rgba(0, 0, 0, 0.3), inset 0 -1px rgba(0, 0, 0, 0.3), inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, 0.3);
   -o-box-shadow: inset -1px 0 rgba(0, 0, 0, 0.3), inset 0 -1px rgba(0, 0, 0, 0.3), inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, 0.3);
   box-shadow: inset -1px 0 rgba(0, 0, 0, 0.3), inset 0 -1px rgba(0, 0, 0, 0.3), inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, 0.3);
+
+  -webkit-transition: width 1s;
+  -moz-transition: width 1s;
+  -o-transition: width 1s;
+  transition: width 1s;
 }
 
 .pace .pace-progress-inner {
