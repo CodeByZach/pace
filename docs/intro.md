@@ -172,6 +172,22 @@ Issues
 We have obviously not tested this on every website.  If you run into an issue, or find a way the automatic
 detection could be better, please create an Issue.  If you can include a test case, that's even better.
 
+Contributing
+------------
+
+PRs Welcome!
+
+Building requires node.js.
+
+```bash
+npm install
+grunt
+```
+
+You can also run `grunt watch` to have it automatically build as you make changes.
+
+There is no need to include compiled files in PRs.
+
 Credits
 -------
 
