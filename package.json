@@ -2,7 +2,10 @@
   "name": "pace",
   "version": "0.4.5",
   "description": "Automatic page load progress bar",
-  "author": "Zack Bloom <zbloom@hubspot.com>",
+  "authors": [
+    "Zack Bloom <zbloom@hubspot.com>",
+    "Adam Schwartz <aschwartz@hubspot.com>"
+  ],
   "license": "MIT",
   "devDependencies": {
     "grunt-contrib-coffee": "~0.7.0",
