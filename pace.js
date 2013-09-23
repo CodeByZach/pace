@@ -18,7 +18,8 @@
     },
     eventLag: {
       minSamples: 10
-    }
+    },
+    target: 'body'
   };
 
   now = function() {
@@ -119,14 +120,16 @@
     }
 
     Bar.prototype.getElement = function() {
+      var targetElement;
       if (this.el == null) {
         this.el = document.createElement('div');
         this.el.className = "pace pace-active";
         this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
-        if (document.body.firstChild != null) {
-          document.body.insertBefore(this.el, document.body.firstChild);
+        targetElement = document.querySelector(options.target);
+        if (targetElement.firstChild != null) {
+          targetElement.insertBefore(this.el, targetElement.firstChild);
         } else {
-          document.body.appendChild(this.el);
+          targetElement.appendChild(this.el);
         }
       }
       return this.el;
@@ -151,7 +154,7 @@
 
     Bar.prototype.render = function() {
       var el, progressStr;
-      if (document.body == null) {
+      if (document.querySelector(options.target) == null) {
         return false;
       }
       el = this.getElement();

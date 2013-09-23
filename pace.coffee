@@ -41,6 +41,8 @@ defaultOptions =
     # how many samples we need before we consider a low number to mean completion.
     minSamples: 10
 
+  target: 'body'
+
 now = ->
   performance?.now?() ? +new Date
 
@@ -115,11 +117,11 @@ class Bar
       </div>
       <div class="pace-activity"></div>
       '''
-
-      if document.body.firstChild?
-        document.body.insertBefore @el, document.body.firstChild
+      targetElement = document.querySelector options.target
+      if targetElement.firstChild?
+        targetElement.insertBefore @el, targetElement.firstChild
       else
-        document.body.appendChild @el
+        targetElement.appendChild @el
 
     @el
 
@@ -140,7 +142,7 @@ class Bar
     @el = undefined
 
   render: ->
-    if not document.body?
+    if not document.querySelector(options.target)?
       return false
 
     el = @getElement()
