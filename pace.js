@@ -329,26 +329,9 @@
       this.progress = 0;
       if (window.ProgressEvent != null) {
         size = null;
-        request.addEventListener('progress', function() {
-          var e, headers, name, val;
-          try {
-            headers = request.getAllResponseHeaders();
-            for (name in headers) {
-              val = headers[name];
-              if (name.toLowerCase() === 'content-length') {
-                size = +val;
-                break;
-              }
-            }
-          } catch (_error) {
-            e = _error;
-          }
-          if (size != null) {
-            try {
-              return _this.progress = request.responseText.length / size;
-            } catch (_error) {
-              e = _error;
-            }
+        request.addEventListener('progress', function(evt) {
+          if (evt.lengthComputable) {
+            return _this.progress = evt.loaded / evt.total;
           } else {
             return _this.progress = _this.progress + (100 - _this.progress) / 2;
           }

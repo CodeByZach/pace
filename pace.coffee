@@ -272,22 +272,9 @@ class XHRRequestTracker
       # We're dealing with a modern browser with progress event support
 
       size = null
-      request.addEventListener 'progress', =>
-        try
-          headers = request.getAllResponseHeaders()
-
-          for name, val of headers
-            if name.toLowerCase() is 'content-length'
-              size = +val
-              break
-
-        catch e
-
-        if size?
-          # This is not perfect as size is in bytes, length is in chars
-          try
-            @progress = request.responseText.length / size
-          catch e
+      request.addEventListener 'progress', (evt) =>
+        if evt.lengthComputable
+          @progress = evt.loaded / evt.total
         else
           # If it's chunked encoding, we have no way of knowing the total length of the
           # response, all we can do is increment the progress with backoff such that we
