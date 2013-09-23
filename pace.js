@@ -12,6 +12,7 @@
     maxProgressPerFrame: 10,
     easeFactor: 1.25,
     restartOnPushState: true,
+    startOnPageLoad: true,
     elements: {
       checkInterval: 100,
       selectors: ['body']
@@ -615,7 +616,9 @@
   } else if (typeof exports === 'object') {
     module.exports = Pace;
   } else {
-    Pace.start();
+    if (options.startOnPageLoad) {
+      Pace.start();
+    }
   }
 
 }).call(this);

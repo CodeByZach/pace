@@ -26,6 +26,10 @@ defaultOptions =
   # Should we restart the browser when pushState or replaceState is called?  (Generally
   # means ajax navigation has occured)
   restartOnPushState: true
+ 
+  # Should pace automatically start when the page is loaded, or should it wait for `start` to
+  # be called?  Always false if pace is loaded with AMD or CommonJS.
+  startOnPageLoad: true
 
   elements:
     # How frequently in ms should we check for the elements being tested for
@@ -169,10 +173,6 @@ class Bar
   done: ->
     @progress >= 100
 
-# Every 100ms, we decide what the next progress should be
-# Every time a new thing happens, we decide what the progress should be
-# CSS animations can't give us backoff
-
 class Events
   constructor: ->
     @bindings = {}
@@ -186,9 +186,10 @@ class Events
     @bindings[name] ?= []
     @bindings[name].push fn
 
-# We should only ever instantiate one of these
 _XMLHttpRequest = window.XMLHttpRequest
 _XDomainRequest = window.XDomainRequest
+
+# We should only ever instantiate one of these
 class RequestIntercept extends Events
   constructor: ->
     super
@@ -521,4 +522,5 @@ else if typeof exports is 'object'
   module.exports = Pace
 else
   # Global
-  Pace.start()
+  if options.startOnPageLoad
+    Pace.start()
