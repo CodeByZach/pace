@@ -1,5 +1,5 @@
 (function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, RequestIntercept, RequestTracker, SOURCE_KEYS, Scaler, animation, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, firstLoad, getFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _XDomainRequest, _XMLHttpRequest, _pushState, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, firstLoad, getFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _pushState, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -216,14 +216,31 @@
 
   _XDomainRequest = window.XDomainRequest;
 
+  _WebSocket = window.WebSocket;
+
+  extendNative = function(to, from) {
+    var key, val, _ref, _results;
+    _ref = from.prototype;
+    _results = [];
+    for (key in _ref) {
+      val = _ref[key];
+      if ((to[key] == null) && typeof val !== 'function') {
+        _results.push(to[key] = val);
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
   RequestIntercept = (function(_super) {
     __extends(RequestIntercept, _super);
 
     function RequestIntercept() {
-      var monitor,
+      var monitorXHR,
         _this = this;
       RequestIntercept.__super__.constructor.apply(this, arguments);
-      monitor = function(req) {
+      monitorXHR = function(req) {
         var _open;
         _open = req.open;
         return req.open = function(type, url, async) {
@@ -238,16 +255,32 @@
       window.XMLHttpRequest = function() {
         var req;
         req = new _XMLHttpRequest;
-        monitor(req);
+        monitorXHR(req);
         return req;
       };
+      extendNative(window.XMLHttpRequest, _XMLHttpRequest);
       if (_XDomainRequest != null) {
         window.XDomainRequest = function() {
           var req;
           req = new _XDomainRequest;
-          monitor(req);
+          monitorXHR(req);
           return req;
         };
+        extendNative(window.XDomainRequest, _XDomainRequest);
+      }
+      if (_WebSocket != null) {
+        window.WebSocket = function(url, protocols) {
+          var req;
+          req = new _WebSocket(url, protocols);
+          _this.trigger('request', {
+            type: 'socket',
+            url: url,
+            protocols: protocols,
+            request: req
+          });
+          return req;
+        };
+        extendNative(window.WebSocket, _WebSocket);
       }
     }
 
@@ -261,16 +294,19 @@
     function AjaxMonitor() {
       var _this = this;
       this.elements = [];
-      intercept.on('request', function(_arg) {
-        var request;
-        request = _arg.request;
-        return _this.watch(request);
+      intercept.on('request', function() {
+        return _this.watch.apply(_this, arguments);
       });
     }
 
-    AjaxMonitor.prototype.watch = function(request) {
-      var tracker;
-      tracker = new RequestTracker(request);
+    AjaxMonitor.prototype.watch = function(_arg) {
+      var request, tracker, type;
+      type = _arg.type, request = _arg.request;
+      if (type === 'socket') {
+        tracker = new SocketRequestTracker(request);
+      } else {
+        tracker = new XHRRequestTracker(request);
+      }
       return this.elements.push(tracker);
     };
 
@@ -278,8 +314,8 @@
 
   })();
 
-  RequestTracker = (function() {
-    function RequestTracker(request) {
+  XHRRequestTracker = (function() {
+    function XHRRequestTracker(request) {
       var handler, size, _fn, _i, _len, _onprogress, _onreadystatechange, _ref,
         _this = this;
       this.progress = 0;
@@ -314,7 +350,7 @@
           _onprogress.apply(null, arguments);
         }
         _ref = ['onload', 'onabort', 'ontimeout', 'onerror'];
-        _fn = function() {
+        _fn = function(handler) {
           var fn;
           fn = request[handler];
           return request[handler] = function() {
@@ -324,7 +360,7 @@
         };
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           handler = _ref[_i];
-          _fn();
+          _fn(handler);
         }
       } else {
         _onreadystatechange = request.onreadystatechange;
@@ -340,7 +376,25 @@
       }
     }
 
-    return RequestTracker;
+    return XHRRequestTracker;
+
+  })();
+
+  SocketRequestTracker = (function() {
+    function SocketRequestTracker(request) {
+      var event, _i, _len, _ref,
+        _this = this;
+      this.progress = 0;
+      _ref = ['error', 'open'];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        event = _ref[_i];
+        request.addEventListener(event, function() {
+          return _this.progress = 100;
+        });
+      }
+    }
+
+    return SocketRequestTracker;
 
   })();
 

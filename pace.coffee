@@ -192,13 +192,19 @@ class Events
 
 _XMLHttpRequest = window.XMLHttpRequest
 _XDomainRequest = window.XDomainRequest
+_WebSocket = window.WebSocket
+
+extendNative = (to, from) ->
+  for key, val of from::
+    if not to[key]? and typeof val isnt 'function'
+      to[key] = val
 
 # We should only ever instantiate one of these
 class RequestIntercept extends Events
   constructor: ->
     super
 
-    monitor = (req) =>
+    monitorXHR = (req) =>
       _open = req.open
       req.open = (type, url, async) =>
         @trigger 'request', {type, url, request: req}
@@ -208,17 +214,31 @@ class RequestIntercept extends Events
     window.XMLHttpRequest = ->
       req = new _XMLHttpRequest
 
-      monitor req
+      monitorXHR req
 
       req
+
+    extendNative window.XMLHttpRequest, _XMLHttpRequest
 
     if _XDomainRequest?
       window.XDomainRequest = ->
         req = new _XDomainRequest
 
-        monitor req
+        monitorXHR req
 
         req
+
+      extendNative window.XDomainRequest, _XDomainRequest
+
+    if _WebSocket?
+      window.WebSocket = (url, protocols) =>
+        req = new _WebSocket(url, protocols)
+
+        @trigger 'request', {type: 'socket', url, protocols, request: req}
+
+        req
+
+      extendNative window.WebSocket, _WebSocket
 
 intercept = new RequestIntercept
 
@@ -226,15 +246,17 @@ class AjaxMonitor
   constructor: ->
     @elements = []
 
-    intercept.on 'request', ({request}) =>
-      @watch request
+    intercept.on 'request', => @watch arguments...
 
-  watch: (request) ->
-    tracker = new RequestTracker(request)
+  watch: ({type, request}) ->
+    if type is 'socket'
+      tracker = new SocketRequestTracker(request)
+    else
+      tracker = new XHRRequestTracker(request)
 
     @elements.push tracker
 
-class RequestTracker
+class XHRRequestTracker
   constructor: (request) ->
     @progress = 0
 
@@ -268,7 +290,7 @@ class RequestTracker
       _onprogress?(arguments...)
 
       for handler in ['onload', 'onabort', 'ontimeout', 'onerror']
-        do =>
+        do (handler) =>
           fn = request[handler]
           request[handler] = =>
             @progress = 100
@@ -284,6 +306,14 @@ class RequestTracker
           @progress = 50
 
         _onreadystatechange?(arguments...)
+
+class SocketRequestTracker
+  constructor: (request) ->
+    @progress = 0
+
+    for event in ['error', 'open']
+      request.addEventListener event, =>
+        @progress = 100
 
 class ElementMonitor
   constructor: (options={}) ->
