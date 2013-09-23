@@ -117,7 +117,7 @@ class Bar
       </div>
       <div class="pace-activity"></div>
       '''
-      targetElement = document.querySelector(options.target);
+      targetElement = document.querySelector options.target
       if targetElement.firstChild?
         targetElement.insertBefore @el, targetElement.firstChild
       else
