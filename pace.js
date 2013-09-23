@@ -11,8 +11,9 @@
     ghostTime: 250,
     maxProgressPerFrame: 10,
     easeFactor: 1.25,
-    restartOnPushState: true,
     startOnPageLoad: true,
+    restartOnPushState: true,
+    restartOnBackboneRoute: true,
     elements: {
       checkInterval: 100,
       selectors: ['body']
@@ -516,6 +517,34 @@
       handlePushState();
       return _replaceState.apply(window.history, arguments);
     };
+  }
+
+  if (options.restartOnBackboneRoute) {
+    setTimeout(function() {
+      if (window.Backbone == null) {
+        return;
+      }
+      return Backbone.History.on('route', function(router, name) {
+        var routeName, rule, _i, _len, _results;
+        if (!(rule = options.restartOnBackboneRoute)) {
+          return;
+        }
+        if (typeof rule === 'object') {
+          _results = [];
+          for (_i = 0, _len = rule.length; _i < _len; _i++) {
+            routeName = rule[_i];
+            if (!(routeName === name)) {
+              continue;
+            }
+            Pace.restart();
+            break;
+          }
+          return _results;
+        } else {
+          return Pace.restart();
+        }
+      });
+    }, 0);
   }
 
   SOURCE_KEYS = {

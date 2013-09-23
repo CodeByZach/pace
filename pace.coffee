@@ -22,14 +22,18 @@ defaultOptions =
 
   # This tweaks the animation easing
   easeFactor: 1.25
+  
+  # Should pace automatically start when the page is loaded, or should it wait for `start` to
+  # be called?  Always false if pace is loaded with AMD or CommonJS.
+  startOnPageLoad: true
 
   # Should we restart the browser when pushState or replaceState is called?  (Generally
   # means ajax navigation has occured)
   restartOnPushState: true
  
-  # Should pace automatically start when the page is loaded, or should it wait for `start` to
-  # be called?  Always false if pace is loaded with AMD or CommonJS.
-  startOnPageLoad: true
+  # Should pace automatically restart when a Backbone route change occurs?  Can also be an
+  # array of route names.  Ignored if Backbone.js is not included on the page.
+  restartOnBackboneRoute: true
 
   elements:
     # How frequently in ms should we check for the elements being tested for
@@ -414,6 +418,24 @@ if window.history.replaceState?
     handlePushState()
 
     _replaceState.apply window.history, arguments
+
+if options.restartOnBackboneRoute
+  # Bind in a timeout, as it's possible Backbone hasen't been
+  # included yet
+  setTimeout ->
+    return unless window.Backbone?
+   
+    Backbone.History.on 'route', (router, name) ->
+      return unless rule = options.restartOnBackboneRoute
+
+      if typeof rule is 'object'
+        # It's an array of route names
+        for routeName in rule when routeName is name
+          Pace.restart()
+          break
+      else
+        Pace.restart()
+  , 0
 
 SOURCE_KEYS =
   ajax: AjaxMonitor
