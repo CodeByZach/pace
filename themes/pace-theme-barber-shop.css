@@ -19,6 +19,11 @@
   left: 0;
   height: 12px;
   overflow: hidden;
+
+  -webkit-transition: width 1s;
+  -moz-transition: width 1s;
+  -o-transition: width 1s;
+  transition: width 1s;
 }
 
 .pace .pace-progress-inner {
