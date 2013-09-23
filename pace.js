@@ -331,7 +331,7 @@
         size = null;
         request.addEventListener('progress', function(evt) {
           if (evt.lengthComputable) {
-            return _this.progress = evt.loaded / evt.total;
+            return _this.progress = 100 * evt.loaded / evt.total;
           } else {
             return _this.progress = _this.progress + (100 - _this.progress) / 2;
           }

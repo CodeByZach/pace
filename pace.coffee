@@ -274,7 +274,7 @@ class XHRRequestTracker
       size = null
       request.addEventListener 'progress', (evt) =>
         if evt.lengthComputable
-          @progress = evt.loaded / evt.total
+          @progress = 100 * evt.loaded / evt.total
         else
           # If it's chunked encoding, we have no way of knowing the total length of the
           # response, all we can do is increment the progress with backoff such that we
