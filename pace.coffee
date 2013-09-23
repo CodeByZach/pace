@@ -35,6 +35,9 @@ defaultOptions =
   # array of route names.  Ignored if Backbone.js is not included on the page.
   restartOnBackboneRoute: true
 
+  # What element should the pace element be appended to on the page?
+  target: 'body'
+
   elements:
     # How frequently in ms should we check for the elements being tested for
     # using the element monitor?
@@ -49,8 +52,12 @@ defaultOptions =
     # how many samples we need before we consider a low number to mean completion.
     minSamples: 10
 
-  # What element should the pace element be appended to on the page?
-  target: 'body'
+  ajax:
+    # Which HTTP methods should we track?
+    trackMethods: ['GET']
+
+    # Should we track web socket connections?
+    trackWebSockets: true
 
 now = ->
   performance?.now?() ? +new Date
@@ -207,7 +214,8 @@ class RequestIntercept extends Events
     monitorXHR = (req) =>
       _open = req.open
       req.open = (type, url, async) =>
-        @trigger 'request', {type, url, request: req}
+        if (type ? 'GET').toUpperCase() in options.ajax.trackMethods
+          @trigger 'request', {type, url, request: req}
 
         _open.apply req, arguments
 
@@ -230,7 +238,7 @@ class RequestIntercept extends Events
 
       extendNative window.XDomainRequest, _XDomainRequest
 
-    if _WebSocket?
+    if _WebSocket? and options.ajax.trackWebSockets
       window.WebSocket = (url, protocols) =>
         req = new _WebSocket(url, protocols)
 
@@ -260,12 +268,11 @@ class XHRRequestTracker
   constructor: (request) ->
     @progress = 0
 
-    if request.onprogress isnt undefined
-      # It will be null, not undefined, on browsers which don't support it
-      
+    if window.ProgressEvent?
+      # We're dealing with a modern browser with progress event support
+
       size = null
-      _onprogress = request.onprogress
-      request.onprogress = =>
+      request.addEventListener 'progress', =>
         try
           headers = request.getAllResponseHeaders()
 
@@ -287,15 +294,9 @@ class XHRRequestTracker
           # never hit 100% until it's done.
           @progress = @progress + (100 - @progress) / 2
 
-      _onprogress?(arguments...)
-
-      for handler in ['onload', 'onabort', 'ontimeout', 'onerror']
-        do (handler) =>
-          fn = request[handler]
-          request[handler] = =>
-            @progress = 100
-
-            fn?(arguments...)
+      for event in ['load', 'abort', 'timeout', 'error']
+        request.addEventListener event, =>
+          @progress = 100
 
     else
       _onreadystatechange = request.onreadystatechange
@@ -480,7 +481,7 @@ SOURCE_KEYS =
   eventLag: EventLagMonitor
 
 do init = ->
-  sources = []
+  Pace.sources = sources = []
 
   for type in ['ajax', 'elements', 'document', 'eventLag']
     if options[type] isnt false
@@ -489,7 +490,7 @@ do init = ->
   for source in options.extraSources ? []
     sources.push new source(options)
 
-  bar = new Bar
+  Pace.bar = bar = new Bar
 
   # Each source of progress data has it's own scaler to smooth its output
   scalers = []

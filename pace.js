@@ -2,7 +2,8 @@
   var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, firstLoad, getFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _pushState, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   defaultOptions = {
     catchupTime: 500,
@@ -14,6 +15,7 @@
     startOnPageLoad: true,
     restartOnPushState: true,
     restartOnBackboneRoute: true,
+    target: 'body',
     elements: {
       checkInterval: 100,
       selectors: ['body']
@@ -21,7 +23,10 @@
     eventLag: {
       minSamples: 10
     },
-    target: 'body'
+    ajax: {
+      trackMethods: ['GET'],
+      trackWebSockets: true
+    }
   };
 
   now = function() {
@@ -244,11 +249,14 @@
         var _open;
         _open = req.open;
         return req.open = function(type, url, async) {
-          _this.trigger('request', {
-            type: type,
-            url: url,
-            request: req
-          });
+          var _ref;
+          if (_ref = (type != null ? type : 'GET').toUpperCase(), __indexOf.call(options.ajax.trackMethods, _ref) >= 0) {
+            _this.trigger('request', {
+              type: type,
+              url: url,
+              request: req
+            });
+          }
           return _open.apply(req, arguments);
         };
       };
@@ -268,7 +276,7 @@
         };
         extendNative(window.XDomainRequest, _XDomainRequest);
       }
-      if (_WebSocket != null) {
+      if ((_WebSocket != null) && options.ajax.trackWebSockets) {
         window.WebSocket = function(url, protocols) {
           var req;
           req = new _WebSocket(url, protocols);
@@ -316,13 +324,12 @@
 
   XHRRequestTracker = (function() {
     function XHRRequestTracker(request) {
-      var handler, size, _fn, _i, _len, _onprogress, _onreadystatechange, _ref,
+      var event, size, _i, _len, _onreadystatechange, _ref,
         _this = this;
       this.progress = 0;
-      if (request.onprogress !== void 0) {
+      if (window.ProgressEvent != null) {
         size = null;
-        _onprogress = request.onprogress;
-        request.onprogress = function() {
+        request.addEventListener('progress', function() {
           var e, headers, name, val;
           try {
             headers = request.getAllResponseHeaders();
@@ -345,22 +352,13 @@
           } else {
             return _this.progress = _this.progress + (100 - _this.progress) / 2;
           }
-        };
-        if (typeof _onprogress === "function") {
-          _onprogress.apply(null, arguments);
-        }
-        _ref = ['onload', 'onabort', 'ontimeout', 'onerror'];
-        _fn = function(handler) {
-          var fn;
-          fn = request[handler];
-          return request[handler] = function() {
-            _this.progress = 100;
-            return typeof fn === "function" ? fn.apply(null, arguments) : void 0;
-          };
-        };
+        });
+        _ref = ['load', 'abort', 'timeout', 'error'];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          handler = _ref[_i];
-          _fn(handler);
+          event = _ref[_i];
+          request.addEventListener(event, function() {
+            return _this.progress = 100;
+          });
         }
       } else {
         _onreadystatechange = request.onreadystatechange;
@@ -616,7 +614,7 @@
 
   (init = function() {
     var source, type, _i, _j, _len, _len1, _ref, _ref1, _ref2;
-    sources = [];
+    Pace.sources = sources = [];
     _ref = ['ajax', 'elements', 'document', 'eventLag'];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       type = _ref[_i];
@@ -629,7 +627,7 @@
       source = _ref2[_j];
       sources.push(new source(options));
     }
-    bar = new Bar;
+    Pace.bar = bar = new Bar;
     scalers = [];
     return uniScaler = new Scaler;
   })();
