@@ -219,8 +219,8 @@ class RequestIntercept extends Events
 
         _open.apply req, arguments
 
-    window.XMLHttpRequest = ->
-      req = new _XMLHttpRequest
+    window.XMLHttpRequest = (flags) ->
+      req = new _XMLHttpRequest(flags)
 
       monitorXHR req
 

@@ -260,9 +260,9 @@
           return _open.apply(req, arguments);
         };
       };
-      window.XMLHttpRequest = function() {
+      window.XMLHttpRequest = function(flags) {
         var req;
-        req = new _XMLHttpRequest;
+        req = new _XMLHttpRequest(flags);
         monitorXHR(req);
         return req;
       };
