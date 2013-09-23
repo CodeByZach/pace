@@ -41,6 +41,7 @@ defaultOptions =
     # how many samples we need before we consider a low number to mean completion.
     minSamples: 10
 
+  # What element should the pace element be appended to on the page?
   target: 'body'
 
 now = ->
