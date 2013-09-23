@@ -518,14 +518,17 @@
                             $('iframe').each(function(){
                                 var _this = this;
 
-                                $(this).contents().find('body').append('' +
+                                doc = (this.contentWindow || this.documentWindow).document;
+                                doc.open();
+                                doc.write('' +
                                     '<div class="pace">' +
                                         '<div class="pace-progress" data-progress="50%" style="width: 50%;">' +
                                             '<div class="pace-progress-inner"></div>' +
                                         '</div>' +
                                         '<div class="pace-activity"></div>' +
                                     '</div>' +
-                                '')
+                                '');
+                                doc.close();
 
                                 // For some strange reason, the Color library we depend on defines itself
                                 // asyncronously
