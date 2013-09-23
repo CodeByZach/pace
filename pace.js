@@ -524,7 +524,7 @@
       if (window.Backbone == null) {
         return;
       }
-      return Backbone.History.on('route', function(router, name) {
+      return Backbone.history.on('route', function(router, name) {
         var routeName, rule, _i, _len, _results;
         if (!(rule = options.restartOnBackboneRoute)) {
           return;

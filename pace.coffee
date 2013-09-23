@@ -425,7 +425,7 @@ if options.restartOnBackboneRoute
   setTimeout ->
     return unless window.Backbone?
    
-    Backbone.History.on 'route', (router, name) ->
+    Backbone.history.on 'route', (router, name) ->
       return unless rule = options.restartOnBackboneRoute
 
       if typeof rule is 'object'
