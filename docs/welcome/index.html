@@ -497,7 +497,7 @@
                             };
 
                             var updateColor = function(color){
-                                $('iframe').each(function(){
+                                $('.browser iframe').each(function(){
                                     initFrame(this, color);
                                 });
                             };
@@ -506,7 +506,7 @@
                                 location.href = 'data:text/css,' + encodeURIComponent(cssCache[theme]);
                             };
 
-                            $('iframe').each(function(){
+                            $('.browser iframe').each(function(){
                                 var _this = this;
 
                                 doc = (this.contentWindow || this.documentWindow).document;
@@ -606,6 +606,16 @@
         </style>
         <div id="retweet_button">
             <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://github.hubspot.com/pace/docs/welcome" data-text="pace.js - Add an automatic page load progress bar to your site" data-count="horizontal" data-via="HubSpotDev">Tweet</a>
+            <script>
+              if (Math.random() >= 0.5)
+                var recommends = ['hubspotdev', 'zackbloom', 'adamfschwartz'];
+              else
+                var recommends = ['hubspotdev', 'adamfschwartz', 'zackbloom'];
+
+              var $button = $('.twitter-share-button');
+              if ($button.length)
+                $button.data('related', recommends.join(','));
+            </script>
             <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
         </div>
         <div id="github_stars">
