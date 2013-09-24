@@ -202,9 +202,13 @@ _XDomainRequest = window.XDomainRequest
 _WebSocket = window.WebSocket
 
 extendNative = (to, from) ->
-  for key, val of from::
-    if not to[key]? and typeof val isnt 'function'
-      to[key] = val
+  for key of from::
+    try
+      val = from::[key]
+
+      if not to[key]? and typeof val isnt 'function'
+        to[key] = val
+    catch e
 
 # We should only ever instantiate one of these
 class RequestIntercept extends Events

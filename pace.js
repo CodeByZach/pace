@@ -224,15 +224,18 @@
   _WebSocket = window.WebSocket;
 
   extendNative = function(to, from) {
-    var key, val, _ref, _results;
-    _ref = from.prototype;
+    var e, key, val, _results;
     _results = [];
-    for (key in _ref) {
-      val = _ref[key];
-      if ((to[key] == null) && typeof val !== 'function') {
-        _results.push(to[key] = val);
-      } else {
-        _results.push(void 0);
+    for (key in from.prototype) {
+      try {
+        val = from.prototype[key];
+        if ((to[key] == null) && typeof val !== 'function') {
+          _results.push(to[key] = val);
+        } else {
+          _results.push(void 0);
+        }
+      } catch (_error) {
+        e = _error;
       }
     }
     return _results;
