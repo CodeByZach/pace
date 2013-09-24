@@ -437,9 +437,9 @@
     };
 
     function DocumentMonitor() {
-      var _onreadystatechange,
+      var _onreadystatechange, _ref,
         _this = this;
-      this.progress = 0;
+      this.progress = (_ref = this.states[document.readyState]) != null ? _ref : 100;
       _onreadystatechange = document.onreadystatechange;
       document.onreadystatechange = function() {
         if (_this.states[document.readyState] != null) {

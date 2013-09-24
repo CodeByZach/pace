@@ -338,7 +338,7 @@ class DocumentMonitor
     complete: 100
 
   constructor: ->
-    @progress = 0
+    @progress = @states[document.readyState] ? 100
 
     _onreadystatechange = document.onreadystatechange
     document.onreadystatechange = =>
