@@ -35,6 +35,9 @@ defaultOptions =
   # array of route names.  Ignored if Backbone.js is not included on the page.
   restartOnBackboneRoute: true
 
+  # What element should the pace element be appended to on the page?
+  target: 'body'
+
   elements:
     # How frequently in ms should we check for the elements being tested for
     # using the element monitor?
@@ -49,8 +52,12 @@ defaultOptions =
     # how many samples we need before we consider a low number to mean completion.
     minSamples: 10
 
-  # What element should the pace element be appended to on the page?
-  target: 'body'
+  ajax:
+    # Which HTTP methods should we track?
+    trackMethods: ['GET']
+
+    # Should we track web socket connections?
+    trackWebSockets: true
 
 now = ->
   performance?.now?() ? +new Date
@@ -192,33 +199,54 @@ class Events
 
 _XMLHttpRequest = window.XMLHttpRequest
 _XDomainRequest = window.XDomainRequest
+_WebSocket = window.WebSocket
+
+extendNative = (to, from) ->
+  for key, val of from::
+    if not to[key]? and typeof val isnt 'function'
+      to[key] = val
 
 # We should only ever instantiate one of these
 class RequestIntercept extends Events
   constructor: ->
     super
 
-    monitor = (req) =>
+    monitorXHR = (req) =>
       _open = req.open
       req.open = (type, url, async) =>
-        @trigger 'request', {type, url, request: req}
+        if (type ? 'GET').toUpperCase() in options.ajax.trackMethods
+          @trigger 'request', {type, url, request: req}
 
         _open.apply req, arguments
 
-    window.XMLHttpRequest = ->
-      req = new _XMLHttpRequest
+    window.XMLHttpRequest = (flags) ->
+      req = new _XMLHttpRequest(flags)
 
-      monitor req
+      monitorXHR req
 
       req
+
+    extendNative window.XMLHttpRequest, _XMLHttpRequest
 
     if _XDomainRequest?
       window.XDomainRequest = ->
         req = new _XDomainRequest
 
-        monitor req
+        monitorXHR req
 
         req
+
+      extendNative window.XDomainRequest, _XDomainRequest
+
+    if _WebSocket? and options.ajax.trackWebSockets
+      window.WebSocket = (url, protocols) =>
+        req = new _WebSocket(url, protocols)
+
+        @trigger 'request', {type: 'socket', url, protocols, request: req}
+
+        req
+
+      extendNative window.WebSocket, _WebSocket
 
 intercept = new RequestIntercept
 
@@ -226,54 +254,36 @@ class AjaxMonitor
   constructor: ->
     @elements = []
 
-    intercept.on 'request', ({request}) =>
-      @watch request
+    intercept.on 'request', => @watch arguments...
 
-  watch: (request) ->
-    tracker = new RequestTracker(request)
+  watch: ({type, request}) ->
+    if type is 'socket'
+      tracker = new SocketRequestTracker(request)
+    else
+      tracker = new XHRRequestTracker(request)
 
     @elements.push tracker
 
-class RequestTracker
+class XHRRequestTracker
   constructor: (request) ->
     @progress = 0
 
-    if request.onprogress isnt undefined
-      # It will be null, not undefined, on browsers which don't support it
-      
+    if window.ProgressEvent?
+      # We're dealing with a modern browser with progress event support
+
       size = null
-      _onprogress = request.onprogress
-      request.onprogress = =>
-        try
-          headers = request.getAllResponseHeaders()
-
-          for name, val of headers
-            if name.toLowerCase() is 'content-length'
-              size = +val
-              break
-
-        catch e
-
-        if size?
-          # This is not perfect as size is in bytes, length is in chars
-          try
-            @progress = request.responseText.length / size
-          catch e
+      request.addEventListener 'progress', (evt) =>
+        if evt.lengthComputable
+          @progress = 100 * evt.loaded / evt.total
         else
           # If it's chunked encoding, we have no way of knowing the total length of the
           # response, all we can do is increment the progress with backoff such that we
           # never hit 100% until it's done.
           @progress = @progress + (100 - @progress) / 2
 
-      _onprogress?(arguments...)
-
-      for handler in ['onload', 'onabort', 'ontimeout', 'onerror']
-        do =>
-          fn = request[handler]
-          request[handler] = =>
-            @progress = 100
-
-            fn?(arguments...)
+      for event in ['load', 'abort', 'timeout', 'error']
+        request.addEventListener event, =>
+          @progress = 100
 
     else
       _onreadystatechange = request.onreadystatechange
@@ -284,6 +294,14 @@ class RequestTracker
           @progress = 50
 
         _onreadystatechange?(arguments...)
+
+class SocketRequestTracker
+  constructor: (request) ->
+    @progress = 0
+
+    for event in ['error', 'open']
+      request.addEventListener event, =>
+        @progress = 100
 
 class ElementMonitor
   constructor: (options={}) ->
@@ -450,7 +468,7 @@ SOURCE_KEYS =
   eventLag: EventLagMonitor
 
 do init = ->
-  sources = []
+  Pace.sources = sources = []
 
   for type in ['ajax', 'elements', 'document', 'eventLag']
     if options[type] isnt false
@@ -459,7 +477,7 @@ do init = ->
   for source in options.extraSources ? []
     sources.push new source(options)
 
-  bar = new Bar
+  Pace.bar = bar = new Bar
 
   # Each source of progress data has it's own scaler to smooth its output
   scalers = []

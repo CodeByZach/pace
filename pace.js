@@ -1,8 +1,9 @@
 (function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, RequestIntercept, RequestTracker, SOURCE_KEYS, Scaler, animation, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, firstLoad, getFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _XDomainRequest, _XMLHttpRequest, _pushState, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, firstLoad, getFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _pushState, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   defaultOptions = {
     catchupTime: 500,
@@ -14,6 +15,7 @@
     startOnPageLoad: true,
     restartOnPushState: true,
     restartOnBackboneRoute: true,
+    target: 'body',
     elements: {
       checkInterval: 100,
       selectors: ['body']
@@ -21,7 +23,10 @@
     eventLag: {
       minSamples: 10
     },
-    target: 'body'
+    ajax: {
+      trackMethods: ['GET'],
+      trackWebSockets: true
+    }
   };
 
   now = function() {
@@ -216,38 +221,74 @@
 
   _XDomainRequest = window.XDomainRequest;
 
+  _WebSocket = window.WebSocket;
+
+  extendNative = function(to, from) {
+    var key, val, _ref, _results;
+    _ref = from.prototype;
+    _results = [];
+    for (key in _ref) {
+      val = _ref[key];
+      if ((to[key] == null) && typeof val !== 'function') {
+        _results.push(to[key] = val);
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
   RequestIntercept = (function(_super) {
     __extends(RequestIntercept, _super);
 
     function RequestIntercept() {
-      var monitor,
+      var monitorXHR,
         _this = this;
       RequestIntercept.__super__.constructor.apply(this, arguments);
-      monitor = function(req) {
+      monitorXHR = function(req) {
         var _open;
         _open = req.open;
         return req.open = function(type, url, async) {
-          _this.trigger('request', {
-            type: type,
-            url: url,
-            request: req
-          });
+          var _ref;
+          if (_ref = (type != null ? type : 'GET').toUpperCase(), __indexOf.call(options.ajax.trackMethods, _ref) >= 0) {
+            _this.trigger('request', {
+              type: type,
+              url: url,
+              request: req
+            });
+          }
           return _open.apply(req, arguments);
         };
       };
-      window.XMLHttpRequest = function() {
+      window.XMLHttpRequest = function(flags) {
         var req;
-        req = new _XMLHttpRequest;
-        monitor(req);
+        req = new _XMLHttpRequest(flags);
+        monitorXHR(req);
         return req;
       };
+      extendNative(window.XMLHttpRequest, _XMLHttpRequest);
       if (_XDomainRequest != null) {
         window.XDomainRequest = function() {
           var req;
           req = new _XDomainRequest;
-          monitor(req);
+          monitorXHR(req);
           return req;
         };
+        extendNative(window.XDomainRequest, _XDomainRequest);
+      }
+      if ((_WebSocket != null) && options.ajax.trackWebSockets) {
+        window.WebSocket = function(url, protocols) {
+          var req;
+          req = new _WebSocket(url, protocols);
+          _this.trigger('request', {
+            type: 'socket',
+            url: url,
+            protocols: protocols,
+            request: req
+          });
+          return req;
+        };
+        extendNative(window.WebSocket, _WebSocket);
       }
     }
 
@@ -261,16 +302,19 @@
     function AjaxMonitor() {
       var _this = this;
       this.elements = [];
-      intercept.on('request', function(_arg) {
-        var request;
-        request = _arg.request;
-        return _this.watch(request);
+      intercept.on('request', function() {
+        return _this.watch.apply(_this, arguments);
       });
     }
 
-    AjaxMonitor.prototype.watch = function(request) {
-      var tracker;
-      tracker = new RequestTracker(request);
+    AjaxMonitor.prototype.watch = function(_arg) {
+      var request, tracker, type;
+      type = _arg.type, request = _arg.request;
+      if (type === 'socket') {
+        tracker = new SocketRequestTracker(request);
+      } else {
+        tracker = new XHRRequestTracker(request);
+      }
       return this.elements.push(tracker);
     };
 
@@ -278,53 +322,26 @@
 
   })();
 
-  RequestTracker = (function() {
-    function RequestTracker(request) {
-      var handler, size, _fn, _i, _len, _onprogress, _onreadystatechange, _ref,
+  XHRRequestTracker = (function() {
+    function XHRRequestTracker(request) {
+      var event, size, _i, _len, _onreadystatechange, _ref,
         _this = this;
       this.progress = 0;
-      if (request.onprogress !== void 0) {
+      if (window.ProgressEvent != null) {
         size = null;
-        _onprogress = request.onprogress;
-        request.onprogress = function() {
-          var e, headers, name, val;
-          try {
-            headers = request.getAllResponseHeaders();
-            for (name in headers) {
-              val = headers[name];
-              if (name.toLowerCase() === 'content-length') {
-                size = +val;
-                break;
-              }
-            }
-          } catch (_error) {
-            e = _error;
-          }
-          if (size != null) {
-            try {
-              return _this.progress = request.responseText.length / size;
-            } catch (_error) {
-              e = _error;
-            }
+        request.addEventListener('progress', function(evt) {
+          if (evt.lengthComputable) {
+            return _this.progress = 100 * evt.loaded / evt.total;
           } else {
             return _this.progress = _this.progress + (100 - _this.progress) / 2;
           }
-        };
-        if (typeof _onprogress === "function") {
-          _onprogress.apply(null, arguments);
-        }
-        _ref = ['onload', 'onabort', 'ontimeout', 'onerror'];
-        _fn = function() {
-          var fn;
-          fn = request[handler];
-          return request[handler] = function() {
-            _this.progress = 100;
-            return typeof fn === "function" ? fn.apply(null, arguments) : void 0;
-          };
-        };
+        });
+        _ref = ['load', 'abort', 'timeout', 'error'];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          handler = _ref[_i];
-          _fn();
+          event = _ref[_i];
+          request.addEventListener(event, function() {
+            return _this.progress = 100;
+          });
         }
       } else {
         _onreadystatechange = request.onreadystatechange;
@@ -340,7 +357,25 @@
       }
     }
 
-    return RequestTracker;
+    return XHRRequestTracker;
+
+  })();
+
+  SocketRequestTracker = (function() {
+    function SocketRequestTracker(request) {
+      var event, _i, _len, _ref,
+        _this = this;
+      this.progress = 0;
+      _ref = ['error', 'open'];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        event = _ref[_i];
+        request.addEventListener(event, function() {
+          return _this.progress = 100;
+        });
+      }
+    }
+
+    return SocketRequestTracker;
 
   })();
 
@@ -562,7 +597,7 @@
 
   (init = function() {
     var source, type, _i, _j, _len, _len1, _ref, _ref1, _ref2;
-    sources = [];
+    Pace.sources = sources = [];
     _ref = ['ajax', 'elements', 'document', 'eventLag'];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       type = _ref[_i];
@@ -575,7 +610,7 @@
       source = _ref2[_j];
       sources.push(new source(options));
     }
-    bar = new Bar;
+    Pace.bar = bar = new Bar;
     scalers = [];
     return uniScaler = new Scaler;
   })();
