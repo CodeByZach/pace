@@ -1,5 +1,5 @@
 (function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, firstLoad, getFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _pushState, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, bar, cancelAnimation, cancelAnimationFrame, createIntercept, defaultOptions, extend, extendNative, firstLoad, getFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _pushState, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -299,12 +299,19 @@
 
   })(Events);
 
-  intercept = new RequestIntercept;
+  intercept = null;
+
+  createIntercept = function() {
+    if ((intercept == null) && options.ajax !== false) {
+      return intercept = new RequestIntercept;
+    }
+  };
 
   AjaxMonitor = (function() {
     function AjaxMonitor() {
       var _this = this;
       this.elements = [];
+      createIntercept();
       intercept.on('request', function() {
         return _this.watch.apply(_this, arguments);
       });
