@@ -52,6 +52,12 @@ defaultOptions =
     # how many samples we need before we consider a low number to mean completion.
     minSamples: 10
 
+    # How many samples should we average to decide what the current lag is?
+    sampleCount: 3
+
+    # Above how many ms of lag is the CPU considered busy?
+    lagThreshold: 3
+
   ajax:
     # Which HTTP methods should we track?
     trackMethods: ['GET']
@@ -99,6 +105,14 @@ extend = (out, sources...) ->
       else
         out[key] = val
   out
+
+avgAmplitude = (arr) ->
+  sum = count = 0
+  for v in arr
+    sum += Math.abs(v)
+    count++
+
+  sum / count
 
 getFromDOM = (key='options', json=true) ->
   el = document.querySelector "[data-pace-#{ key }]"
@@ -364,18 +378,28 @@ class EventLagMonitor
 
     avg = 0
 
+    samples = []
+
     points = 0
     last = now()
-    setInterval =>
+    interval = setInterval =>
       diff = now() - last - 50
       last = now()
 
-      avg = avg + (diff - avg)/15
+      samples.push diff
 
-      if points++ > options.eventLag.minSamples and Math.abs(avg) < 3
-        avg = 0
+      if samples.length > options.eventLag.sampleCount
+        samples.pop()
 
-      @progress = 100 * (3 / (avg + 3))
+      avg = avgAmplitude samples
+
+      if ++points >= options.eventLag.minSamples and avg < options.eventLag.lagThreshold
+        @progress = 100
+
+        clearInterval interval
+      else
+        @progress = 100 * (3 / (avg + 3))
+
     , 50
 
 class Scaler
