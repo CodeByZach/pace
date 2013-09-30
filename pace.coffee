@@ -252,11 +252,16 @@ class RequestIntercept extends Events
 
       extendNative window.WebSocket, _WebSocket
 
-intercept = new RequestIntercept
+intercept = null
+createIntercept = ->
+  if not intercept? and options.ajax isnt false
+    intercept = new RequestIntercept
 
 class AjaxMonitor
   constructor: ->
     @elements = []
+
+    createIntercept()
 
     intercept.on 'request', => @watch arguments...
 
