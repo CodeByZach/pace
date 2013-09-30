@@ -1,5 +1,5 @@
 (function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, bar, cancelAnimation, cancelAnimationFrame, createIntercept, defaultOptions, extend, extendNative, firstLoad, getFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _pushState, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, bar, cancelAnimation, cancelAnimationFrame, createIntercept, defaultOptions, extend, extendNative, firstLoad, getFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _pushState, _ref, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -121,6 +121,18 @@
 
   options = Pace.options = extend(defaultOptions, window.paceOptions, getFromDOM());
 
+  NoTargetError = (function(_super) {
+    __extends(NoTargetError, _super);
+
+    function NoTargetError() {
+      _ref = NoTargetError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return NoTargetError;
+
+  })(Error);
+
   Bar = (function() {
     function Bar() {
       this.progress = 0;
@@ -129,10 +141,13 @@
     Bar.prototype.getElement = function() {
       var targetElement;
       if (this.el == null) {
+        targetElement = document.querySelector(options.target);
+        if (!targetElement) {
+          throw new NoTargetError;
+        }
         this.el = document.createElement('div');
         this.el.className = "pace pace-active";
         this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
-        targetElement = document.querySelector(options.target);
         if (targetElement.firstChild != null) {
           targetElement.insertBefore(this.el, targetElement.firstChild);
         } else {
@@ -193,12 +208,12 @@
     }
 
     Events.prototype.trigger = function(name, val) {
-      var binding, _i, _len, _ref, _results;
+      var binding, _i, _len, _ref1, _results;
       if (this.bindings[name] != null) {
-        _ref = this.bindings[name];
+        _ref1 = this.bindings[name];
         _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          binding = _ref[_i];
+        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+          binding = _ref1[_i];
           _results.push(binding.call(this, val));
         }
         return _results;
@@ -252,8 +267,8 @@
         var _open;
         _open = req.open;
         return req.open = function(type, url, async) {
-          var _ref;
-          if (_ref = (type != null ? type : 'GET').toUpperCase(), __indexOf.call(options.ajax.trackMethods, _ref) >= 0) {
+          var _ref1;
+          if (_ref1 = (type != null ? type : 'GET').toUpperCase(), __indexOf.call(options.ajax.trackMethods, _ref1) >= 0) {
             _this.trigger('request', {
               type: type,
               url: url,
@@ -334,7 +349,7 @@
 
   XHRRequestTracker = (function() {
     function XHRRequestTracker(request) {
-      var event, size, _i, _len, _onreadystatechange, _ref,
+      var event, size, _i, _len, _onreadystatechange, _ref1,
         _this = this;
       this.progress = 0;
       if (window.ProgressEvent != null) {
@@ -346,9 +361,9 @@
             return _this.progress = _this.progress + (100 - _this.progress) / 2;
           }
         });
-        _ref = ['load', 'abort', 'timeout', 'error'];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          event = _ref[_i];
+        _ref1 = ['load', 'abort', 'timeout', 'error'];
+        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+          event = _ref1[_i];
           request.addEventListener(event, function() {
             return _this.progress = 100;
           });
@@ -356,8 +371,8 @@
       } else {
         _onreadystatechange = request.onreadystatechange;
         request.onreadystatechange = function() {
-          var _ref1;
-          if ((_ref1 = request.readyState) === 0 || _ref1 === 4) {
+          var _ref2;
+          if ((_ref2 = request.readyState) === 0 || _ref2 === 4) {
             _this.progress = 100;
           } else if (request.readyState === 3) {
             _this.progress = 50;
@@ -373,12 +388,12 @@
 
   SocketRequestTracker = (function() {
     function SocketRequestTracker(request) {
-      var event, _i, _len, _ref,
+      var event, _i, _len, _ref1,
         _this = this;
       this.progress = 0;
-      _ref = ['error', 'open'];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        event = _ref[_i];
+      _ref1 = ['error', 'open'];
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        event = _ref1[_i];
         request.addEventListener(event, function() {
           return _this.progress = 100;
         });
@@ -391,7 +406,7 @@
 
   ElementMonitor = (function() {
     function ElementMonitor(options) {
-      var selector, _i, _len, _ref;
+      var selector, _i, _len, _ref1;
       if (options == null) {
         options = {};
       }
@@ -399,9 +414,9 @@
       if (options.selectors == null) {
         options.selectors = [];
       }
-      _ref = options.selectors;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        selector = _ref[_i];
+      _ref1 = options.selectors;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        selector = _ref1[_i];
         this.elements.push(new ElementTracker(selector));
       }
     }
@@ -444,9 +459,9 @@
     };
 
     function DocumentMonitor() {
-      var _onreadystatechange, _ref,
+      var _onreadystatechange, _ref1,
         _this = this;
-      this.progress = (_ref = this.states[document.readyState]) != null ? _ref : 100;
+      this.progress = (_ref1 = this.states[document.readyState]) != null ? _ref1 : 100;
       _onreadystatechange = document.onreadystatechange;
       document.onreadystatechange = function() {
         if (_this.states[document.readyState] != null) {
@@ -606,18 +621,18 @@
   };
 
   (init = function() {
-    var source, type, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+    var source, type, _i, _j, _len, _len1, _ref1, _ref2, _ref3;
     Pace.sources = sources = [];
-    _ref = ['ajax', 'elements', 'document', 'eventLag'];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      type = _ref[_i];
+    _ref1 = ['ajax', 'elements', 'document', 'eventLag'];
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+      type = _ref1[_i];
       if (options[type] !== false) {
         sources.push(new SOURCE_KEYS[type](options[type]));
       }
     }
-    _ref2 = (_ref1 = options.extraSources) != null ? _ref1 : [];
-    for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-      source = _ref2[_j];
+    _ref3 = (_ref2 = options.extraSources) != null ? _ref2 : [];
+    for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+      source = _ref3[_j];
       sources.push(new source(options));
     }
     Pace.bar = bar = new Bar;
@@ -646,14 +661,14 @@
     bar.render();
     cancelAnimation = false;
     return animation = runAnimation(function(frameTime, enqueueNextFrame) {
-      var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref;
+      var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, source, start, sum, _i, _j, _len, _len1, _ref1;
       remaining = 100 - bar.progress;
       count = sum = 0;
       done = true;
       for (i = _i = 0, _len = sources.length; _i < _len; i = ++_i) {
         source = sources[i];
         scalerList = scalers[i] != null ? scalers[i] : scalers[i] = [];
-        elements = (_ref = source.elements) != null ? _ref : [source];
+        elements = (_ref1 = source.elements) != null ? _ref1 : [source];
         for (j = _j = 0, _len1 = elements.length; _j < _len1; j = ++_j) {
           element = elements[j];
           scaler = scalerList[j] != null ? scalerList[j] : scalerList[j] = new Scaler(element);
@@ -681,7 +696,11 @@
 
   Pace.start = function(_options) {
     extend(options, _options);
-    bar.render();
+    try {
+      bar.render();
+    } catch (_error) {
+      NoTargetError = _error;
+    }
     if (!document.querySelector('.pace')) {
       return setTimeout(Pace.start, 50);
     } else {

@@ -118,12 +118,19 @@ window.Pace ?= {}
 
 options = Pace.options = extend defaultOptions, window.paceOptions, getFromDOM()
 
+class NoTargetError extends Error
+
 class Bar
   constructor: ->
     @progress = 0
 
   getElement: ->
     if not @el?
+      targetElement = document.querySelector options.target
+
+      if not targetElement
+        throw new NoTargetError
+
       @el = document.createElement 'div'
       @el.className = "pace pace-active"
 
@@ -133,7 +140,6 @@ class Bar
       </div>
       <div class="pace-activity"></div>
       '''
-      targetElement = document.querySelector options.target
       if targetElement.firstChild?
         targetElement.insertBefore @el, targetElement.firstChild
       else
@@ -561,7 +567,9 @@ Pace.go = ->
 Pace.start = (_options) ->
   extend options, _options
 
-  bar.render()
+  try
+    bar.render()
+  catch NoTargetError
 
   # It's usually possible to render a bit before the document declares itself ready
   if not document.querySelector('.pace')
