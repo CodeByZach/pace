@@ -1,4 +1,3 @@
 title: "Pace"
 source: "pace.coffee"
-examples: "**/*.md"
 assets: "{templates/*,themes/*,docs/welcome/*,docs/lib/*,docs/resources/*.css,*.js}"
