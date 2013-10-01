@@ -34,6 +34,12 @@ defaultOptions =
   # Should pace automatically restart when a Backbone route change occurs?  Can also be an
   # array of route names.  Ignored if Backbone.js is not included on the page.
   restartOnBackboneRoute: true
+  
+  # Should we show the progress bar for every ajax request (not just regular or ajax-y page
+  # navigation)? Set to false to disable.
+  #
+  # If so, how many ms does the request have to be running for before we show the progress?
+  restartOnRequestAfter: 50
 
   # What element should the pace element be appended to on the page?
   target: 'body'
@@ -272,18 +278,42 @@ class RequestIntercept extends Events
 
       extendNative window.WebSocket, _WebSocket
 
-intercept = null
-createIntercept = ->
-  if not intercept? and options.ajax isnt false
-    intercept = new RequestIntercept
+_intercept = null
+getIntercept = ->
+  if not _intercept?
+    _intercept = new RequestIntercept
+  _intercept
+
+if options.restartOnRequestAfter isnt false
+  # If we want to start the progress bar
+  # on every request, we need to hear the request
+  # and then inject it into the new ajax monitor
+  # start will have created.
+  
+  getIntercept().on 'request', ({type, request}) ->
+    if not Pace.running
+      args = arguments
+
+      setTimeout ->
+        if type is 'socket'
+          stillActive = request.readyState < 2
+        else
+          stillActive = 0 < request.readyState < 4
+
+        if stillActive
+          Pace.restart()
+
+          for source in Pace.sources
+            if source instanceof AjaxMonitor
+              source.watch args...
+              break
+      , options.restartOnRequestAfter
 
 class AjaxMonitor
   constructor: ->
     @elements = []
 
-    createIntercept()
-
-    intercept.on 'request', => @watch arguments...
+    getIntercept().on 'request', => @watch arguments...
 
   watch: ({type, request}) ->
     if type is 'socket'
@@ -456,6 +486,7 @@ bar = null
 uniScaler = null
 animation = null
 cancelAnimation = null
+Pace.running = false
 
 handlePushState = ->
   if options.restartOnPushState
@@ -526,6 +557,8 @@ do init = ->
   uniScaler = new Scaler
 
 Pace.stop = ->
+  Pace.running = false
+
   bar.destroy()
 
   # Not all browsers support cancelAnimationFrame
@@ -542,6 +575,8 @@ Pace.restart = ->
   Pace.go()
 
 Pace.go = ->
+  Pace.running = true
+
   bar.render()
 
   cancelAnimation = false
@@ -584,12 +619,16 @@ Pace.go = ->
 
       setTimeout ->
         bar.finish()
+
+        Pace.running = false
       , Math.max(options.ghostTime, Math.min(options.minTime, now() - start))
     else
       enqueueNextFrame()
 
 Pace.start = (_options) ->
   extend options, _options
+
+  Pace.running = true
 
   try
     bar.render()

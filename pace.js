@@ -1,5 +1,5 @@
 (function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, bar, cancelAnimation, cancelAnimationFrame, createIntercept, defaultOptions, extend, extendNative, firstLoad, getFromDOM, handlePushState, init, intercept, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _pushState, _ref, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, firstLoad, getFromDOM, getIntercept, handlePushState, init, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _intercept, _pushState, _ref, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -15,13 +15,16 @@
     startOnPageLoad: true,
     restartOnPushState: true,
     restartOnBackboneRoute: true,
+    restartOnRequestAfter: 50,
     target: 'body',
     elements: {
       checkInterval: 100,
       selectors: ['body']
     },
     eventLag: {
-      minSamples: 10
+      minSamples: 10,
+      sampleCount: 3,
+      lagThreshold: 3
     },
     ajax: {
       trackMethods: ['GET'],
@@ -89,6 +92,17 @@
       }
     }
     return out;
+  };
+
+  avgAmplitude = function(arr) {
+    var count, sum, v, _i, _len;
+    sum = count = 0;
+    for (_i = 0, _len = arr.length; _i < _len; _i++) {
+      v = arr[_i];
+      sum += Math.abs(v);
+      count++;
+    }
+    return sum / count;
   };
 
   getFromDOM = function(key, json) {
@@ -314,20 +328,53 @@
 
   })(Events);
 
-  intercept = null;
+  _intercept = null;
 
-  createIntercept = function() {
-    if ((intercept == null) && options.ajax !== false) {
-      return intercept = new RequestIntercept;
+  getIntercept = function() {
+    if (_intercept == null) {
+      _intercept = new RequestIntercept;
     }
+    return _intercept;
   };
+
+  if (options.restartOnRequestAfter !== false) {
+    getIntercept().on('request', function(_arg) {
+      var args, request, type;
+      type = _arg.type, request = _arg.request;
+      if (!Pace.running) {
+        args = arguments;
+        return setTimeout(function() {
+          var source, stillActive, _i, _len, _ref1, _ref2, _results;
+          if (type === 'socket') {
+            stillActive = request.readyState < 2;
+          } else {
+            stillActive = (0 < (_ref1 = request.readyState) && _ref1 < 4);
+          }
+          if (stillActive) {
+            Pace.restart();
+            _ref2 = Pace.sources;
+            _results = [];
+            for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+              source = _ref2[_i];
+              if (source instanceof AjaxMonitor) {
+                source.watch.apply(source, args);
+                break;
+              } else {
+                _results.push(void 0);
+              }
+            }
+            return _results;
+          }
+        }, options.restartOnRequestAfter);
+      }
+    });
+  }
 
   AjaxMonitor = (function() {
     function AjaxMonitor() {
       var _this = this;
       this.elements = [];
-      createIntercept();
-      intercept.on('request', function() {
+      getIntercept().on('request', function() {
         return _this.watch.apply(_this, arguments);
       });
     }
@@ -477,21 +524,28 @@
 
   EventLagMonitor = (function() {
     function EventLagMonitor() {
-      var avg, last, points,
+      var avg, interval, last, points, samples,
         _this = this;
       this.progress = 0;
       avg = 0;
+      samples = [];
       points = 0;
       last = now();
-      setInterval(function() {
+      interval = setInterval(function() {
         var diff;
         diff = now() - last - 50;
         last = now();
-        avg = avg + (diff - avg) / 15;
-        if (points++ > options.eventLag.minSamples && Math.abs(avg) < 3) {
-          avg = 0;
+        samples.push(diff);
+        if (samples.length > options.eventLag.sampleCount) {
+          samples.pop();
         }
-        return _this.progress = 100 * (3 / (avg + 3));
+        avg = avgAmplitude(samples);
+        if (++points >= options.eventLag.minSamples && avg < options.eventLag.lagThreshold) {
+          _this.progress = 100;
+          return clearInterval(interval);
+        } else {
+          return _this.progress = 100 * (3 / (avg + 3));
+        }
       }, 50);
     }
 
@@ -556,6 +610,8 @@
   animation = null;
 
   cancelAnimation = null;
+
+  Pace.running = false;
 
   handlePushState = function() {
     if (options.restartOnPushState) {
@@ -641,6 +697,7 @@
   })();
 
   Pace.stop = function() {
+    Pace.running = false;
     bar.destroy();
     cancelAnimation = true;
     if (animation != null) {
@@ -658,6 +715,7 @@
   };
 
   Pace.go = function() {
+    Pace.running = true;
     bar.render();
     cancelAnimation = false;
     return animation = runAnimation(function(frameTime, enqueueNextFrame) {
@@ -686,7 +744,8 @@
       if (bar.done() || done || cancelAnimation) {
         bar.update(100);
         return setTimeout(function() {
-          return bar.finish();
+          bar.finish();
+          return Pace.running = false;
         }, Math.max(options.ghostTime, Math.min(options.minTime, now() - start)));
       } else {
         return enqueueNextFrame();
@@ -696,6 +755,7 @@
 
   Pace.start = function(_options) {
     extend(options, _options);
+    Pace.running = true;
     try {
       bar.render();
     } catch (_error) {
