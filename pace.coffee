@@ -39,7 +39,7 @@ defaultOptions =
   # navigation)? Set to false to disable.
   #
   # If so, how many ms does the request have to be running for before we show the progress?
-  restartOnRequestAfter: 50
+  restartOnRequestAfter: 500
 
   # What element should the pace element be appended to on the page?
   target: 'body'

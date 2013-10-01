@@ -1,7 +1,7 @@
 pace
 ====
 
-Include [pace.js](https://raw.github.com/HubSpot/pace/v0.4.11/pace.min.js) and the
+Include [pace.js](https://raw.github.com/HubSpot/pace/v0.4.12/pace.min.js) and the
 [theme](http://github.hubspot.com/pace/docs/welcome/) css of your choice on your page
 (as early as is possible), and you're done!
 
@@ -34,7 +34,11 @@ You can set `window.paceOptions` before bringing in the file:
 ```javascript
 paceOptions = {
   // Disable the 'elements' source
-  elements: false
+  elements: false,
+
+  // Only show the progress on regular and ajax-y page navigation,
+  // not every request
+  restartOnRequestAfter: false
 }
 ```
 
@@ -128,8 +132,17 @@ Most users want the progress bar to automatically restart when a pushState event
 (generally means ajax navigation is occuring).  You can disable this:
 
 ```javascript
-paceOptions: {
+paceOptions = {
   restartOnPushState: false
+}
+```
+
+You can also have pace restart on every ajax request which lasts longer than x ms.  You'll want to
+disable this if you make ajax requests the user doesn't need to know about, like precaching:
+
+```javascript
+paceOptions = {
+  restartOnRequestAfter: false
 }
 ```
 
