@@ -15,7 +15,7 @@
     startOnPageLoad: true,
     restartOnPushState: true,
     restartOnBackboneRoute: true,
-    restartOnRequestAfter: 50,
+    restartOnRequestAfter: 500,
     target: 'body',
     elements: {
       checkInterval: 100,
