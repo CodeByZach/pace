@@ -537,7 +537,7 @@
         last = now();
         samples.push(diff);
         if (samples.length > options.eventLag.sampleCount) {
-          samples.pop();
+          samples.shift();
         }
         avg = avgAmplitude(samples);
         if (++points >= options.eventLag.minSamples && avg < options.eventLag.lagThreshold) {

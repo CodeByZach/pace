@@ -419,7 +419,7 @@ class EventLagMonitor
       samples.push diff
 
       if samples.length > options.eventLag.sampleCount
-        samples.pop()
+        samples.shift()
 
       avg = avgAmplitude samples
 
