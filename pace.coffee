@@ -640,6 +640,19 @@ Pace.start = (_options) ->
   else
     Pace.go()
 
+# use whenever you have some code that will cause an ajax request 
+# that you don't want to track in pace:
+# ex:
+# $.ajax('url/user/cares/about') # will be tracked in Pace
+# Pace.ignore -> $.ajax('req/user/doesnt/need/to/know/about') # WONT be tracked in Pace
+# $.ajax('another/url') # will be tracked in Pace
+Pace.ignore = (fn) ->
+  _trackMethods = Pace.options.ajax.trackMethods
+  Pace.options.ajax.trackMethods = []
+  res = fn()
+  Pace.options.ajax.trackMethods = _trackMethods
+
+
 if typeof define is 'function' and define.amd
   # AMD
   define -> Pace
