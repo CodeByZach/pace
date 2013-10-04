@@ -167,8 +167,8 @@ class Bar
 
     if not @lastRenderedProgress or @lastRenderedProgress|0 != @progress|0
       # The whole-part of the number has changed
-      
-      el.setAttribute 'data-progress-text', "#{ @progress|0 }%"
+
+      el.children[0].setAttribute 'data-progress-text', "#{ @progress|0 }%"
 
       if @progress >= 100
         # We cap it at 99 so we can use prefix-based attribute selectors
@@ -177,7 +177,7 @@ class Bar
         progressStr = if @progress < 10 then "0" else ""
         progressStr += @progress|0
 
-      el.setAttribute 'data-progress', "#{ progressStr }"
+      el.children[0].setAttribute 'data-progress', "#{ progressStr }"
 
     @lastRenderedProgress = @progress
 
