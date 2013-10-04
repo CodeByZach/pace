@@ -21,7 +21,7 @@
   position: absolute;
   top: 0;
   right: .5rem;
-  content: attr(data-progress);
+  content: attr(data-progress-text);
   font-family: "Helvetica Neue", sans-serif;
   font-weight: 100;
   font-size: 5rem;
