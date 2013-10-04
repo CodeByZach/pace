@@ -31,10 +31,6 @@ defaultOptions =
   # means ajax navigation has occured)
   restartOnPushState: true
  
-  # Should pace automatically restart when a Backbone route change occurs?  Can also be an
-  # array of route names.  Ignored if Backbone.js is not included on the page.
-  restartOnBackboneRoute: true
-  
   # Should we show the progress bar for every ajax request (not just regular or ajax-y page
   # navigation)? Set to false to disable.
   #
@@ -506,30 +502,6 @@ if window.history.replaceState?
     handlePushState()
 
     _replaceState.apply window.history, arguments
-
-firstLoad = true
-if options.restartOnBackboneRoute
-  # Bind in a timeout, as it's possible Backbone hasen't been
-  # included yet
-  setTimeout ->
-    return unless window.Backbone?
-   
-    Backbone.history.on 'route', (router, name) ->
-      return unless rule = options.restartOnBackboneRoute
-
-      if firstLoad
-        # We don't want to do anything on the initial route
-        firstLoad = false
-        return
-
-      if typeof rule is 'object'
-        # It's an array of route names
-        for routeName in rule when routeName is name
-          Pace.restart()
-          break
-      else
-        Pace.restart()
-  , 0
 
 SOURCE_KEYS =
   ajax: AjaxMonitor
