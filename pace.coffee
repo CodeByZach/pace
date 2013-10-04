@@ -65,7 +65,7 @@ defaultOptions =
     trackMethods: ['GET']
 
     # Should we track web socket connections?
-    trackWebSockets: true
+    trackWebSockets: false
 
 now = ->
   performance?.now?() ? +new Date
