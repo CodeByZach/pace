@@ -22,7 +22,7 @@ defaultOptions =
 
   # This tweaks the animation easing
   easeFactor: 1.25
-  
+
   # Should pace automatically start when the page is loaded, or should it wait for `start` to
   # be called?  Always false if pace is loaded with AMD or CommonJS.
   startOnPageLoad: true
@@ -30,7 +30,7 @@ defaultOptions =
   # Should we restart the browser when pushState or replaceState is called?  (Generally
   # means ajax navigation has occured)
   restartOnPushState: true
- 
+
   # Should we show the progress bar for every ajax request (not just regular or ajax-y page
   # navigation)? Set to false to disable.
   #
@@ -44,10 +44,10 @@ defaultOptions =
     # How frequently in ms should we check for the elements being tested for
     # using the element monitor?
     checkInterval: 100
-    
+
     # What elements should we wait for before deciding the page is fully loaded (not required)
     selectors: ['body']
-    
+
   eventLag:
     # When we first start measuring event lag, not much is going on in the browser yet, so it's
     # not uncommon for the numbers to be abnormally low for the first few samples.  This configures
@@ -122,7 +122,7 @@ getFromDOM = (key='options', json=true) ->
   return unless el
 
   data = el.getAttribute "data-pace-#{ key }"
-  
+
   return data if not json
 
   try
@@ -184,7 +184,7 @@ class Bar
       return false
 
     el = @getElement()
-      
+
     el.children[0].style.width = "#{ @progress }%"
 
     if not @lastRenderedProgress or @lastRenderedProgress|0 != @progress|0
@@ -285,7 +285,7 @@ if options.restartOnRequestAfter isnt false
   # on every request, we need to hear the request
   # and then inject it into the new ajax monitor
   # start will have created.
-  
+
   getIntercept().on 'request', ({type, request}) ->
     if not Pace.running
       args = arguments
@@ -365,7 +365,7 @@ class ElementMonitor
     options.selectors ?= []
     for selector in options.selectors
       @elements.push new ElementTracker selector
-    
+
 class ElementTracker
   constructor: (@selector) ->
     @progress = 0
