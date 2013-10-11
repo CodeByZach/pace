@@ -2,11 +2,17 @@
 .pace {
   -webkit-pointer-events: none;
   pointer-events: none;
+
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
 
   -webkit-perspective: 12rem;
+  -moz-perspective: 12rem;
+  -ms-perspective: 12rem;
+  -o-perspective: 12rem;
+  perspective: 12rem;
+
   z-index: 2000;
   position: fixed;
   height: 6rem;
@@ -25,16 +31,12 @@
 .pace .pace-progress {
   position: fixed;
   z-index: 2000;
-}
-
-.pace .pace-progress:after {
-  content: attr(data-progress-text);
   display: block;
   position: absolute;
   left: 0;
   top: 0;
   height: 6rem;
-  width: 6rem;
+  width: 6rem !important;
   line-height: 6rem;
   font-size: 2rem;
   border-radius: 50%;
@@ -55,6 +57,11 @@
   -ms-transform-style: preserve-3d;
   -o-transform-style: preserve-3d;
   transform-style: preserve-3d;
+}
+
+.pace .pace-progress:after {
+  content: attr(data-progress-text);
+  display: block;
 }
 
 @-webkit-keyframes pace-3d-spinner {
