@@ -150,6 +150,7 @@ class Bar
       @el = document.createElement 'div'
       @el.className = "pace pace-active"
 
+      document.body.className = document.body.className.replace 'pace-done', ''
       document.body.className += ' pace-running'
 
       @el.innerHTML = '''
