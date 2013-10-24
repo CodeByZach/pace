@@ -175,14 +175,15 @@ class Bar
     document.body.className = document.body.className.replace 'pace-running', ''
     document.body.className += ' pace-done'
 
-
   update: (prog) ->
     @progress = prog
 
     do @render
 
   destroy: ->
-    @getElement().parentNode.removeChild(@getElement())
+    try
+      @getElement().parentNode.removeChild(@getElement())
+    catch NoTargetError
 
     @el = undefined
 
@@ -551,7 +552,7 @@ Pace.stop = ->
 
 Pace.restart = ->
   Pace.stop()
-  Pace.go()
+  Pace.start()
 
 Pace.go = ->
   Pace.running = true

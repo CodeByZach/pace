@@ -187,7 +187,11 @@
     };
 
     Bar.prototype.destroy = function() {
-      this.getElement().parentNode.removeChild(this.getElement());
+      try {
+        this.getElement().parentNode.removeChild(this.getElement());
+      } catch (_error) {
+        NoTargetError = _error;
+      }
       return this.el = void 0;
     };
 
@@ -680,7 +684,7 @@
 
   Pace.restart = function() {
     Pace.stop();
-    return Pace.go();
+    return Pace.start();
   };
 
   Pace.go = function() {
