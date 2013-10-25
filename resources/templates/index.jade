@@ -1,0 +1,34 @@
+extends base
+
+block content
+
+    .hs-doc-marquee
+
+        .hs-page-width-normal
+
+            .row-fluid
+
+                .span6
+
+                    h1= name
+
+                    h3.hs-doc-marquee-description= desc
+
+                    p.hs-doc-marquee-release= package.release
+
+                    p.hs-doc-marquee-stars
+
+                        | <iframe src="http://ghbtns.com/github-btn.html?user=HubSpot&repo=#{ repo.name }&type=watch&count=true&size=large" allowtransparency="true" frameborder="0" scrolling="0" width="240" height="30"></iframe>
+
+                .span6
+
+                    .hs-doc-marquee-buttons
+
+                        | <a class="hs-doc-marquee-button" href="http://#{ repo.host }/#{ repo.user }/#{ repo.name }">Star on GitHub</a>
+
+                        if package && package.release
+                            | <a class="hs-doc-marquee-button" href="http://#{ repo.host }/#{ repo.user }/#{ repo.name }/archive/v#{ package.release }.zip">Download ZIP (v#{ package.release })</a>
+                        else
+                            | <a class="hs-doc-marquee-button" href="http://#{ repo.host }/#{ repo.user }/#{ repo.name }/archive/master.zip">Download ZIP</a>
+
+    include includes/navigation-and-content

@@ -1,5 +1,5 @@
 (function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, firstLoad, getFromDOM, getIntercept, handlePushState, init, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _intercept, _pushState, _ref, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, init, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _intercept, _pushState, _ref, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -14,7 +14,6 @@
     easeFactor: 1.25,
     startOnPageLoad: true,
     restartOnPushState: true,
-    restartOnBackboneRoute: true,
     restartOnRequestAfter: 500,
     target: 'body',
     elements: {
@@ -28,7 +27,7 @@
     },
     ajax: {
       trackMethods: ['GET'],
-      trackWebSockets: true
+      trackWebSockets: false
     }
   };
 
@@ -161,6 +160,8 @@
         }
         this.el = document.createElement('div');
         this.el.className = "pace pace-active";
+        document.body.className = document.body.className.replace('pace-done', '');
+        document.body.className += ' pace-running';
         this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
         if (targetElement.firstChild != null) {
           targetElement.insertBefore(this.el, targetElement.firstChild);
@@ -175,7 +176,9 @@
       var el;
       el = this.getElement();
       el.className = el.className.replace('pace-active', '');
-      return el.className += ' pace-inactive';
+      el.className += ' pace-inactive';
+      document.body.className = document.body.className.replace('pace-running', '');
+      return document.body.className += ' pace-done';
     };
 
     Bar.prototype.update = function(prog) {
@@ -184,7 +187,11 @@
     };
 
     Bar.prototype.destroy = function() {
-      this.getElement().parentNode.removeChild(this.getElement());
+      try {
+        this.getElement().parentNode.removeChild(this.getElement());
+      } catch (_error) {
+        NoTargetError = _error;
+      }
       return this.el = void 0;
     };
 
@@ -196,14 +203,14 @@
       el = this.getElement();
       el.children[0].style.width = "" + this.progress + "%";
       if (!this.lastRenderedProgress || this.lastRenderedProgress | 0 !== this.progress | 0) {
-        el.setAttribute('data-progress-text', "" + (this.progress | 0) + "%");
+        el.children[0].setAttribute('data-progress-text', "" + (this.progress | 0) + "%");
         if (this.progress >= 100) {
           progressStr = '99';
         } else {
           progressStr = this.progress < 10 ? "0" : "";
           progressStr += this.progress | 0;
         }
-        el.setAttribute('data-progress', "" + progressStr);
+        el.children[0].setAttribute('data-progress', "" + progressStr);
       }
       return this.lastRenderedProgress = this.progress;
     };
@@ -635,40 +642,6 @@
     };
   }
 
-  firstLoad = true;
-
-  if (options.restartOnBackboneRoute) {
-    setTimeout(function() {
-      if (window.Backbone == null) {
-        return;
-      }
-      return Backbone.history.on('route', function(router, name) {
-        var routeName, rule, _i, _len, _results;
-        if (!(rule = options.restartOnBackboneRoute)) {
-          return;
-        }
-        if (firstLoad) {
-          firstLoad = false;
-          return;
-        }
-        if (typeof rule === 'object') {
-          _results = [];
-          for (_i = 0, _len = rule.length; _i < _len; _i++) {
-            routeName = rule[_i];
-            if (!(routeName === name)) {
-              continue;
-            }
-            Pace.restart();
-            break;
-          }
-          return _results;
-        } else {
-          return Pace.restart();
-        }
-      });
-    }, 0);
-  }
-
   SOURCE_KEYS = {
     ajax: AjaxMonitor,
     elements: ElementMonitor,
@@ -711,7 +684,7 @@
 
   Pace.restart = function() {
     Pace.stop();
-    return Pace.go();
+    return Pace.start();
   };
 
   Pace.go = function() {
