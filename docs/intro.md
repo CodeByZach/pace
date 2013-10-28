@@ -110,8 +110,8 @@ Elements
 Elements being rendered to the screen is one way for us to decide that the page has been
 rendered.  If you would like to use that source of information (not required at all),
 specify one or more selectors.  You can comma seperate the selectors to propertly handle
-error states, where the progress bar should disappear, but the element were looking for
-may never apper:
+error states, where the progress bar should disappear, but the element we are looking for
+may never appear:
 
 ```javascript
 paceOptions = {
