@@ -183,7 +183,7 @@ Issues
 ------
 
 We have obviously not tested this on every website.  If you run into an issue, or find a way the automatic
-detection could be better, please create an Issue.  If you can include a test case, that's even better.
+detection could be better, please [create an Issue](https://github.com/HubSpot/pace/issues/new).  If you can include a test case, that's even better.
 
 Contributing
 ------------
