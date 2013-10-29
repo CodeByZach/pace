@@ -1,10 +1,9 @@
 <head>
-  <link rel="stylesheet" href="../themes/pace-theme-center-circle.css" />
+  <link rel="stylesheet" href="../themes/pace-theme-barber-shop.css" />
 
   <script>
     paceOptions = {
-      elements: false,
-      restartOnRequestAfter: false
+      elements: false
     };
   </script>
   <script src="../pace.js"></script>
@@ -22,7 +21,9 @@
     load(3000);
 
     setTimeout(function(){
-      load(3100);
+      Pace.ignore(function(){
+        load(3100);
+      });
     }, 4000);
 
   </script>

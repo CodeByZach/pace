@@ -162,6 +162,48 @@ whenever `pushState` or `replaceState` is called by default.
 
 - `Pace.stop`: Hide the progress bar and stop updating it.
 
+- `Pace.track': Explicitly track one or more requests, see Tracking below
+
+- `Pace.ignore`: Expliticly ignore one or more requests, see Tracking below
+
+Tracking
+--------
+
+By default, Pace will show any ajax requests which begin as a part of a normal or ajax-y page load, or which last longer than
+500ms.
+
+You can disable all ajax tracking by setting `ajax` to false:
+
+```javascript
+Pace.options = {
+  ajax: false
+}
+```
+
+You can disable ajax tracking except on page navigation by setting `restartOnRequestAfter` to false:
+
+```javascript
+Pace.options = {
+  restartOnRequestAfter: false
+}
+```
+
+You can manually disable tracking for a specific request or requests by triggering them within a `Pace.ignore` callback:
+
+```javascript
+Pace.ignore(function(){
+  $.ajax(...)
+});
+```
+
+You can force the progress bar to be shown for a specific request by triggering them within a `Pace.track` callback:
+
+```javascript
+Pace.track(function(){
+  $.ajax(...)
+});
+```
+
 Dependencies
 ------------
 

@@ -240,6 +240,32 @@ extendNative = (to, from) ->
         to[key] = val
     catch e
 
+ignoreStack = []
+
+Pace.ignore = (fn, args...) ->
+  ignoreStack.unshift 'ignore'
+  ret = fn(args...)
+  ignoreStack.shift()
+  ret
+
+Pace.track = (fn, args...) ->
+  ignoreStack.unshift 'track'
+  ret = fn(args...)
+  ignoreStack.shift()
+  ret
+
+shouldTrack = (method='GET') ->
+  if ignoreStack[0] is 'track'
+    return 'force'
+  
+  if not ignoreStack.length and options.ajax
+    if method is 'socket' and options.ajax.trackWebSockets
+      return true
+    else if method.toUpperCase() in options.ajax.trackMethods
+      return true
+
+  return false
+
 # We should only ever instantiate one of these
 class RequestIntercept extends Events
   constructor: ->
@@ -248,7 +274,7 @@ class RequestIntercept extends Events
     monitorXHR = (req) =>
       _open = req.open
       req.open = (type, url, async) =>
-        if (type ? 'GET').toUpperCase() in options.ajax.trackMethods
+        if shouldTrack(type)
           @trigger 'request', {type, url, request: req}
 
         _open.apply req, arguments
@@ -276,7 +302,8 @@ class RequestIntercept extends Events
       window.WebSocket = (url, protocols) =>
         req = new _WebSocket(url, protocols)
 
-        @trigger 'request', {type: 'socket', url, protocols, request: req}
+        if shouldTrack('socket')
+          @trigger 'request', {type: 'socket', url, protocols, request: req}
 
         req
 
@@ -288,30 +315,33 @@ getIntercept = ->
     _intercept = new RequestIntercept
   _intercept
 
-if options.restartOnRequestAfter isnt false
-  # If we want to start the progress bar
-  # on every request, we need to hear the request
-  # and then inject it into the new ajax monitor
-  # start will have created.
+# If we want to start the progress bar
+# on every request, we need to hear the request
+# and then inject it into the new ajax monitor
+# start will have created.
 
-  getIntercept().on 'request', ({type, request}) ->
-    if not Pace.running
-      args = arguments
+getIntercept().on 'request', ({type, request}) ->
+  if not Pace.running and (options.restartOnRequestAfter isnt false or shouldTrack(type) is 'force')
+    args = arguments
 
-      setTimeout ->
-        if type is 'socket'
-          stillActive = request.readyState < 2
-        else
-          stillActive = 0 < request.readyState < 4
+    after = options.restartOnRequestAfter or 0
+    if typeof after is 'boolean'
+      after = 0
 
-        if stillActive
-          Pace.restart()
+    setTimeout ->
+      if type is 'socket'
+        stillActive = request.readyState < 2
+      else
+        stillActive = 0 < request.readyState < 4
 
-          for source in Pace.sources
-            if source instanceof AjaxMonitor
-              source.watch args...
-              break
-      , options.restartOnRequestAfter
+      if stillActive
+        Pace.restart()
+
+        for source in Pace.sources
+          if source instanceof AjaxMonitor
+            source.watch args...
+            break
+    , after
 
 class AjaxMonitor
   constructor: ->

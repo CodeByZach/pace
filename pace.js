@@ -1,5 +1,5 @@
 (function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, init, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _intercept, _pushState, _ref, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, ignoreStack, init, now, options, requestAnimationFrame, result, runAnimation, scalers, shouldTrack, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _intercept, _pushState, _ref, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -277,6 +277,44 @@
     return _results;
   };
 
+  ignoreStack = [];
+
+  Pace.ignore = function() {
+    var args, fn, ret;
+    fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    ignoreStack.unshift('ignore');
+    ret = fn.apply(null, args);
+    ignoreStack.shift();
+    return ret;
+  };
+
+  Pace.track = function() {
+    var args, fn, ret;
+    fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    ignoreStack.unshift('track');
+    ret = fn.apply(null, args);
+    ignoreStack.shift();
+    return ret;
+  };
+
+  shouldTrack = function(method) {
+    var _ref1;
+    if (method == null) {
+      method = 'GET';
+    }
+    if (ignoreStack[0] === 'track') {
+      return 'force';
+    }
+    if (!ignoreStack.length && options.ajax) {
+      if (method === 'socket' && options.ajax.trackWebSockets) {
+        return true;
+      } else if (_ref1 = method.toUpperCase(), __indexOf.call(options.ajax.trackMethods, _ref1) >= 0) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   RequestIntercept = (function(_super) {
     __extends(RequestIntercept, _super);
 
@@ -288,8 +326,7 @@
         var _open;
         _open = req.open;
         return req.open = function(type, url, async) {
-          var _ref1;
-          if (_ref1 = (type != null ? type : 'GET').toUpperCase(), __indexOf.call(options.ajax.trackMethods, _ref1) >= 0) {
+          if (shouldTrack(type)) {
             _this.trigger('request', {
               type: type,
               url: url,
@@ -319,12 +356,14 @@
         window.WebSocket = function(url, protocols) {
           var req;
           req = new _WebSocket(url, protocols);
-          _this.trigger('request', {
-            type: 'socket',
-            url: url,
-            protocols: protocols,
-            request: req
-          });
+          if (shouldTrack('socket')) {
+            _this.trigger('request', {
+              type: 'socket',
+              url: url,
+              protocols: protocols,
+              request: req
+            });
+          }
           return req;
         };
         extendNative(window.WebSocket, _WebSocket);
@@ -344,38 +383,40 @@
     return _intercept;
   };
 
-  if (options.restartOnRequestAfter !== false) {
-    getIntercept().on('request', function(_arg) {
-      var args, request, type;
-      type = _arg.type, request = _arg.request;
-      if (!Pace.running) {
-        args = arguments;
-        return setTimeout(function() {
-          var source, stillActive, _i, _len, _ref1, _ref2, _results;
-          if (type === 'socket') {
-            stillActive = request.readyState < 2;
-          } else {
-            stillActive = (0 < (_ref1 = request.readyState) && _ref1 < 4);
-          }
-          if (stillActive) {
-            Pace.restart();
-            _ref2 = Pace.sources;
-            _results = [];
-            for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-              source = _ref2[_i];
-              if (source instanceof AjaxMonitor) {
-                source.watch.apply(source, args);
-                break;
-              } else {
-                _results.push(void 0);
-              }
-            }
-            return _results;
-          }
-        }, options.restartOnRequestAfter);
+  getIntercept().on('request', function(_arg) {
+    var after, args, request, type;
+    type = _arg.type, request = _arg.request;
+    if (!Pace.running && (options.restartOnRequestAfter !== false || shouldTrack(type) === 'force')) {
+      args = arguments;
+      after = options.restartOnRequestAfter || 0;
+      if (typeof after === 'boolean') {
+        after = 0;
       }
-    });
-  }
+      return setTimeout(function() {
+        var source, stillActive, _i, _len, _ref1, _ref2, _results;
+        if (type === 'socket') {
+          stillActive = request.readyState < 2;
+        } else {
+          stillActive = (0 < (_ref1 = request.readyState) && _ref1 < 4);
+        }
+        if (stillActive) {
+          Pace.restart();
+          _ref2 = Pace.sources;
+          _results = [];
+          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+            source = _ref2[_i];
+            if (source instanceof AjaxMonitor) {
+              source.watch.apply(source, args);
+              break;
+            } else {
+              _results.push(void 0);
+            }
+          }
+          return _results;
+        }
+      }, after);
+    }
+  });
 
   AjaxMonitor = (function() {
     function AjaxMonitor() {
