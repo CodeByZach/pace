@@ -377,6 +377,22 @@
                 letter-spacing: 2px;
             }
 
+            .themes a.author, .themes a:hover.author {
+                margin: -1em 0;
+                display: block;
+                font-size: .5rem;
+                color: #888;
+            }
+
+            .themes a:hover.author {
+                color: #444;
+            }
+
+            .themes a.author:before {
+                content: "by: ";
+                color: #ccc;
+            }
+
             a.button {
                 padding: 0.5rem 1rem;
                 color: #fff;
@@ -436,43 +452,55 @@
 
                         var themes = [{
                             name: 'minimal',
-                            title: 'Minimal'
+                            title: 'Minimal',
+                            author: 'adamschwartz'
                         }, {
                             name: 'flash',
-                            title: 'Flash'
+                            title: 'Flash',
+                            author: 'adamschwartz'
                         }, {
                             name: 'barber-shop',
-                            title: 'Barber Shop'
+                            title: 'Barber Shop',
+                            author: 'adamschwartz'
                         }, {
                             name: 'mac-osx',
-                            title: 'Mac OSX'
+                            title: 'Mac OSX',
+                            author: 'adamschwartz'
                         }, {
                             name: 'fill-left',
-                            title: 'Fill Left'
+                            title: 'Fill Left',
+                            author: 'adamschwartz'
                         }, {
                             name: 'flat-top',
-                            title: 'Flat Top'
+                            title: 'Flat Top',
+                            author: 'adamschwartz'
                         }, {
                             name: 'big-counter',
-                            title: 'Big Counter'
+                            title: 'Big Counter',
+                            author: 'adamschwartz'
                         }, {
                             name: 'corner-indicator',
-                            title: 'Corner Indicator'
+                            title: 'Corner Indicator',
+                            author: 'adamschwartz'
                         }, {
                             name: 'bounce',
-                            title: 'Bounce'
+                            title: 'Bounce',
+                            author: 'adamschwartz'
                         }, {
                             name: 'center-circle',
-                            title: 'Center Circle'
+                            title: 'Center Circle',
+                            author: 'adamschwartz'
                         }, {
                             name: 'loading-bar',
-                            title: 'Loading Bar'
+                            title: 'Loading Bar',
+                            author: 'gavJackson'
                         }];
 
                         var init = function() {
                             $.each(themes, function(i, theme){
                                 $('.themes').append('<div class="theme ' + (i % 2 === 0 ? 'even' : 'odd') + '">'+
                                     '<h3>' + theme.title + '</h3>' +
+                                    (theme.author ? '<br/><a class="author" href="https://github.com/' + theme.author + '" target="_blank" rel="nofollow">@' + theme.author + '</a></h4>' : '') +
                                     '<p><a href="#" class="download-link" data-theme="' + theme.name + '">download</a></p>'+
                                     '<div class="browser"><iframe data-theme="' + theme.name + '"></iframe></div>' +
                                 '</div>');
