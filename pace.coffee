@@ -13,7 +13,7 @@ defaultOptions =
 
   # What is the minimum amount of time the bar should sit after the last
   # update before disappearing
-  ghostTime: 250
+  ghostTime: 500
 
   # Its easy for a bunch of the bar to be eaten in the first few frames
   # before we know how much there is to load.  This limits how much of

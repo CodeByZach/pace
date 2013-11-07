@@ -162,7 +162,7 @@ whenever `pushState` or `replaceState` is called by default.
 
 - `Pace.stop`: Hide the progress bar and stop updating it.
 
-- `Pace.track': Explicitly track one or more requests, see Tracking below
+- `Pace.track`: Explicitly track one or more requests, see Tracking below
 
 - `Pace.ignore`: Expliticly ignore one or more requests, see Tracking below
 

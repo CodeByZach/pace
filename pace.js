@@ -9,7 +9,7 @@
     catchupTime: 500,
     initialRate: .03,
     minTime: 500,
-    ghostTime: 250,
+    ghostTime: 500,
     maxProgressPerFrame: 10,
     easeFactor: 1.25,
     startOnPageLoad: true,
