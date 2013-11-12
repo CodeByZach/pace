@@ -95,8 +95,8 @@ changes look smooth to the user.</p>
 <p>Elements being rendered to the screen is one way for us to decide that the page has been
 rendered.  If you would like to use that source of information (not required at all),
 specify one or more selectors.  You can comma seperate the selectors to propertly handle
-error states, where the progress bar should disappear, but the element were looking for
-may never apper:</p>
+error states, where the progress bar should disappear, but the element we are looking for
+may never appear:</p>
 <pre><code class="lang-javascript">paceOptions = {
   elements: {
     selectors: [<span class="string">'.timeline,.timeline-error'</span>, <span class="string">'.user-profile,.profile-error'</span>]
@@ -128,7 +128,30 @@ whenever <code>pushState</code> or <code>replaceState</code> is called by defaul
 </li>
 <li><p><code>Pace.stop</code>: Hide the progress bar and stop updating it.</p>
 </li>
+<li><p><code>Pace.track</code>: Explicitly track one or more requests, see Tracking below</p>
+</li>
+<li><p><code>Pace.ignore</code>: Expliticly ignore one or more requests, see Tracking below</p>
+</li>
 </ul>
+<h2>Tracking</h2>
+<p>By default, Pace will show any ajax requests which begin as a part of a normal or ajax-y page load, or which last longer than
+500ms.</p>
+<p>You can disable all ajax tracking by setting <code>ajax</code> to false:</p>
+<pre><code class="lang-javascript">Pace.options = {
+  ajax: <span class="literal">false</span>
+}</code></pre>
+<p>You can disable ajax tracking except on page navigation by setting <code>restartOnRequestAfter</code> to false:</p>
+<pre><code class="lang-javascript">Pace.options = {
+  restartOnRequestAfter: <span class="literal">false</span>
+}</code></pre>
+<p>You can manually disable tracking for a specific request or requests by triggering them within a <code>Pace.ignore</code> callback:</p>
+<pre><code class="lang-javascript">Pace.ignore(<span class="keyword">function</span>(){
+  $.ajax(...)
+});</code></pre>
+<p>You can force the progress bar to be shown for a specific request by triggering them within a <code>Pace.track</code> callback:</p>
+<pre><code class="lang-javascript">Pace.track(<span class="keyword">function</span>(){
+  $.ajax(...)
+});</code></pre>
 <h2>Dependencies</h2>
 <p>None!</p>
 <h2>Support</h2>
@@ -139,7 +162,7 @@ please create an issue.</p>
 <p>pace.js is 4kb minified and gzipped.  The themes vary between 0.5 and 4kb.</p>
 <h2>Issues</h2>
 <p>We have obviously not tested this on every website.  If you run into an issue, or find a way the automatic
-detection could be better, please create an Issue.  If you can include a test case, that&#39;s even better.</p>
+detection could be better, please <a href="https://github.com/HubSpot/pace/issues/new">create an Issue</a>.  If you can include a test case, that&#39;s even better.</p>
 <h2>Contributing</h2>
 <p>PRs Welcome!</p>
 <p>Building requires node.js.</p>

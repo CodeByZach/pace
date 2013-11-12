@@ -94,7 +94,7 @@ update before disappearing</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  ghostTime: <span class="number">250</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  ghostTime: <span class="number">500</span></pre></div></div>
             
         </li>
         
@@ -502,7 +502,33 @@ _WebSocket = window.WebSocket
 
       <span class="keyword">if</span> <span class="keyword">not</span> to[key]? <span class="keyword">and</span> <span class="keyword">typeof</span> val <span class="keyword">isnt</span> <span class="string">'function'</span>
         to[key] = val
-    <span class="keyword">catch</span> e</pre></div></div>
+    <span class="keyword">catch</span> e
+
+ignoreStack = []
+
+Pace.<span class="function"><span class="title">ignore</span></span> = (fn, args...) -&gt;
+  ignoreStack.unshift <span class="string">'ignore'</span>
+  ret = fn(args...)
+  ignoreStack.shift()
+  ret
+
+Pace.<span class="function"><span class="title">track</span></span> = (fn, args...) -&gt;
+  ignoreStack.unshift <span class="string">'track'</span>
+  ret = fn(args...)
+  ignoreStack.shift()
+  ret
+
+<span class="function"><span class="title">shouldTrack</span></span> = (method=<span class="string">'GET'</span>) -&gt;
+  <span class="keyword">if</span> ignoreStack[<span class="number">0</span>] <span class="keyword">is</span> <span class="string">'track'</span>
+    <span class="keyword">return</span> <span class="string">'force'</span>
+  
+  <span class="keyword">if</span> <span class="keyword">not</span> ignoreStack.length <span class="keyword">and</span> options.ajax
+    <span class="keyword">if</span> method <span class="keyword">is</span> <span class="string">'socket'</span> <span class="keyword">and</span> options.ajax.trackWebSockets
+      <span class="keyword">return</span> <span class="literal">true</span>
+    <span class="keyword">else</span> <span class="keyword">if</span> method.toUpperCase() <span class="keyword">in</span> options.ajax.trackMethods
+      <span class="keyword">return</span> <span class="literal">true</span>
+
+  <span class="keyword">return</span> <span class="literal">false</span></pre></div></div>
             
         </li>
         
@@ -524,7 +550,7 @@ _WebSocket = window.WebSocket
     <span class="function"><span class="title">monitorXHR</span></span> = (req) =&gt;
       _open = req.open
       req.<span class="function"><span class="title">open</span></span> = (type, url, async) =&gt;
-        <span class="keyword">if</span> (type ? <span class="string">'GET'</span>).toUpperCase() <span class="keyword">in</span> options.ajax.trackMethods
+        <span class="keyword">if</span> shouldTrack(type)
           <span class="property">@trigger</span> <span class="string">'request'</span>, {type, url, request: req}
 
         _open.apply req, arguments
@@ -552,7 +578,8 @@ _WebSocket = window.WebSocket
       window.<span class="function"><span class="title">WebSocket</span></span> = (url, protocols) =&gt;
         req = <span class="keyword">new</span> _WebSocket(url, protocols)
 
-        <span class="property">@trigger</span> <span class="string">'request'</span>, {type: <span class="string">'socket'</span>, url, protocols, request: req}
+        <span class="keyword">if</span> shouldTrack(<span class="string">'socket'</span>)
+          <span class="property">@trigger</span> <span class="string">'request'</span>, {type: <span class="string">'socket'</span>, url, protocols, request: req}
 
         req
 
@@ -562,9 +589,7 @@ _intercept = <span class="literal">null</span>
 <span class="function"><span class="title">getIntercept</span></span> = -&gt;
   <span class="keyword">if</span> <span class="keyword">not</span> _intercept?
     _intercept = <span class="keyword">new</span> RequestIntercept
-  _intercept
-
-<span class="keyword">if</span> options.restartOnRequestAfter <span class="keyword">isnt</span> <span class="literal">false</span></pre></div></div>
+  _intercept</pre></div></div>
             
         </li>
         
@@ -582,24 +607,28 @@ start will have created.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  getIntercept().<span class="literal">on</span> <span class="string">'request'</span>, ({type, request}) -&gt;
-    <span class="keyword">if</span> <span class="keyword">not</span> Pace.running
-      args = arguments
+            <div class="content"><div class='highlight'><pre>getIntercept().<span class="literal">on</span> <span class="string">'request'</span>, ({type, request}) -&gt;
+  <span class="keyword">if</span> <span class="keyword">not</span> Pace.running <span class="keyword">and</span> (options.restartOnRequestAfter <span class="keyword">isnt</span> <span class="literal">false</span> <span class="keyword">or</span> shouldTrack(type) <span class="keyword">is</span> <span class="string">'force'</span>)
+    args = arguments
 
-      setTimeout -&gt;
-        <span class="keyword">if</span> type <span class="keyword">is</span> <span class="string">'socket'</span>
-          stillActive = request.readyState &lt; <span class="number">2</span>
-        <span class="keyword">else</span>
-          stillActive = <span class="number">0</span> &lt; request.readyState &lt; <span class="number">4</span>
+    after = options.restartOnRequestAfter <span class="keyword">or</span> <span class="number">0</span>
+    <span class="keyword">if</span> <span class="keyword">typeof</span> after <span class="keyword">is</span> <span class="string">'boolean'</span>
+      after = <span class="number">0</span>
 
-        <span class="keyword">if</span> stillActive
-          Pace.restart()
+    setTimeout -&gt;
+      <span class="keyword">if</span> type <span class="keyword">is</span> <span class="string">'socket'</span>
+        stillActive = request.readyState &lt; <span class="number">2</span>
+      <span class="keyword">else</span>
+        stillActive = <span class="number">0</span> &lt; request.readyState &lt; <span class="number">4</span>
 
-          <span class="keyword">for</span> source <span class="keyword">in</span> Pace.sources
-            <span class="keyword">if</span> source <span class="keyword">instanceof</span> AjaxMonitor
-              source.watch args...
-              <span class="keyword">break</span>
-      , options.restartOnRequestAfter
+      <span class="keyword">if</span> stillActive
+        Pace.restart()
+
+        <span class="keyword">for</span> source <span class="keyword">in</span> Pace.sources
+          <span class="keyword">if</span> source <span class="keyword">instanceof</span> AjaxMonitor
+            source.watch args...
+            <span class="keyword">break</span>
+    , after
 
 <span class="class"><span class="keyword">class</span> <span class="title">AjaxMonitor</span></span>
   constructor: -&gt;
