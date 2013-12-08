@@ -55,10 +55,14 @@
     tick = function() {
       var diff;
       diff = now() - last;
-      last = now();
-      return fn(diff, function() {
-        return requestAnimationFrame(tick);
-      });
+      if (diff >= 33) {
+        last = now();
+        return fn(diff, function() {
+          return requestAnimationFrame(tick);
+        });
+      } else {
+        return setTimeout(tick, 33 - diff);
+      }
     };
     return tick();
   };

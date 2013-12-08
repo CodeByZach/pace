@@ -86,10 +86,15 @@ runAnimation = (fn) ->
   last = now()
   tick = ->
     diff = now() - last
-    last = now()
 
-    fn diff, ->
-      requestAnimationFrame tick
+    if diff >= 33
+      # Don't run faster than 30 fps
+
+      last = now()
+      fn diff, ->
+        requestAnimationFrame tick
+    else
+      setTimeout tick, (33 - diff)
 
   tick()
 
