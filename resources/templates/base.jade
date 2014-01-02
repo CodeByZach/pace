@@ -1,0 +1,46 @@
+doctype 5
+
+html
+    head
+        meta(charset="utf-8")
+        meta(http-equiv="X-UA-Compatible", content="chrome=1")
+        meta(name="viewport", content="width=device-width, initial-scale=1, user-scalable=no")
+
+        title= name
+
+        block early-head
+
+        link(rel="icon", href="http://static.hubspot.com/favicon.ico")
+
+        link(rel="stylesheet", href="https://static2cdn.hubspot.com/hubspot_public_assets/static-1.112/shared/sass/hubspot_public_assets.css")
+        link(rel="stylesheet", href="https://static.hubspot.com/bundles/navigation.css")
+
+        link(rel="stylesheet", href="/static-resources/css/print.css")
+        link(rel="stylesheet", href="/static-resources/css/highlight-theme-github.css")
+        link(rel="stylesheet", href="/static-resources/css/navigation-tweaks.css")
+        link(rel="stylesheet", href="/static-resources/css/documentation.css")
+
+        script(src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js")
+
+        link(rel='stylesheet', href='/#{ repo.name }/#{ root }/resources/executr/lib/CodeMirror/codemirror.css')
+        link(rel='stylesheet', href='/#{ repo.name }/#{ root }/resources/executr/build/css/executr.css')
+        script(src='/#{ repo.name }/#{ root }/resources/executr/lib/CodeMirror/codemirror.js')
+        script(src='/#{ repo.name }/#{ root }/resources/executr/lib/CodeMirror/mode/coffeescript/coffeescript.js')
+        script(src='/#{ repo.name }/#{ root }/resources/executr/lib/CodeMirror/mode/javascript/javascript.js')
+        script(src='/#{ repo.name }/#{ root }/resources/executr/lib/coffee-script.js')
+        script(src='/#{ repo.name }/#{ root }/resources/executr/lib/underscore.min.js')
+        script(src='/#{ repo.name }/#{ root }/resources/executr/lib/js2coffee.min.js')
+        script(src='/#{ repo.name }/#{ root }/resources/executr/build/js/executr.js')
+        script(src='/#{ repo.name }/#{ root }/resources/executr/build/js/executr-run.js')
+
+        script(src="//use.typekit.net/jbn8qxr.js")
+        script
+            try{Typekit.load();}catch(e){}
+
+    body
+        include includes/topbar.html
+
+        block content
+
+        include includes/footer
+        include includes/analytics.html

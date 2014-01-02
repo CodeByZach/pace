@@ -9,6 +9,7 @@
         <meta http-equiv="X-UA-Compatible" content="chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
         <title>PACE — Automatic page load progress bars</title>
+        <meta name="description" content="Pace is a Javascript and CSS library to automatically add beautiful progress and activity indicators for page loads and ajax navigation. It is free and open source and was developed by HubSpot developers Adam Schwartz (@adamfschwartz) and Zack Bloom (@zackbloom).">
         <link rel="icon" href="http://static.hubspot.com/favicon.ico">
         <script type="text/javascript" src="//use.typekit.net/jbn8qxr.js"></script>
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
@@ -376,6 +377,22 @@
                 letter-spacing: 2px;
             }
 
+            .themes a.author, .themes a:hover.author {
+                margin: -1em 0;
+                display: block;
+                font-size: .5rem;
+                color: #888;
+            }
+
+            .themes a:hover.author {
+                color: #444;
+            }
+
+            .themes a.author:before {
+                content: "by: ";
+                color: #ccc;
+            }
+
             a.button {
                 padding: 0.5rem 1rem;
                 color: #fff;
@@ -412,11 +429,11 @@
         <div class="section">
             <div class="page">
                 <h2>What is Pace?</h2>
-                <p style="text-align: left">Include pace.js and the theme css of your choice, and you get a beautiful progress indicator for your page load and ajax navigation.</p>
+                <p style="text-align: left">Include pace.js and a CSS theme of your choice, and you get a beautiful progress indicator for your page load and ajax navigation.</p>
                 <p style="text-align: left">No need to hook into any of your code, progress is detected automatically.</p>
                 <br/>
                 <h2>Download</h2>
-                <p><a class="button" href="https://raw.github.com/HubSpot/pace/v0.4.13/pace.min.js">Pace.js</a></p>
+                <p><a class="button" href="https://raw.github.com/HubSpot/pace/v0.4.16/pace.min.js">Pace.js</a></p>
                 <br/>
                 <h2>Themes</h2>
                 <label class="color-label" for="color-select">Enter a color:</label>
@@ -435,37 +452,59 @@
 
                         var themes = [{
                             name: 'minimal',
-                            title: 'Minimal'
+                            title: 'Minimal',
+                            author: 'adamschwartz'
                         }, {
                             name: 'flash',
-                            title: 'Flash'
+                            title: 'Flash',
+                            author: 'adamschwartz'
                         }, {
                             name: 'barber-shop',
-                            title: 'Barber Shop'
+                            title: 'Barber Shop',
+                            author: 'adamschwartz'
                         }, {
                             name: 'mac-osx',
-                            title: 'Mac OSX'
+                            title: 'Mac OSX',
+                            author: 'adamschwartz'
                         }, {
                             name: 'fill-left',
-                            title: 'Fill Left'
+                            title: 'Fill Left',
+                            author: 'adamschwartz'
                         }, {
                             name: 'flat-top',
-                            title: 'Flat Top'
+                            title: 'Flat Top',
+                            author: 'adamschwartz'
                         }, {
                             name: 'big-counter',
-                            title: 'Big Counter'
+                            title: 'Big Counter',
+                            author: 'adamschwartz'
                         }, {
                             name: 'corner-indicator',
-                            title: 'Corner Indicator'
+                            title: 'Corner Indicator',
+                            author: 'adamschwartz'
                         }, {
                             name: 'bounce',
-                            title: 'Bounce'
+                            title: 'Bounce',
+                            author: 'adamschwartz'
+                        }, {
+                            name: 'center-circle',
+                            title: 'Center Circle',
+                            author: 'adamschwartz'
+                        }, {
+                            name: 'loading-bar',
+                            title: 'Loading Bar',
+                            author: 'gavJackson'
+                        }, {
+                            name: 'center-radar',
+                            title: 'Center Radar',
+                            author: 'kennyglenn'
                         }];
 
                         var init = function() {
                             $.each(themes, function(i, theme){
                                 $('.themes').append('<div class="theme ' + (i % 2 === 0 ? 'even' : 'odd') + '">'+
                                     '<h3>' + theme.title + '</h3>' +
+                                    (theme.author ? '<br/><a class="author" href="https://github.com/' + theme.author + '" target="_blank" rel="nofollow">@' + theme.author + '</a></h4>' : '') +
                                     '<p><a href="#" class="download-link" data-theme="' + theme.name + '">download</a></p>'+
                                     '<div class="browser"><iframe data-theme="' + theme.name + '"></iframe></div>' +
                                 '</div>');
@@ -514,7 +553,7 @@
                                 doc.open();
                                 doc.write('' +
                                     '<div class="pace">' +
-                                        '<div class="pace-progress" data-progress="50%" style="width: 50%;">' +
+                                        '<div class="pace-progress" data-progress="50" data-progress-text="50%" style="width: 50%;">' +
                                             '<div class="pace-progress-inner"></div>' +
                                         '</div>' +
                                         '<div class="pace-activity"></div>' +
@@ -567,7 +606,7 @@
             </div>
         </div>
 
-        <script>document.body.className = 'page-loaded';</script>
+        <script>setTimeout(function(){ document.body.className = 'page-loaded' }, 0);</script>
 
         <!-- Share -->
 
@@ -633,6 +672,16 @@
             })(document,"script","hs-analytics",300000);
         </script>
         <!-- End of Async HubSpot Analytics Code -->
+
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-45159009-1', 'hubspot.com');
+          ga('send', 'pageview');
+        </script>
 
         <!-- Force 3d acceleration always and forever :) -->
         <div style="-webkit-transform: translateZ(0)"></div>

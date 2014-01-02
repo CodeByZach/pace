@@ -1,0 +1,25 @@
+.hs-doc-sidenav
+
+  nav
+
+    ul.hs-public-sidenav
+
+      li(class=(index == path ? 'current-nav-item' : ''))
+        a(href=linkPrefix) Home
+
+      each group, name in docs
+        if name
+          li
+            b= name
+
+        each doc in group
+          li(class=(doc.fullPath == path ? 'current-nav-item' : ''))
+            a(href=linkPrefix + doc.link)= doc.displayPath
+
+      if sources.length
+        li
+          b Annotated source
+
+        each file in sources
+          li
+            a(target="_blank", href=linkPrefix + file.link)= file.displayPath
