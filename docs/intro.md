@@ -166,6 +166,23 @@ whenever `pushState` or `replaceState` is called by default.
 
 - `Pace.ignore`: Expliticly ignore one or more requests, see Tracking below
 
+Events
+------
+
+Pace fires the following events:
+
+- `start`: When pace is initially started, or as a part of a restart
+- `stop`: When pace is manually stopped, or as a part of a restart
+- `restart`: When pace is restarted (manually, or by a new AJAX request)
+- `done`: When pace is finished
+- `hide`: When the pace is hidden (can be later than `done`, based on `ghostTime` and `minTime`)
+
+You can bind onto events using the `on`, `off` and `once` methods:
+
+- `Pace.on(event, handler, [context])`: Call `handler` (optionally with context) when `event` is triggered
+- `Pace.off(event, [handler])`: Unbind the provided `event` and `handler` combination.
+- `Pace.once(event, handler, [context])`: Bind `handler` to the next (and only the next) incidence of `event`
+
 Tracking
 --------
 

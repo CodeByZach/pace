@@ -1,5 +1,5 @@
 (function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, ignoreStack, init, now, options, requestAnimationFrame, result, runAnimation, scalers, shouldTrack, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _intercept, _pushState, _ref, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Evented, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, ignoreStack, init, now, options, requestAnimationFrame, result, runAnimation, scalers, shouldTrack, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _intercept, _pushState, _ref, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -132,9 +132,80 @@
     }
   };
 
+  Evented = (function() {
+    function Evented() {}
+
+    Evented.prototype.on = function(event, handler, ctx, once) {
+      var _base;
+      if (once == null) {
+        once = false;
+      }
+      if (this.bindings == null) {
+        this.bindings = {};
+      }
+      if ((_base = this.bindings)[event] == null) {
+        _base[event] = [];
+      }
+      return this.bindings[event].push({
+        handler: handler,
+        ctx: ctx,
+        once: once
+      });
+    };
+
+    Evented.prototype.once = function(event, handler, ctx) {
+      return this.on(event, handler, ctx, true);
+    };
+
+    Evented.prototype.off = function(event, handler) {
+      var i, _ref, _results;
+      if (((_ref = this.bindings) != null ? _ref[event] : void 0) == null) {
+        return;
+      }
+      if (handler == null) {
+        return delete this.bindings[event];
+      } else {
+        i = 0;
+        _results = [];
+        while (i < this.bindings[event].length) {
+          if (this.bindings[event][i].handler === handler) {
+            _results.push(this.bindings[event].splice(i, 1));
+          } else {
+            _results.push(i++);
+          }
+        }
+        return _results;
+      }
+    };
+
+    Evented.prototype.trigger = function() {
+      var args, ctx, event, handler, i, once, _ref, _ref1, _results;
+      event = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      if ((_ref = this.bindings) != null ? _ref[event] : void 0) {
+        i = 0;
+        _results = [];
+        while (i < this.bindings[event].length) {
+          _ref1 = this.bindings[event][i], handler = _ref1.handler, ctx = _ref1.ctx, once = _ref1.once;
+          handler.apply(ctx != null ? ctx : this, args);
+          if (once) {
+            _results.push(this.bindings[event].splice(i, 1));
+          } else {
+            _results.push(i++);
+          }
+        }
+        return _results;
+      }
+    };
+
+    return Evented;
+
+  })();
+
   if (window.Pace == null) {
     window.Pace = {};
   }
+
+  extend(Pace, Evented.prototype);
 
   options = Pace.options = extend(defaultOptions, window.paceOptions, getFromDOM());
 
@@ -715,6 +786,7 @@
   })();
 
   Pace.stop = function() {
+    Pace.trigger('stop');
     Pace.running = false;
     bar.destroy();
     cancelAnimation = true;
@@ -728,12 +800,14 @@
   };
 
   Pace.restart = function() {
+    Pace.trigger('restart');
     Pace.stop();
     return Pace.start();
   };
 
   Pace.go = function() {
     Pace.running = true;
+    Pace.trigger('go');
     bar.render();
     cancelAnimation = false;
     return animation = runAnimation(function(frameTime, enqueueNextFrame) {
@@ -761,9 +835,11 @@
       start = now();
       if (bar.done() || done || cancelAnimation) {
         bar.update(100);
+        Pace.trigger('done');
         return setTimeout(function() {
           bar.finish();
-          return Pace.running = false;
+          Pace.running = false;
+          return Pace.trigger('hide');
         }, Math.max(options.ghostTime, Math.min(options.minTime, now() - start)));
       } else {
         return enqueueNextFrame();
@@ -774,6 +850,7 @@
   Pace.start = function(_options) {
     extend(options, _options);
     Pace.running = true;
+    Pace.trigger('start');
     try {
       bar.render();
     } catch (_error) {

@@ -135,7 +135,44 @@ getFromDOM = (key='options', json=true) ->
   catch e
     console?.error "Error parsing inline pace options", e
 
+class Evented
+  on: (event, handler, ctx, once=false) ->
+    @bindings ?= {}
+    @bindings[event] ?= []
+    @bindings[event].push {handler, ctx, once}
+
+  once: (event, handler, ctx) ->
+    @on(event, handler, ctx, true)
+
+  off: (event, handler) ->
+    return unless @bindings?[event]?
+
+    if not handler?
+      delete @bindings[event]
+    else
+      i = 0
+      while i < @bindings[event].length
+        if @bindings[event][i].handler is handler
+          @bindings[event].splice i, 1
+        else
+          i++
+
+  trigger: (event, args...) ->
+    if @bindings?[event]
+      i = 0
+      while i < @bindings[event].length
+        {handler, ctx, once} = @bindings[event][i]
+
+        handler.apply(ctx ? @, args)
+
+        if once
+          @bindings[event].splice i, 1
+        else
+          i++
+
 window.Pace ?= {}
+
+extend Pace, Evented::
 
 options = Pace.options = extend defaultOptions, window.paceOptions, getFromDOM()
 
@@ -572,6 +609,7 @@ do init = ->
   uniScaler = new Scaler
 
 Pace.stop = ->
+  Pace.trigger 'stop'
   Pace.running = false
 
   bar.destroy()
@@ -586,6 +624,7 @@ Pace.stop = ->
   init()
 
 Pace.restart = ->
+  Pace.trigger 'restart'
   Pace.stop()
   Pace.start()
 
@@ -632,10 +671,14 @@ Pace.go = ->
     if bar.done() or done or cancelAnimation
       bar.update 100
 
+      Pace.trigger 'done'
+
       setTimeout ->
         bar.finish()
 
         Pace.running = false
+
+        Pace.trigger 'hide'
       , Math.max(options.ghostTime, Math.min(options.minTime, now() - start))
     else
       enqueueNextFrame()
@@ -653,6 +696,7 @@ Pace.start = (_options) ->
   if not document.querySelector('.pace')
     setTimeout Pace.start, 50
   else
+    Pace.trigger 'start'
     Pace.go()
 
 if typeof define is 'function' and define.amd
