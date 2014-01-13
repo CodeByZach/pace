@@ -174,7 +174,12 @@ window.Pace ?= {}
 
 extend Pace, Evented::
 
-options = Pace.options = extend defaultOptions, window.paceOptions, getFromDOM()
+options = Pace.options = extend {}, defaultOptions, window.paceOptions, getFromDOM()
+
+for source in ['ajax', 'document', 'eventLag', 'elements']
+  # true enables them without configuration, so we grab the config from the defaults
+  if options[source] is true
+    options[source] = defaultOptions[source]
 
 class NoTargetError extends Error
 
