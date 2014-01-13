@@ -1,7 +1,7 @@
 pace
 ====
 
-Include [pace.js](https://raw.github.com/HubSpot/pace/v0.4.16/pace.min.js) and the
+Include [pace.js](https://raw.github.com/HubSpot/pace/v0.4.17/pace.min.js) and the
 [theme](http://github.hubspot.com/pace/docs/welcome/) css of your choice on your page
 (as early as is possible), and you're done!
 
