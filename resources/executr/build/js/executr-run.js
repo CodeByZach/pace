@@ -1,5 +1,5 @@
 $(function(){
-    var codeSelector, switcherHTML, $docContent;
+    var codeSelector, switcherHTML, $docContent, options;
 
     codeSelector = 'pre code[data-type="coffeescript"], pre code[data-type="javascript"]';
 
@@ -20,10 +20,15 @@ $(function(){
         $docContent = $(codeSelector).first().parents('.hs-doc-content').first().append(switcherHTML);
     }
 
-    $('body').executr({
+    options = {
         codeSelector: codeSelector,
         codeMirrorOptions: {
             viewportMargin: Infinity
         }
-    });
+    };
+
+    if (window.EXECUTR_OPTIONS)
+        $.extend(true, options, EXECUTR_OPTIONS);
+
+    $('body').executr(options);
 });

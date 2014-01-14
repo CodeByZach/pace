@@ -304,74 +304,146 @@ how many samples we need before we consider a low number to mean completion.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    trackWebSockets: false
+            <div class="content"><div class='highlight'><pre>    trackWebSockets: <span class="literal">false</span>
 
-now = -&gt;
-  performance?.now?() ? +new Date
+<span class="function"><span class="title">now</span></span> = -&gt;
+  performance?.now?() ? +<span class="keyword">new</span> Date
 
-requestAnimationFrame = window.requestAnimationFrame or window.mozRequestAnimationFrame or
-                        window.webkitRequestAnimationFrame or window.msRequestAnimationFrame
+requestAnimationFrame = window.requestAnimationFrame <span class="keyword">or</span> window.mozRequestAnimationFrame <span class="keyword">or</span>
+                        window.webkitRequestAnimationFrame <span class="keyword">or</span> window.msRequestAnimationFrame
 
-cancelAnimationFrame = window.cancelAnimationFrame or window.mozCancelAnimationFrame
+cancelAnimationFrame = window.cancelAnimationFrame <span class="keyword">or</span> window.mozCancelAnimationFrame
 
-if not requestAnimationFrame?
-  requestAnimationFrame = (fn) -&gt;
-    setTimeout fn, 50
+<span class="keyword">if</span> <span class="keyword">not</span> requestAnimationFrame?
+  <span class="function"><span class="title">requestAnimationFrame</span></span> = (fn) -&gt;
+    setTimeout fn, <span class="number">50</span>
 
-  cancelAnimationFrame = (id) -&gt;
+  <span class="function"><span class="title">cancelAnimationFrame</span></span> = (id) -&gt;
     clearTimeout id
 
-runAnimation = (fn) -&gt;
+<span class="function"><span class="title">runAnimation</span></span> = (fn) -&gt;
   last = now()
-  tick = -&gt;
+  <span class="function"><span class="title">tick</span></span> = -&gt;
     diff = now() - last
-    last = now()
 
-    fn diff, -&gt;
-      requestAnimationFrame tick
+    <span class="keyword">if</span> diff &gt;= <span class="number">33</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>Don&#39;t run faster than 30 fps</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      last = now()
+      fn diff, -&gt;
+        requestAnimationFrame tick
+    <span class="keyword">else</span>
+      setTimeout tick, (<span class="number">33</span> - diff)
 
   tick()
 
-result = (obj, key, args...) -&gt;
-  if typeof obj[key] is 'function'
+<span class="function"><span class="title">result</span></span> = (obj, key, args...) -&gt;
+  <span class="keyword">if</span> <span class="keyword">typeof</span> obj[key] <span class="keyword">is</span> <span class="string">'function'</span>
     obj[key](args...)
-  else
+  <span class="keyword">else</span>
     obj[key]
 
-extend = (out, sources...) -&gt;
-  for source in sources when source
-    for own key, val of source
-      if out[key]? and typeof out[key] is 'object' and val? and typeof val is 'object'
+<span class="function"><span class="title">extend</span></span> = (out, sources...) -&gt;
+  <span class="keyword">for</span> source <span class="keyword">in</span> sources <span class="keyword">when</span> source
+    <span class="keyword">for</span> own key, val <span class="keyword">of</span> source
+      <span class="keyword">if</span> out[key]? <span class="keyword">and</span> <span class="keyword">typeof</span> out[key] <span class="keyword">is</span> <span class="string">'object'</span> <span class="keyword">and</span> val? <span class="keyword">and</span> <span class="keyword">typeof</span> val <span class="keyword">is</span> <span class="string">'object'</span>
         extend(out[key], val)
-      else
+      <span class="keyword">else</span>
         out[key] = val
   out
 
-avgAmplitude = (arr) -&gt;
-  sum = count = 0
-  for v in arr
+<span class="function"><span class="title">avgAmplitude</span></span> = (arr) -&gt;
+  sum = count = <span class="number">0</span>
+  <span class="keyword">for</span> v <span class="keyword">in</span> arr
     sum += Math.abs(v)
     count++
 
   sum / count
 
-getFromDOM = (key='options', json=true) -&gt;
-  el = document.querySelector "[data-pace-#{ key }]"
+<span class="function"><span class="title">getFromDOM</span></span> = (key=<span class="string">'options'</span>, json=<span class="literal">true</span>) -&gt;
+  el = document.querySelector <span class="string">"[data-pace-<span class="subst">#{ key }</span>]"</span>
 
-  return unless el
+  <span class="keyword">return</span> <span class="keyword">unless</span> el
 
-  data = el.getAttribute "data-pace-#{ key }"
+  data = el.getAttribute <span class="string">"data-pace-<span class="subst">#{ key }</span>"</span>
 
-  return data if not json
+  <span class="keyword">return</span> data <span class="keyword">if</span> <span class="keyword">not</span> json
 
-  try
-    return JSON.parse data
-  catch e
-    console?.error "Error parsing inline pace options", e
+  <span class="keyword">try</span>
+    <span class="keyword">return</span> JSON.parse data
+  <span class="keyword">catch</span> e
+    console?.error <span class="string">"Error parsing inline pace options"</span>, e
+
+<span class="class"><span class="keyword">class</span> <span class="title">Evented</span></span>
+  <span class="literal">on</span>: (event, handler, ctx, once=<span class="literal">false</span>) -&gt;
+    <span class="property">@bindings</span> ?= {}
+    <span class="property">@bindings</span>[event] ?= []
+    <span class="property">@bindings</span>[event].push {handler, ctx, once}
+
+  once: (event, handler, ctx) -&gt;
+    <span class="property">@on</span>(event, handler, ctx, <span class="literal">true</span>)
+
+  <span class="literal">off</span>: (event, handler) -&gt;
+    <span class="keyword">return</span> <span class="keyword">unless</span> <span class="property">@bindings</span>?[event]?
+
+    <span class="keyword">if</span> <span class="keyword">not</span> handler?
+      <span class="keyword">delete</span> <span class="property">@bindings</span>[event]
+    <span class="keyword">else</span>
+      i = <span class="number">0</span>
+      <span class="keyword">while</span> i &lt; <span class="property">@bindings</span>[event].length
+        <span class="keyword">if</span> <span class="property">@bindings</span>[event][i].handler <span class="keyword">is</span> handler
+          <span class="property">@bindings</span>[event].splice i, <span class="number">1</span>
+        <span class="keyword">else</span>
+          i++
+
+  trigger: (event, args...) -&gt;
+    <span class="keyword">if</span> <span class="property">@bindings</span>?[event]
+      i = <span class="number">0</span>
+      <span class="keyword">while</span> i &lt; <span class="property">@bindings</span>[event].length
+        {handler, ctx, once} = <span class="property">@bindings</span>[event][i]
+
+        handler.apply(ctx ? @, args)
+
+        <span class="keyword">if</span> once
+          <span class="property">@bindings</span>[event].splice i, <span class="number">1</span>
+        <span class="keyword">else</span>
+          i++
 
 window.Pace ?= {}
 
-options = Pace.options = extend defaultOptions, window.paceOptions, getFromDOM()
+extend Pace, Evented::
+
+options = Pace.options = extend {}, defaultOptions, window.paceOptions, getFromDOM()
+
+<span class="keyword">for</span> source <span class="keyword">in</span> [<span class="string">'ajax'</span>, <span class="string">'document'</span>, <span class="string">'eventLag'</span>, <span class="string">'elements'</span>]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>true enables them without configuration, so we grab the config from the defaults</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  if options[source] is true
+    options[source] = defaultOptions[source]
 
 class NoTargetError extends Error
 
@@ -439,11 +511,11 @@ class Bar
         </li>
         
         
-        <li id="section-19">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>The whole-part of the number has changed</p>
 
@@ -456,11 +528,11 @@ class Bar
         </li>
         
         
-        <li id="section-20">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>We cap it at 99 so we can use prefix-based attribute selectors</p>
 
@@ -533,11 +605,11 @@ Pace.<span class="function"><span class="title">track</span></span> = (fn, args.
         </li>
         
         
-        <li id="section-21">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>We should only ever instantiate one of these</p>
 
@@ -594,11 +666,11 @@ _intercept = <span class="literal">null</span>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p>If we want to start the progress bar
 on every request, we need to hear the request
@@ -653,11 +725,11 @@ start will have created.</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>We&#39;re dealing with a modern browser with progress event support</p>
 
@@ -672,11 +744,11 @@ start will have created.</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>If it&#39;s chunked encoding, we have no way of knowing the total length of the
 response, all we can do is increment the progress with backoff such that we
@@ -810,11 +882,11 @@ never hit 100% until it&#39;s done.</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>After we&#39;ve got a datapoint, we have catchupTime to
 get the progress bar to reflect that new data</p>
@@ -828,11 +900,11 @@ get the progress bar to reflect that new data</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p>Based on the rate of the last update, we preemptively update
 the progress bar, scaling it so it can never hit 100% until we
@@ -866,11 +938,11 @@ Pace.running = <span class="literal">false</span>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>We reset the bar whenever it looks like an ajax navigation has occured.</p>
 
@@ -911,11 +983,11 @@ SOURCE_KEYS =
         </li>
         
         
-        <li id="section-28">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>Each source of progress data has it&#39;s own scaler to smooth its output</p>
 
@@ -926,11 +998,11 @@ SOURCE_KEYS =
         </li>
         
         
-        <li id="section-29">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>We have an extra scaler for the final output to keep things looking nice as we add and
 remove sources</p>
@@ -940,6 +1012,7 @@ remove sources</p>
             <div class="content"><div class='highlight'><pre>  uniScaler = <span class="keyword">new</span> Scaler
 
 Pace.<span class="function"><span class="title">stop</span></span> = -&gt;
+  Pace.trigger <span class="string">'stop'</span>
   Pace.running = <span class="literal">false</span>
 
   bar.destroy()</pre></div></div>
@@ -947,11 +1020,11 @@ Pace.<span class="function"><span class="title">stop</span></span> = -&gt;
         </li>
         
         
-        <li id="section-30">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>Not all browsers support cancelAnimationFrame</p>
 
@@ -966,6 +1039,7 @@ Pace.<span class="function"><span class="title">stop</span></span> = -&gt;
   init()
 
 Pace.<span class="function"><span class="title">restart</span></span> = -&gt;
+  Pace.trigger <span class="string">'restart'</span>
   Pace.stop()
   Pace.start()
 
@@ -980,11 +1054,11 @@ Pace.<span class="function"><span class="title">go</span></span> = -&gt;
         </li>
         
         
-        <li id="section-31">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Every source gives us a progress number from 0 - 100
 It&#39;s up to us to figure out how to turn that into a smoothly moving bar</p>
@@ -1001,11 +1075,11 @@ between the numbers.</p>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>A source is composed of a bunch of elements, each with a raw, unscaled progress</p>
 
@@ -1019,11 +1093,11 @@ between the numbers.</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>Each element is given it&#39;s own scaler, which turns its value into something
 smoothed for display</p>
@@ -1048,10 +1122,14 @@ smoothed for display</p>
     <span class="keyword">if</span> bar.done() <span class="keyword">or</span> done <span class="keyword">or</span> cancelAnimation
       bar.update <span class="number">100</span>
 
+      Pace.trigger <span class="string">'done'</span>
+
       setTimeout -&gt;
         bar.finish()
 
         Pace.running = <span class="literal">false</span>
+
+        Pace.trigger <span class="string">'hide'</span>
       , Math.max(options.ghostTime, Math.min(options.minTime, now() - start))
     <span class="keyword">else</span>
       enqueueNextFrame()
@@ -1068,11 +1146,11 @@ Pace.<span class="function"><span class="title">start</span></span> = (_options)
         </li>
         
         
-        <li id="section-34">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>It&#39;s usually possible to render a bit before the document declares itself ready</p>
 
@@ -1081,6 +1159,7 @@ Pace.<span class="function"><span class="title">start</span></span> = (_options)
             <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> <span class="keyword">not</span> document.querySelector(<span class="string">'.pace'</span>)
     setTimeout Pace.start, <span class="number">50</span>
   <span class="keyword">else</span>
+    Pace.trigger <span class="string">'start'</span>
     Pace.go()
 
 <span class="keyword">if</span> <span class="keyword">typeof</span> define <span class="keyword">is</span> <span class="string">'function'</span> <span class="keyword">and</span> define.amd</pre></div></div>
@@ -1088,11 +1167,11 @@ Pace.<span class="function"><span class="title">start</span></span> = (_options)
         </li>
         
         
-        <li id="section-35">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>AMD</p>
 
@@ -1104,11 +1183,11 @@ Pace.<span class="function"><span class="title">start</span></span> = (_options)
         </li>
         
         
-        <li id="section-36">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>CommonJS</p>
 
@@ -1120,11 +1199,11 @@ Pace.<span class="function"><span class="title">start</span></span> = (_options)
         </li>
         
         
-        <li id="section-37">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>Global</p>
 

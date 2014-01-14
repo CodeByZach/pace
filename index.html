@@ -11,8 +11,13 @@
                     </a>
                 </li>
                 <li>
-                    <a href="http://hubspot.github.com">
+                    <a class="current-nav-item" href="http://hubspot.github.com">
                         Open Source
+                    </a>
+                </li>
+                <li>
+                    <a href="http://dev.hubspot.com/blog">
+                        Blog
                     </a>
                 </li>
             </ul>
@@ -24,8 +29,8 @@
         </div>
     </div>
 </div>
-<div class="hs-doc-marquee"><div class="hs-page-width-normal"><div class="row-fluid"><div class="span6"><h1>pace</h1><h3 class="hs-doc-marquee-description">Automatic page load progress bar</h3><p class="hs-doc-marquee-release">0.4.15</p><p class="hs-doc-marquee-stars"><iframe src="http://ghbtns.com/github-btn.html?user=HubSpot&repo=pace&type=watch&count=true&size=large" allowtransparency="true" frameborder="0" scrolling="0" width="240" height="30"></iframe></p></div><div class="span6"><div class="hs-doc-marquee-buttons"><a class="hs-doc-marquee-button" href="http://github.com/HubSpot/pace">Star on GitHub</a><a class="hs-doc-marquee-button" href="http://github.com/HubSpot/pace/archive/v0.4.15.zip">Download ZIP (v0.4.15)</a></div></div></div></div></div><div class="hs-page-width-normal"><div class="row-fluid"><div class="span3"><div class="hs-doc-sidenav"><nav><ul class="hs-public-sidenav"><li class="current-nav-item"><a href="">Home</a></li><li><b>Annotated source</b></li><li><a target="_blank" href="source/pace.html">pace.coffee</a></li></ul></nav></div></div><div class="span9"><div class="hs-doc-content"><h1>pace</h1>
-<p>Include <a href="https://raw.github.com/HubSpot/pace/v0.4.15/pace.min.js">pace.js</a> and the
+<div class="hs-doc-marquee"><div class="hs-page-width-normal"><div class="row-fluid"><div class="span6"><h1>pace</h1><h3 class="hs-doc-marquee-description">Automatic page load progress bar</h3><p class="hs-doc-marquee-release">0.4.17</p><p class="hs-doc-marquee-stars"><iframe src="http://ghbtns.com/github-btn.html?user=HubSpot&repo=pace&type=watch&count=true&size=large" allowtransparency="true" frameborder="0" scrolling="0" width="240" height="30"></iframe></p></div><div class="span6"><div class="hs-doc-marquee-buttons"><a class="hs-doc-marquee-button" href="http://github.com/HubSpot/pace">Star on GitHub</a><a class="hs-doc-marquee-button" href="http://github.com/HubSpot/pace/archive/v0.4.17.zip">Download ZIP (v0.4.17)</a></div></div></div></div></div><div class="hs-page-width-normal"><div class="row-fluid"><div class="span3"><div class="hs-doc-sidenav"><nav><ul class="hs-public-sidenav"><li class="current-nav-item"><a href="">Home</a></li><li><b>Annotated source</b></li><li><a target="_blank" href="source/pace.html">pace.coffee</a></li></ul></nav></div></div><div class="span9"><div class="hs-doc-content"><h1>pace</h1>
+<p>Include <a href="https://raw.github.com/HubSpot/pace/v0.4.17/pace.min.js">pace.js</a> and the
 <a href="http://github.hubspot.com/pace/docs/welcome/">theme</a> css of your choice on your page
 (as early as is possible), and you&#39;re done!</p>
 <p>Pace will automatically monitor your ajax requests, event loop lag, document
@@ -132,6 +137,21 @@ whenever <code>pushState</code> or <code>replaceState</code> is called by defaul
 </li>
 <li><p><code>Pace.ignore</code>: Expliticly ignore one or more requests, see Tracking below</p>
 </li>
+</ul>
+<h2>Events</h2>
+<p>Pace fires the following events:</p>
+<ul>
+<li><code>start</code>: When pace is initially started, or as a part of a restart</li>
+<li><code>stop</code>: When pace is manually stopped, or as a part of a restart</li>
+<li><code>restart</code>: When pace is restarted (manually, or by a new AJAX request)</li>
+<li><code>done</code>: When pace is finished</li>
+<li><code>hide</code>: When the pace is hidden (can be later than <code>done</code>, based on <code>ghostTime</code> and <code>minTime</code>)</li>
+</ul>
+<p>You can bind onto events using the <code>on</code>, <code>off</code> and <code>once</code> methods:</p>
+<ul>
+<li><code>Pace.on(event, handler, [context])</code>: Call <code>handler</code> (optionally with context) when <code>event</code> is triggered</li>
+<li><code>Pace.off(event, [handler])</code>: Unbind the provided <code>event</code> and <code>handler</code> combination.</li>
+<li><code>Pace.once(event, handler, [context])</code>: Bind <code>handler</code> to the next (and only the next) incidence of <code>event</code></li>
 </ul>
 <h2>Tracking</h2>
 <p>By default, Pace will show any ajax requests which begin as a part of a normal or ajax-y page load, or which last longer than

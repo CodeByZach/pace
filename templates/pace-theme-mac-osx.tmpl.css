@@ -65,6 +65,7 @@
   -moz-background-size: 28px 100%;
   -o-background-size: 28px 100%;
   background-size: 28px 100%;
+
   -webkit-animation: pace-stripe-animation 500ms linear infinite;
   -moz-animation: pace-stripe-animation 500ms linear infinite;
   -ms-animation: pace-stripe-animation 500ms linear infinite;
