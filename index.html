@@ -29,7 +29,7 @@
         </div>
     </div>
 </div>
-<div class="hs-doc-marquee"><div class="hs-page-width-normal"><div class="row-fluid"><div class="span6"><h1>pace</h1><h3 class="hs-doc-marquee-description">Automatic page load progress bar</h3><p class="hs-doc-marquee-release">0.4.17</p><p class="hs-doc-marquee-stars"><iframe src="http://ghbtns.com/github-btn.html?user=HubSpot&repo=pace&type=watch&count=true&size=large" allowtransparency="true" frameborder="0" scrolling="0" width="240" height="30"></iframe></p></div><div class="span6"><div class="hs-doc-marquee-buttons"><a class="hs-doc-marquee-button" href="http://github.com/HubSpot/pace">Star on GitHub</a><a class="hs-doc-marquee-button" href="http://github.com/HubSpot/pace/archive/v0.4.17.zip">Download ZIP (v0.4.17)</a></div></div></div></div></div><div class="hs-page-width-normal"><div class="row-fluid"><div class="span3"><div class="hs-doc-sidenav"><nav><ul class="hs-public-sidenav"><li class="current-nav-item"><a href="">Home</a></li><li><b>Annotated source</b></li><li><a target="_blank" href="source/pace.html">pace.coffee</a></li></ul></nav></div></div><div class="span9"><div class="hs-doc-content"><h1>pace</h1>
+<div class="hs-doc-marquee"><div class="hs-page-width-normal"><div class="row-fluid"><div class="span6"><h1>pace</h1><h3 class="hs-doc-marquee-description">Automatic page load progress bar</h3><p class="hs-doc-marquee-release">0.4.17</p><p class="hs-doc-marquee-stars"><iframe src="http://ghbtns.com/github-btn.html?user=HubSpot&repo=pace&type=watch&count=true&size=large" allowtransparency="true" frameborder="0" scrolling="0" width="240" height="30"></iframe></p></div><div class="span6"><div class="hs-doc-marquee-buttons"><a class="hs-doc-marquee-button" href="http://github.com/HubSpot/pace">Star on GitHub</a><a class="hs-doc-marquee-button" href="http://github.com/HubSpot/pace/archive/v0.4.17.zip">Download ZIP (v0.4.17)</a></div></div></div></div></div><div class="hs-page-width-normal"><div class="row-fluid"><div class="span3"><div class="hs-doc-sidenav"><nav><ul class="hs-public-sidenav"><li class="current-nav-item"><a href="">Home</a></li><li><b>Annotated source</b></li><li><a target="_blank" href="source/pace.html">pace.coffee</a></li></ul></nav></div></div><div class="span9"><div class="hs-doc-content"><h1 id="pace">pace</h1>
 <p>Include <a href="https://raw.github.com/HubSpot/pace/v0.4.17/pace.min.js">pace.js</a> and the
 <a href="http://github.hubspot.com/pace/docs/welcome/">theme</a> css of your choice on your page
 (as early as is possible), and you&#39;re done!</p>
@@ -38,12 +38,12 @@ ready state, and elements on your page to decide the progress.  On ajax navigati
 it will begin again!</p>
 <p>If you use AMD or Browserify, require in pace.js and call <code>pace.start()</code> as early in
 the loading process as is possible.</p>
-<h2>Example</h2>
+<h2 id="example">Example</h2>
 <pre><code class="lang-html"><span class="tag">&lt;<span class="title">head</span>&gt;</span>
   <span class="tag">&lt;<span class="title">script</span> <span class="attribute">src</span>=<span class="value">"/pace/pace.js"</span>&gt;</span><span class="javascript"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span>
   <span class="tag">&lt;<span class="title">link</span> <span class="attribute">href</span>=<span class="value">"/pace/themes/pace-theme-barber-shop.css"</span> <span class="attribute">rel</span>=<span class="value">"stylesheet"</span> /&gt;</span>
 <span class="tag">&lt;/<span class="title">head</span>&gt;</span></code></pre>
-<h2>Configuration</h2>
+<h2 id="configuration">Configuration</h2>
 <p>Pace is fully automatic, no configuration is necessary to get started.</p>
 <p>If you would like to make some tweaks, here&#39;s how:</p>
 <p>You can set <code>window.paceOptions</code> before bringing in the file:</p>
@@ -63,11 +63,11 @@ the loading process as is possible.</p>
     document: <span class="literal">false</span>
   });
 });</code></pre>
-<h2>Themes</h2>
+<h2 id="themes">Themes</h2>
 <p>Pace includes a bunch of <a href="http://github.hubspot.com/pace/docs/welcome/">themes</a>
 to get you started.  Just include the appropriate css file.  Send us a PR with
 any interesting themes you create.</p>
-<h2>Collectors</h2>
+<h2 id="collectors">Collectors</h2>
 <p>Collectors are the bits of code which gather progress information.  Pace includes four default collectors:</p>
 <ul>
 <li><p>Ajax</p>
@@ -96,7 +96,7 @@ any interesting themes you create.</p>
 have a <code>.progress</code> property, or a <code>.elements</code> property which is a list of objects with
 <code>.progress</code> properties.  Pace will automatically handle all scaling to make the progress
 changes look smooth to the user.</p>
-<h2>Elements</h2>
+<h2 id="elements">Elements</h2>
 <p>Elements being rendered to the screen is one way for us to decide that the page has been
 rendered.  If you would like to use that source of information (not required at all),
 specify one or more selectors.  You can comma seperate the selectors to propertly handle
@@ -110,7 +110,7 @@ may never appear:</p>
 <p>Pace will consider the elements test successful when each selector matches something.  For
 this example, when either <code>.timeline</code> or <code>.timeline-error</code> exist, and either <code>.user-profile</code>
 or <code>.profile-error</code> exist.</p>
-<h2>Restart Rules</h2>
+<h2 id="restart-rules">Restart Rules</h2>
 <p>Most users want the progress bar to automatically restart when a pushState event occurs
 (generally means ajax navigation is occuring).  You can disable this:</p>
 <pre><code class="lang-javascript">paceOptions = {
@@ -123,7 +123,7 @@ disable this if you make ajax requests the user doesn&#39;t need to know about, 
 }</code></pre>
 <p>You can always trigger a restart manually by calling <code>Pace.restart()</code></p>
 <p>See <a href="https://github.com/HubSpot/pace/blob/master/pace.coffee">the source</a> for a full list of all options.</p>
-<h2>API</h2>
+<h2 id="api">API</h2>
 <p>Pace exposes the following methods:</p>
 <ul>
 <li><p><code>Pace.start</code>: Show the progress bar and start updating.  Called automatically if you don&#39;t use AMD or CommonJS.</p>
@@ -138,7 +138,7 @@ whenever <code>pushState</code> or <code>replaceState</code> is called by defaul
 <li><p><code>Pace.ignore</code>: Expliticly ignore one or more requests, see Tracking below</p>
 </li>
 </ul>
-<h2>Events</h2>
+<h2 id="events">Events</h2>
 <p>Pace fires the following events:</p>
 <ul>
 <li><code>start</code>: When pace is initially started, or as a part of a restart</li>
@@ -153,7 +153,7 @@ whenever <code>pushState</code> or <code>replaceState</code> is called by defaul
 <li><code>Pace.off(event, [handler])</code>: Unbind the provided <code>event</code> and <code>handler</code> combination.</li>
 <li><code>Pace.once(event, handler, [context])</code>: Bind <code>handler</code> to the next (and only the next) incidence of <code>event</code></li>
 </ul>
-<h2>Tracking</h2>
+<h2 id="tracking">Tracking</h2>
 <p>By default, Pace will show any ajax requests which begin as a part of a normal or ajax-y page load, or which last longer than
 500ms.</p>
 <p>You can disable all ajax tracking by setting <code>ajax</code> to false:</p>
@@ -172,25 +172,25 @@ whenever <code>pushState</code> or <code>replaceState</code> is called by defaul
 <pre><code class="lang-javascript">Pace.track(<span class="keyword">function</span>(){
   $.ajax(...)
 });</code></pre>
-<h2>Dependencies</h2>
+<h2 id="dependencies">Dependencies</h2>
 <p>None!</p>
-<h2>Support</h2>
+<h2 id="support">Support</h2>
 <p>Pace is designed to support IE8+ (standards mode), FF 3.5+, Chrome, Safari 4+, Opera 10.5+, and all modern
 mobile browsers.  If you run into a compatibility issue, or can make a case for supporting something else,
 please create an issue.</p>
-<h2>Size</h2>
+<h2 id="size">Size</h2>
 <p>pace.js is 4kb minified and gzipped.  The themes vary between 0.5 and 4kb.</p>
-<h2>Issues</h2>
+<h2 id="issues">Issues</h2>
 <p>We have obviously not tested this on every website.  If you run into an issue, or find a way the automatic
 detection could be better, please <a href="https://github.com/HubSpot/pace/issues/new">create an Issue</a>.  If you can include a test case, that&#39;s even better.</p>
-<h2>Contributing</h2>
+<h2 id="contributing">Contributing</h2>
 <p>PRs Welcome!</p>
 <p>Building requires node.js.</p>
 <pre><code class="lang-bash">npm install
 grunt</code></pre>
 <p>You can also run <code>grunt watch</code> to have it automatically build as you make changes.</p>
 <p>There is no need to include compiled files in PRs.</p>
-<h2>Credits</h2>
+<h2 id="credits">Credits</h2>
 <p><a href="http://dev.hubspot.com">HubSpot</a></p>
 <p>Javascript by <a href="http://twitter.com/zackbloom">Zack Bloom</a>
 CSS by <a href="http://twitter.com/adamfschwartz">Adam Schwartz</a></p>
