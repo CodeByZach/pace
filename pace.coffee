@@ -259,7 +259,7 @@ class Bar
     @lastRenderedProgress = @progress
 
   done: ->
-    @progress >= 100
+    @progress >= 98
 
 class Events
   constructor: ->
