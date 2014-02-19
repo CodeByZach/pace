@@ -197,7 +197,7 @@ class Bar
       @el = document.createElement 'div'
       @el.className = "pace pace-active"
 
-      document.body.className = document.body.className.replace 'pace-done', ''
+      document.body.className = document.body.className.replace /pace-done/g, ''
       document.body.className += ' pace-running'
 
       @el.innerHTML = '''
@@ -304,7 +304,7 @@ Pace.track = (fn, args...) ->
 shouldTrack = (method='GET') ->
   if ignoreStack[0] is 'track'
     return 'force'
-  
+
   if not ignoreStack.length and options.ajax
     if method is 'socket' and options.ajax.trackWebSockets
       return true
