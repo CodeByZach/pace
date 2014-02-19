@@ -1,6 +1,6 @@
 {
   "name": "PACE",
-  "main": "pace.min.js",
+  "main": "pace.js",
   "version": "0.4.17",
   "homepage": "http://github.hubspot.com/pace/docs/welcome",
   "authors": [
