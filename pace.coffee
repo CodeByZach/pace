@@ -638,6 +638,8 @@ Pace.go = ->
 
   bar.render()
 
+  start = now()
+
   cancelAnimation = false
   animation = runAnimation (frameTime, enqueueNextFrame) ->
     # Every source gives us a progress number from 0 - 100
@@ -672,7 +674,6 @@ Pace.go = ->
 
     bar.update uniScaler.tick(frameTime, avg)
 
-    start = now()
     if bar.done() or done or cancelAnimation
       bar.update 100
 

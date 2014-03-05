@@ -814,11 +814,13 @@
   };
 
   Pace.go = function() {
+    var start;
     Pace.running = true;
     bar.render();
+    start = now();
     cancelAnimation = false;
     return animation = runAnimation(function(frameTime, enqueueNextFrame) {
-      var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, start, sum, _j, _k, _len1, _len2, _ref2;
+      var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, sum, _j, _k, _len1, _len2, _ref2;
       remaining = 100 - bar.progress;
       count = sum = 0;
       done = true;
@@ -839,7 +841,6 @@
       }
       avg = sum / count;
       bar.update(uniScaler.tick(frameTime, avg));
-      start = now();
       if (bar.done() || done || cancelAnimation) {
         bar.update(100);
         Pace.trigger('done');
