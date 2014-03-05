@@ -221,6 +221,16 @@ Pace.track(function(){
 });
 ```
 
+You can also ignore URLs based on a pattern:
+
+```javascript
+Pace.options = {
+  ajax: {
+    ignoredURLs: ['some-substring', /some-regexp/]
+  }
+}
+```
+
 Dependencies
 ------------
 
