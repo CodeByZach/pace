@@ -65,7 +65,7 @@ defaultOptions =
     trackMethods: ['GET']
 
     # Should we track web socket connections?
-    trackWebSockets: false
+    trackWebSockets: true
 
     # A list of regular expressions or substrings of URLS we should ignore (for both tracking and restarting)
     ignoreURLs: []
@@ -350,7 +350,10 @@ class RequestIntercept extends Events
 
     if _WebSocket? and options.ajax.trackWebSockets
       window.WebSocket = (url, protocols) =>
-        req = new _WebSocket(url, protocols)
+        if protocols?
+          req = new _WebSocket(url, protocols)
+        else
+          req = new _WebSocket(url)
 
         if shouldTrack('socket')
           @trigger 'request', {type: 'socket', url, protocols, request: req}
