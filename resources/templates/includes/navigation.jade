@@ -15,11 +15,3 @@
         each doc in group
           li(class=(doc.fullPath == path ? 'current-nav-item' : ''))
             a(href=linkPrefix + doc.link)= doc.displayPath
-
-      if sources.length
-        li
-          b Annotated source
-
-        each file in sources
-          li
-            a(target="_blank", href=linkPrefix + file.link)= file.displayPath
