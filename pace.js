@@ -27,7 +27,7 @@
     },
     ajax: {
       trackMethods: ['GET'],
-      trackWebSockets: false,
+      trackWebSockets: true,
       ignoreURLs: []
     }
   };
@@ -244,7 +244,7 @@
         }
         this.el = document.createElement('div');
         this.el.className = "pace pace-active";
-        document.body.className = document.body.className.replace('pace-done', '');
+        document.body.className = document.body.className.replace(/pace-done/g, '');
         document.body.className += ' pace-running';
         this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
         if (targetElement.firstChild != null) {
@@ -439,7 +439,11 @@
       if ((_WebSocket != null) && options.ajax.trackWebSockets) {
         window.WebSocket = function(url, protocols) {
           var req;
-          req = new _WebSocket(url, protocols);
+          if (protocols != null) {
+            req = new _WebSocket(url, protocols);
+          } else {
+            req = new _WebSocket(url);
+          }
           if (shouldTrack('socket')) {
             _this.trigger('request', {
               type: 'socket',
