@@ -1,12 +1,12 @@
 <head>
-  <link rel="stylesheet" href="../themes/pace-theme-barber-shop.css" />
+  <link rel="stylesheet" href="../themes/pace-theme-flash-bind.css" />
 
   <script>
     paceOptions = {
       elements: true
     };
   </script>
-  <script src="../pace.js"></script>
+  <script data-pace-options='{ "bindActivityOnClasses" : ["square"] }' src="../pace.js"></script>
   <script>
     function load(time){
       var x = new XMLHttpRequest()
@@ -32,4 +32,8 @@
 
   </script>
 </head>
-<body></body>
+<body>
+<p><br /><br /></p>
+<div style="background: #999; height: 100px; width: 100px;" class="square"> Binded with Pace .pace-bind</div>
+
+</body>

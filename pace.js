@@ -6,6 +6,7 @@
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   defaultOptions = {
+    bindActivityOnClasses: [],
     catchupTime: 500,
     initialRate: .03,
     minTime: 500,
@@ -26,7 +27,7 @@
       lagThreshold: 3
     },
     ajax: {
-      trackMethods: ['GET'],
+      trackMethods: ['GET', 'POST'],
       trackWebSockets: true,
       ignoreURLs: []
     }
@@ -236,7 +237,7 @@
     }
 
     Bar.prototype.getElement = function() {
-      var targetElement;
+      var targetElement, bEls, _bEi, bE;
       if (this.el == null) {
         targetElement = document.querySelector(options.target);
         if (!targetElement) {
@@ -247,21 +248,52 @@
         document.body.className = document.body.className.replace(/pace-done/g, '');
         document.body.className += ' pace-running';
         this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
+
         if (targetElement.firstChild != null) {
           targetElement.insertBefore(this.el, targetElement.firstChild);
         } else {
           targetElement.appendChild(this.el);
         }
+
+        bEls = this.getBindedElements();
+        for (_bEi in bEls) {
+          bE = bEls[_bEi];
+          bE.className = bE.className.replace('pace-bind', '');
+          bE.className += ' pace-bind';
+        }
       }
       return this.el;
     };
 
+    Bar.prototype.getBindedElements = function() {
+      var _ei, _ec, el;
+
+      if (this.bindedElements == null) {
+        this.bindedElements = [];
+        for (_ei in options.bindActivityOnClasses) {
+          _ec = options.bindActivityOnClasses[_ei].replace('.', '');
+          el = document.querySelector('.'+_ec);
+          if (el) {
+            this.bindedElements.push(el);
+          }
+        }
+      }
+      return this.bindedElements;
+    };
+
     Bar.prototype.finish = function() {
-      var el;
+      var el, bEls;
       el = this.getElement();
       el.className = el.className.replace('pace-active', '');
       el.className += ' pace-inactive';
       document.body.className = document.body.className.replace('pace-running', '');
+
+      bEls = this.getBindedElements();
+      for (_bEi in bEls) {
+        bE = bEls[_bEi];
+        bE.className = bE.className.replace('pace-bind', '');
+      }
+
       return document.body.className += ' pace-done';
     };
 
