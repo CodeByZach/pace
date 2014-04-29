@@ -202,8 +202,10 @@
 
   })();
 
+  var Pace = window.Pace || {};
+
   if (window.Pace == null) {
-    window.Pace = {};
+    window.Pace = Pace;
   }
 
   extend(Pace, Evented.prototype);
