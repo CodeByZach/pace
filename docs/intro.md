@@ -226,7 +226,7 @@ You can also ignore URLs based on a pattern:
 ```javascript
 Pace.options = {
   ajax: {
-    ignoredURLs: ['some-substring', /some-regexp/]
+    ignoreURLs: ['some-substring', /some-regexp/]
   }
 }
 ```
