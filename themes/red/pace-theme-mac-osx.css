@@ -1,0 +1,85 @@
+/* This is a compiled file, you should be editing the file in the templates directory */
+.pace {
+  -webkit-pointer-events: none;
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.pace-inactive {
+  display: none;
+}
+
+.pace .pace-progress {
+  background-color: #ee3148;
+
+  color: #F47181;
+  position: fixed;
+  z-index: 2000;
+  top: 0;
+  left: 0;
+  height: 12px;
+  overflow: hidden;
+
+  -webkit-border-radius: 0 0 4px 0;
+  -moz-border-radius: 0 0 4px 0;
+  -o-border-radius: 0 0 4px 0;
+  border-radius: 0 0 4px 0;
+
+  -webkit-box-shadow: inset -1px 0 rgba(0, 0, 0, 0.3), inset 0 -1px rgba(0, 0, 0, 0.3), inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, 0.3);
+  -moz-box-shadow: inset -1px 0 rgba(0, 0, 0, 0.3), inset 0 -1px rgba(0, 0, 0, 0.3), inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, 0.3);
+  -o-box-shadow: inset -1px 0 rgba(0, 0, 0, 0.3), inset 0 -1px rgba(0, 0, 0, 0.3), inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, 0.3);
+  box-shadow: inset -1px 0 rgba(0, 0, 0, 0.3), inset 0 -1px rgba(0, 0, 0, 0.3), inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, 0.3);
+
+  -webkit-transition: width 1s;
+  -moz-transition: width 1s;
+  -o-transition: width 1s;
+  transition: width 1s;
+}
+
+.pace .pace-progress-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: -28px;
+  bottom: 0;
+
+  background-image: -o-radial-gradient(rgba(185, 15, 35, 0.6) 0%, rgba(238, 49, 72, 0) 100%);
+  background-image: -moz-radial-gradient(rgba(185, 15, 35, 0.6) 0%, rgba(238, 49, 72, 0) 100%);
+  background-image: -webkit-radial-gradient(rgba(185, 15, 35, 0.6) 0%, rgba(238, 49, 72, 0) 100%);
+  background-image: radial-gradient(rgba(185, 15, 35, 0.6) 0%, rgba(238, 49, 72, 0) 100%);
+
+
+  -webkit-background-size: 28px 100%;
+  -moz-background-size: 28px 100%;
+  -o-background-size: 28px 100%;
+  background-size: 28px 100%;
+
+  -webkit-animation: pace-stripe-animation 500ms linear infinite;
+  -moz-animation: pace-stripe-animation 500ms linear infinite;
+  -ms-animation: pace-stripe-animation 500ms linear infinite;
+  -o-animation: pace-stripe-animation 500ms linear infinite;
+  animation: pace-stripe-animation 500ms linear infinite;
+}
+
+@-webkit-keyframes pace-stripe-animation {
+  0% { -webkit-transform: none; transform: none; }
+  100% { -webkit-transform: translate(-28px, 0); transform: translate(-28px, 0); }
+}
+@-moz-keyframes pace-stripe-animation {
+  0% { -moz-transform: none; transform: none; }
+  100% { -moz-transform: translate(-28px, 0); transform: translate(-28px, 0); }
+}
+@-o-keyframes pace-stripe-animation {
+  0% { -o-transform: none; transform: none; }
+  100% { -o-transform: translate(-28px, 0); transform: translate(-28px, 0); }
+}
+@-ms-keyframes pace-stripe-animation {
+  0% { -ms-transform: none; transform: none; }
+  100% { -ms-transform: translate(-28px, 0); transform: translate(-28px, 0); }
+}
+@keyframes pace-stripe-animation {
+  0% { transform: none; transform: none; }
+  100% { transform: translate(-28px, 0); transform: translate(-28px, 0); }
+}
