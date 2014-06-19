@@ -22,7 +22,7 @@
       "theme": {
         "title": "Theme",
         "type": "string",
-        "enum": ["barber-shop", "big-counter", "bounce", "center-atom", "center-circle", "center-radar", "center-simple", "corner-indicator", "fille-left", "flash", "flat-top", "loading-bar", "mac-osx", "minimal"],
+        "enum": ["barber-shop", "big-counter", "bounce", "center-atom", "center-circle", "center-radar", "center-simple", "corner-indicator", "fill-left", "flash", "flat-top", "loading-bar", "mac-osx", "minimal"],
         "default": "barber-shop"
       }
     }
