@@ -3,6 +3,18 @@ fs = require('fs')
 
 ThemeUtils = require('./docs/lib/themes.coffee')
 
+themeColors =
+  black:  '#000000'
+  white:  '#ffffff'
+  silver: '#d6d6d6'
+  red:    '#ee3148'
+  orange: '#eb7a55'
+  yellow: '#fcd25a'
+  green:  '#22df80'
+  blue:   '#2299dd'
+  pink:   '#e90f92'
+  purple: '#7c60e0'
+
 module.exports = (grunt) ->
   grunt.registerTask 'themes', 'Compile the pace theme files', ->
     done = @async()
@@ -10,16 +22,17 @@ module.exports = (grunt) ->
     options = grunt.config('themes')
 
     grunt.file.glob options.src, (err, files) ->
-      for file in files
-        body = ThemeUtils.compileTheme fs.readFileSync(file).toString()
+      for colorName, color of themeColors
+        for file in files
+          body = ThemeUtils.compileTheme fs.readFileSync(file).toString(), {color}
 
-        body = "/* This is a compiled file, you should be editing the file in the templates directory */\n" + body
+          body = "/* This is a compiled file, you should be editing the file in the templates directory */\n" + body
 
-        name = Path.basename file
-        name = name.replace '.tmpl', ''
-        path = Path.join options.dest, name
+          name = Path.basename file
+          name = name.replace '.tmpl', ''
+          path = Path.join options.dest, colorName, name
 
-        fs.writeFileSync path, body
+          fs.writeFileSync path, body
 
       done()
 
