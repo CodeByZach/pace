@@ -7,7 +7,7 @@
       },
       {
         "type": "style",
-        "src": "./themes/pace-theme-{{ options.theme }}.css"
+        "src": "./themes/{{ options.color }}/pace-theme-{{ options.theme }}.css"
       }
     ]
   },
@@ -16,8 +16,8 @@
       "color": {
         "title": "Color",
         "type": "string",
-        "format": "color",
-        "default": "auto"
+        "enum": ["black", "white", "silver", "red", "orange", "yellow", "green", "blue", "pink", "purple"],
+        "default": "blue"
       },
       "theme": {
         "title": "Theme",
