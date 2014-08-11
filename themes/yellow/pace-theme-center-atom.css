@@ -1,0 +1,170 @@
+/* This is a compiled file, you should be editing the file in the templates directory */
+.pace.pace-inactive {
+  display: none;
+}
+
+.pace {
+  -webkit-pointer-events: none;
+  pointer-events: none;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+
+  z-index: 2000;
+  position: fixed;
+  height: 60px;
+  width: 100px;
+  margin: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.pace .pace-progress {
+  z-index: 2000;
+  position: absolute;
+  height: 60px;
+  width: 100px !important;
+}
+
+.pace .pace-progress:before {
+  content: attr(data-progress-text);
+  text-align: center;
+  color: #fff;
+  background: #fcd25a;
+  border-radius: 50%;
+  font-family: "Helvetica Neue", sans-serif;
+  font-size: 14px;
+  font-weight: 100;
+  line-height: 1;
+  padding: 20% 0 7px;
+  width: 50%;
+  height: 40%;
+  margin: 10px 0 0 30px;
+  display: block;
+  z-index: 999;
+  position: absolute;
+}
+
+.pace .pace-progress:after {
+  border-radius: 50%;
+  border: 5px solid #fcd25a;
+  content: ' ';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 60px;
+  width: 100px;
+
+  -webkit-transform: rotate(90deg);
+     -moz-transform: rotate(90deg);
+       -o-transform: rotate(90deg);
+          transform: rotate(90deg);
+  -webkit-animation: spin-3 2s linear infinite;
+     -moz-animation: spin-3 2s linear infinite;
+       -o-animation: spin-3 2s linear infinite;
+          animation: spin-3 2s linear infinite;
+}
+
+.pace .pace-activity {
+  font-size: 15px;
+  line-height: 1;
+  z-index: 2000;
+  position: absolute;
+  height: 60px;
+  width: 100px;
+
+  display: block;
+}
+
+.pace .pace-activity:before {
+  border-radius: 50%;
+  border: 5px solid #fcd25a;
+  content: ' ';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 60px;
+  width: 100px;
+
+  -webkit-animation: spin-1 2s linear infinite;
+     -moz-animation: spin-1 2s linear infinite;
+       -o-animation: spin-1 2s linear infinite;
+          animation: spin-1 2s linear infinite;
+}
+
+.pace .pace-activity:after{
+  border-radius: 50%;
+  border: 5px solid #fcd25a;
+  content: ' ';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 60px;
+  width: 100px;
+
+  -webkit-transform: rotate(45deg);
+     -moz-transform: rotate(45deg);
+       -o-transform: rotate(45deg);
+          transform: rotate(45deg);
+  -webkit-animation: spin-2 2s linear infinite;
+     -moz-animation: spin-2 2s linear infinite;
+       -o-animation: spin-2 2s linear infinite;
+          animation: spin-2 2s linear infinite;
+}
+
+@-webkit-keyframes spin-1 {
+  0%  { -webkit-transform: rotate(0deg); }
+  100%{ -webkit-transform: rotate(359deg);}
+}
+@-moz-keyframes spin-1 {
+  0%  { -moz-transform: rotate(0deg); }
+  100%{ -moz-transform: rotate(359deg);}
+}
+@-o-keyframes spin-1 {
+  0%  { -o-transform: rotate(0deg); }
+  100%{ -o-transform: rotate(359deg);}
+}
+@keyframes spin-1 {
+  0%  { transform: rotate(0deg); }
+  100%{ transform: rotate(359deg);}
+}
+
+@-webkit-keyframes spin-2 {
+  0%  { -webkit-transform: rotate(59.8deg); }
+  100%{ -webkit-transform: rotate(418.8deg);}
+}
+@-moz-keyframes spin-2 {
+  0%  { -moz-transform: rotate(59.8deg); }
+  100%{ -moz-transform: rotate(418.8deg);}
+}
+@-o-keyframes spin-2 {
+  0%  { -o-transform: rotate(59.8deg); }
+  100%{ -o-transform: rotate(418.8deg);}
+}
+@keyframes spin-2 {
+  0%  { transform: rotate(59.8deg); }
+  100%{ transform: rotate(418.8deg);}
+}
+
+@-webkit-keyframes spin-3 {
+  0%  { -webkit-transform: rotate(119.6deg); }
+  100%{ -webkit-transform: rotate(478.6deg);}
+}
+@-moz-keyframes spin-3 {
+  0%  { -moz-transform: rotate(119.6deg); }
+  100%{ -moz-transform: rotate(478.6deg);}
+}
+@-o-keyframes spin-3 {
+  0%  { -o-transform: rotate(119.6deg); }
+  100%{ -o-transform: rotate(478.6deg);}
+}
+@keyframes spin-3 {
+  0%  { transform: rotate(119.6deg); }
+  100%{ transform: rotate(478.6deg);}
+}
