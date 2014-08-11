@@ -336,7 +336,8 @@ class RequestIntercept extends Events
 
       req
 
-    extendNative window.XMLHttpRequest, _XMLHttpRequest
+    try
+      extendNative window.XMLHttpRequest, _XMLHttpRequest
 
     if _XDomainRequest?
       window.XDomainRequest = ->
@@ -346,7 +347,8 @@ class RequestIntercept extends Events
 
         req
 
-      extendNative window.XDomainRequest, _XDomainRequest
+      try
+        extendNative window.XDomainRequest, _XDomainRequest
 
     if _WebSocket? and options.ajax.trackWebSockets
       window.WebSocket = (url, protocols) =>
@@ -360,7 +362,8 @@ class RequestIntercept extends Events
 
         req
 
-      extendNative window.WebSocket, _WebSocket
+      try
+        extendNative window.WebSocket, _WebSocket
 
 _intercept = null
 getIntercept = ->

@@ -426,7 +426,9 @@
         monitorXHR(req);
         return req;
       };
-      extendNative(window.XMLHttpRequest, _XMLHttpRequest);
+      try {
+        extendNative(window.XMLHttpRequest, _XMLHttpRequest);
+      } catch (_error) {}
       if (_XDomainRequest != null) {
         window.XDomainRequest = function() {
           var req;
@@ -434,7 +436,9 @@
           monitorXHR(req);
           return req;
         };
-        extendNative(window.XDomainRequest, _XDomainRequest);
+        try {
+          extendNative(window.XDomainRequest, _XDomainRequest);
+        } catch (_error) {}
       }
       if ((_WebSocket != null) && options.ajax.trackWebSockets) {
         window.WebSocket = function(url, protocols) {
@@ -454,7 +458,9 @@
           }
           return req;
         };
-        extendNative(window.WebSocket, _WebSocket);
+        try {
+          extendNative(window.WebSocket, _WebSocket);
+        } catch (_error) {}
       }
     }
 
