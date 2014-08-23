@@ -12,6 +12,14 @@ it will begin again!
 If you use AMD or Browserify, require in pace.js and call `pace.start()` as early in
 the loading process as is possible.
 
+Install with Eager
+------------------
+
+The easiest way to add Pace to your site is with [Eager](http://eager.io).
+Click Install to see a live preview of Pace on your website.
+
+<iframe style="height: 48px; width: 180px" src="//install.eager.io?appId=kYKTiQjoVjQk" allowtransparency="true" scroll="no" frameBorder="0"></iframe>
+
 Example
 -------
 
