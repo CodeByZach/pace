@@ -1,6 +1,10 @@
 pace
 ====
 
+<a href="https://eager.io/app/kYKTiQjoVjQk/install?source=button">
+  <img src="https://install.eager.io/install-button.png" border="0" width="126">
+</a>
+
 An automatic web page progress bar.
 
 Include [pace.js](https://raw.github.com/HubSpot/pace/v0.5.6/pace.min.js) and a [theme](http://github.hubspot.com/pace/docs/welcome/) of your choice to your page and you are done!
