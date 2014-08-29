@@ -8,6 +8,10 @@
   ],
   "license": "MIT",
   "main": "pace.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/HubSpot/pace.git"
+  },
   "devDependencies": {
     "grunt-contrib-coffee": "~0.7.0",
     "coffee-script": "~1.6.3",
