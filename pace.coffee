@@ -1,24 +1,25 @@
 defaultOptions =
   # How long should it take for the bar to animate to a new
   # point after receiving it
-  catchupTime: 500
+  catchupTime: 100
 
   # How quickly should the bar be moving before it has any progress
   # info from a new source in %/ms
   initialRate: .03
 
   # What is the minimum amount of time the bar should be on the
-  # screen
-  minTime: 500
+  # screen.  Irrespective of this number, the bar will always be on screen for
+  # 33 * (100 / maxProgressPerFrame) + ghostTime ms.
+  minTime: 250
 
   # What is the minimum amount of time the bar should sit after the last
   # update before disappearing
-  ghostTime: 500
+  ghostTime: 100
 
   # Its easy for a bunch of the bar to be eaten in the first few frames
   # before we know how much there is to load.  This limits how much of
   # the bar can be used per frame
-  maxProgressPerFrame: 10
+  maxProgressPerFrame: 20
 
   # This tweaks the animation easing
   easeFactor: 1.25
