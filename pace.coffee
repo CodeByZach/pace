@@ -244,7 +244,9 @@ class Bar
 
     el = @getElement()
 
-    el.children[0].style.width = "#{ @progress }%"
+    transform = "translate3d(#{ @progress }%, 0, 0)"
+    for key in ['webkitTransform', 'msTransform', 'transform']
+      el.children[0].style[key] = transform
 
     if not @lastRenderedProgress or @lastRenderedProgress|0 != @progress|0
       # The whole-part of the number has changed
