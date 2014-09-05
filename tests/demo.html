@@ -1,5 +1,5 @@
 <head>
-  <link rel="stylesheet" href="../themes/pace-theme-barber-shop.css" />
+  <link rel="stylesheet" href="../themes/blue/pace-theme-center-simple.css" />
 
   <script>
     paceOptions = {
@@ -35,8 +35,10 @@
   <input id="range" type="range" min="0" max="100">
   <script>
     range.addEventListener('input', function(){
-      var progress = document.querySelector('.pace-progress');
-      progress.setAttribute('data-progress-text', range.value + '%');
-      progress.setAttribute('style', '-webkit-transform: translate3d(' + range.value + '%, 0px, 0px)');
+      document.querySelector('.pace').classList.remove('pace-inactive');
+      document.querySelector('.pace').classList.add('pace-active');
+
+      document.querySelector('.pace-progress').setAttribute('data-progress-text', range.value + '%');
+      document.querySelector('.pace-progress').setAttribute('style', '-webkit-transform: translate3d(' + range.value + '%, 0px, 0px)');
     });
   </script>
