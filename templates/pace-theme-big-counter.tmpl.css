@@ -1,6 +1,7 @@
 .pace {
   -webkit-pointer-events: none;
   pointer-events: none;
+
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
@@ -17,6 +18,10 @@
   right: 0;
   height: 5rem;
   width: 5rem;
+
+  -webkit-transform: translate3d(0, 0, 0) !important;
+  -ms-transform: translate3d(0, 0, 0) !important;
+  transform: translate3d(0, 0, 0) !important;
 }
 
 .pace .pace-progress:after {
