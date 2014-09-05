@@ -45,11 +45,11 @@
   font-weight: 100;
   text-align: center;
 
-  -webkit-animation: pace-3d-spinner linear infinite 2s;
-  -moz-animation: pace-3d-spinner linear infinite 2s;
-  -ms-animation: pace-3d-spinner linear infinite 2s;
-  -o-animation: pace-3d-spinner linear infinite 2s;
-  animation: pace-3d-spinner linear infinite 2s;
+  -webkit-animation: pace-theme-center-circle-spin linear infinite 2s;
+  -moz-animation: pace-theme-center-circle-spin linear infinite 2s;
+  -ms-animation: pace-theme-center-circle-spin linear infinite 2s;
+  -o-animation: pace-theme-center-circle-spin linear infinite 2s;
+  animation: pace-theme-center-circle-spin linear infinite 2s;
 
   -webkit-transform-style: preserve-3d;
   -moz-transform-style: preserve-3d;
@@ -63,47 +63,27 @@
   display: block;
 }
 
-@-webkit-keyframes pace-3d-spinner {
-  from {
-    -webkit-transform: rotateY(0deg);
-  }
-  to {
-    -webkit-transform: rotateY(360deg);
-  }
+@-webkit-keyframes pace-theme-center-circle-spin {
+  from { -webkit-transform: rotateY(0deg) }
+  to { -webkit-transform: rotateY(360deg) }
 }
 
-@-moz-keyframes pace-3d-spinner {
-  from {
-    -moz-transform: rotateY(0deg);
-  }
-  to {
-    -moz-transform: rotateY(360deg);
-  }
+@-moz-keyframes pace-theme-center-circle-spin {
+  from { -moz-transform: rotateY(0deg) }
+  to { -moz-transform: rotateY(360deg) }
 }
 
-@-ms-keyframes pace-3d-spinner {
-  from {
-    -ms-transform: rotateY(0deg);
-  }
-  to {
-    -ms-transform: rotateY(360deg);
-  }
+@-ms-keyframes pace-theme-center-circle-spin {
+  from { -ms-transform: rotateY(0deg) }
+  to { -ms-transform: rotateY(360deg) }
 }
 
-@-o-keyframes pace-3d-spinner {
-  from {
-    -o-transform: rotateY(0deg);
-  }
-  to {
-    -o-transform: rotateY(360deg);
-  }
+@-o-keyframes pace-theme-center-circle-spin {
+  from { -o-transform: rotateY(0deg) }
+  to { -o-transform: rotateY(360deg) }
 }
 
-@keyframes pace-3d-spinner {
-  from {
-    transform: rotateY(0deg);
-  }
-  to {
-    transform: rotateY(360deg);
-  }
+@keyframes pace-theme-center-circle-spin {
+  from { transform: rotateY(0deg) }
+  to { transform: rotateY(360deg) }
 }
