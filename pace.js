@@ -6,11 +6,11 @@
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   defaultOptions = {
-    catchupTime: 500,
+    catchupTime: 100,
     initialRate: .03,
-    minTime: 500,
-    ghostTime: 500,
-    maxProgressPerFrame: 10,
+    minTime: 250,
+    ghostTime: 100,
+    maxProgressPerFrame: 20,
     easeFactor: 1.25,
     startOnPageLoad: true,
     restartOnPushState: true,
@@ -280,12 +280,17 @@
     };
 
     Bar.prototype.render = function() {
-      var el, progressStr;
+      var el, key, progressStr, transform, _j, _len1, _ref2;
       if (document.querySelector(options.target) == null) {
         return false;
       }
       el = this.getElement();
-      el.children[0].style.width = "" + this.progress + "%";
+      transform = "translate3d(" + this.progress + "%, 0, 0)";
+      _ref2 = ['webkitTransform', 'msTransform', 'transform'];
+      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+        key = _ref2[_j];
+        el.children[0].style[key] = transform;
+      }
       if (!this.lastRenderedProgress || this.lastRenderedProgress | 0 !== this.progress | 0) {
         el.children[0].setAttribute('data-progress-text', "" + (this.progress | 0) + "%");
         if (this.progress >= 100) {
