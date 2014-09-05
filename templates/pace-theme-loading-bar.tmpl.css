@@ -47,12 +47,6 @@
   -moz-background-clip: padding;
   background-clip: padding-box;
 
-  -webkit-transition: width 1s ease-in-out 1s linear;
-  -moz-transition: width 1s ease-in-out 1s linear;
-  -ms-transition: width 1s ease-in-out 1s linear;
-  -o-transition: width 1s ease-in-out 1s linear;
-  transition: width 1s ease-in-out 1s linear;
-
   -webkit-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
 
