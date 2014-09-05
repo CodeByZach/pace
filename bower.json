@@ -1,7 +1,7 @@
 {
   "name": "PACE",
   "main": "pace.js",
-  "version": "0.5.6",
+  "version": "1.0.0",
   "homepage": "http://github.hubspot.com/pace/docs/welcome",
   "authors": [
     "Zack Bloom <zackbloom@gmail.com>",
