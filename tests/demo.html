@@ -29,7 +29,14 @@
     Pace.on('hide', function(){
       console.log('done');
     });
-
   </script>
-</head>
-<body></body>
+
+<body>
+  <input id="range" type="range" min="0" max="100">
+  <script>
+    range.addEventListener('input', function(){
+      var progress = document.querySelector('.pace-progress');
+      progress.setAttribute('data-progress-text', range.value + '%');
+      progress.setAttribute('style', '-webkit-transform: translate3d(' + range.value + '%, 0px, 0px)');
+    });
+  </script>
