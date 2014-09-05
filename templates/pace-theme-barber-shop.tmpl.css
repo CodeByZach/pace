@@ -37,30 +37,30 @@
   -o-background-size: 32px 32px;
   background-size: 32px 32px;
 
-  -webkit-animation: pace-stripe-animation 500ms linear infinite;
-  -moz-animation: pace-stripe-animation 500ms linear infinite;
-  -ms-animation: pace-stripe-animation 500ms linear infinite;
-  -o-animation: pace-stripe-animation 500ms linear infinite;
-  animation: pace-stripe-animation 500ms linear infinite;
+  -webkit-animation: pace-theme-barber-shop-motion 500ms linear infinite;
+  -moz-animation: pace-theme-barber-shop-motion 500ms linear infinite;
+  -ms-animation: pace-theme-barber-shop-motion 500ms linear infinite;
+  -o-animation: pace-theme-barber-shop-motion 500ms linear infinite;
+  animation: pace-theme-barber-shop-motion 500ms linear infinite;
 }
 
-@-webkit-keyframes pace-stripe-animation {
+@-webkit-keyframes pace-theme-barber-shop-motion {
   0% { -webkit-transform: none; transform: none; }
   100% { -webkit-transform: translate(-32px, 0); transform: translate(-32px, 0); }
 }
-@-moz-keyframes pace-stripe-animation {
+@-moz-keyframes pace-theme-barber-shop-motion {
   0% { -moz-transform: none; transform: none; }
   100% { -moz-transform: translate(-32px, 0); transform: translate(-32px, 0); }
 }
-@-o-keyframes pace-stripe-animation {
+@-o-keyframes pace-theme-barber-shop-motion {
   0% { -o-transform: none; transform: none; }
   100% { -o-transform: translate(-32px, 0); transform: translate(-32px, 0); }
 }
-@-ms-keyframes pace-stripe-animation {
+@-ms-keyframes pace-theme-barber-shop-motion {
   0% { -ms-transform: none; transform: none; }
   100% { -ms-transform: translate(-32px, 0); transform: translate(-32px, 0); }
 }
-@keyframes pace-stripe-animation {
+@keyframes pace-theme-barber-shop-motion {
   0% { transform: none; transform: none; }
   100% { transform: translate(-32px, 0); transform: translate(-32px, 0); }
 }
