@@ -26,12 +26,6 @@
   -o-box-sizing: border-box;
   box-sizing: border-box;
 
-  -webkit-transition: width 1s ease-in-out 1s linear;
-  -moz-transition: width 1s ease-in-out 1s linear;
-  -ms-transition: width 1s ease-in-out 1s linear;
-  -o-transition: width 1s ease-in-out 1s linear;
-  transition: width 1s ease-in-out 1s linear;
-
   -webkit-transform: translate3d(0, 0, 0);
   -moz-transform: translate3d(0, 0, 0);
   -ms-transform: translate3d(0, 0, 0);
