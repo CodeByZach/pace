@@ -174,7 +174,8 @@ class Evented
         else
           i++
 
-window.Pace ?= {}
+Pace = window.Pace or {}
+window.Pace = Pace
 
 extend Pace, Evented::
 
