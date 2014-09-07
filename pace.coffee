@@ -445,10 +445,12 @@ class XHRRequestTracker
           # response, all we can do is increment the progress with backoff such that we
           # never hit 100% until it's done.
           @progress = @progress + (100 - @progress) / 2
+      , false
 
       for event in ['load', 'abort', 'timeout', 'error']
         request.addEventListener event, =>
           @progress = 100
+        , false
 
     else
       _onreadystatechange = request.onreadystatechange
@@ -467,6 +469,7 @@ class SocketRequestTracker
     for event in ['error', 'open']
       request.addEventListener event, =>
         @progress = 100
+      , false
 
 class ElementMonitor
   constructor: (options={}) ->

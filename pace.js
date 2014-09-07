@@ -573,13 +573,13 @@
           } else {
             return _this.progress = _this.progress + (100 - _this.progress) / 2;
           }
-        });
+        }, false);
         _ref2 = ['load', 'abort', 'timeout', 'error'];
         for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
           event = _ref2[_j];
           request.addEventListener(event, function() {
             return _this.progress = 100;
-          });
+          }, false);
         }
       } else {
         _onreadystatechange = request.onreadystatechange;
@@ -609,7 +609,7 @@
         event = _ref2[_j];
         request.addEventListener(event, function() {
           return _this.progress = 100;
-        });
+        }, false);
       }
     }
 
