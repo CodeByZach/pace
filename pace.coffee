@@ -311,7 +311,7 @@ Pace.track = (fn, args...) ->
 shouldTrack = (method='GET') ->
   if ignoreStack[0] is 'track'
     return 'force'
-  
+
   if not ignoreStack.length and options.ajax
     if method is 'socket' and options.ajax.trackWebSockets
       return true
@@ -739,7 +739,7 @@ Pace.start = (_options) ->
 
 if typeof define is 'function' and define.amd
   # AMD
-  define -> Pace
+  define ['pace'], -> Pace
 else if typeof exports is 'object'
   # CommonJS
   module.exports = Pace
