@@ -224,7 +224,7 @@ class Bar
     el.className = el.className.replace 'pace-active', ''
     el.className += ' pace-inactive'
 
-    document.body.className = document.body.className.replace 'pace-running', ''
+    document.body.className = document.body.className.replace /pace-running/g, ''
     document.body.className += ' pace-done'
 
   update: (prog) ->
