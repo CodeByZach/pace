@@ -353,9 +353,13 @@
     _results = [];
     for (key in from.prototype) {
       try {
-        val = from.prototype[key];
-        if ((to[key] == null) && typeof val !== 'function') {
-          _results.push(to[key] = val);
+        if (__indexOf.call(from, val) >= 0) {
+          val = from.prototype[key];
+          if ((to[key] == null) && typeof val !== 'function') {
+            _results.push(to[key] = val);
+          } else {
+            _results.push(void 0);
+          }
         } else {
           _results.push(void 0);
         }

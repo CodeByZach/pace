@@ -288,10 +288,11 @@ _WebSocket = window.WebSocket
 extendNative = (to, from) ->
   for key of from::
     try
-      val = from::[key]
+      if val in from
+        val = from::[key]
 
-      if not to[key]? and typeof val isnt 'function'
-        to[key] = val
+        if not to[key]? and typeof val isnt 'function'
+          to[key] = val
     catch e
 
 ignoreStack = []
