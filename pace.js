@@ -357,13 +357,13 @@
           if (typeof Object.defineProperty === 'function') {
             _results.push(Object.defineProperty(to, key, {
               get: function() {
-                return from[key];
+                return from.prototype[key];
               },
               configurable: true,
               enumerable: true
             }));
           } else {
-            _results.push(to[key] = from[key]);
+            _results.push(to[key] = from.prototype[key]);
           }
         } else {
           _results.push(void 0);

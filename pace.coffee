@@ -292,12 +292,12 @@ extendNative = (to, from) ->
         if typeof Object.defineProperty is 'function'
           Object.defineProperty(to, key, {
              get: ->
-                 return from[key];
+                 return from::[key];
               ,
               configurable: true,
               enumerable: true })
         else
-          to[key] = from[key]
+          to[key] = from::[key]
     catch e
 
 ignoreStack = []
