@@ -288,10 +288,16 @@ _WebSocket = window.WebSocket
 extendNative = (to, from) ->
   for key of from::
     try
-      val = from::[key]
-
-      if not to[key]? and typeof val isnt 'function'
-        to[key] = val
+      if not to[key]? and typeof from[key] isnt 'function'
+        if typeof Object.defineProperty is 'function'
+          Object.defineProperty(to, key, {
+             get: ->
+                 return from::[key];
+              ,
+              configurable: true,
+              enumerable: true })
+        else
+          to[key] = from::[key]
     catch e
 
 ignoreStack = []

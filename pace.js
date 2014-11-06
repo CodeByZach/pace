@@ -349,13 +349,22 @@
   _WebSocket = window.WebSocket;
 
   extendNative = function(to, from) {
-    var e, key, val, _results;
+    var e, key, _results;
     _results = [];
     for (key in from.prototype) {
       try {
-        val = from.prototype[key];
-        if ((to[key] == null) && typeof val !== 'function') {
-          _results.push(to[key] = val);
+        if ((to[key] == null) && typeof from[key] !== 'function') {
+          if (typeof Object.defineProperty === 'function') {
+            _results.push(Object.defineProperty(to, key, {
+              get: function() {
+                return from.prototype[key];
+              },
+              configurable: true,
+              enumerable: true
+            }));
+          } else {
+            _results.push(to[key] = from.prototype[key]);
+          }
         } else {
           _results.push(void 0);
         }
