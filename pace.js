@@ -354,13 +354,17 @@
     for (key in from.prototype) {
       try {
         if ((to[key] == null) && typeof from[key] !== 'function') {
-          _results.push(typeof Object.defineProperty === "function" ? Object.defineProperty(to, key, {
-            get: function() {
-              return from[key];
-            },
-            configurable: true,
-            enumerable: true
-          }) : void 0);
+          if (typeof Object.defineProperty === 'function') {
+            _results.push(Object.defineProperty(to, key, {
+              get: function() {
+                return from[key];
+              },
+              configurable: true,
+              enumerable: true
+            }));
+          } else {
+            _results.push(to[key] = from[key]);
+          }
         } else {
           _results.push(void 0);
         }
