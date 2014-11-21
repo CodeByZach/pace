@@ -16,6 +16,8 @@
   height: 12px;
   background: #ee3148;
 
+  -webkit-transition: -webkit-transform .3s;
+  transition: transform .3s;
 
   -webkit-transform: translateY(-50px);
   transform: translateY(-50px);
