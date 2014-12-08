@@ -10,6 +10,11 @@
       {
         "type": "style",
         "src": "./themes/{{ options.color }}/pace-theme-{{ options.theme }}.css"
+      },
+      {
+        "type": "style",
+        "if": "options.hidePage",
+        "contents": "body > *:not(.pace), body:before, body:after { -webkit-transition: opacity .4s ease-in-out; -moz-transition: opacity .4s ease-in-out; -o-transition: opacity .4s ease-in-out; -ms-transition: opacity .4s ease-in-out; transition: opacity .4s ease-in-out } body:not(.pace-done) > *:not(.pace), body:not(.pace-done):before, body:not(.pace-done):after { opacity: 0 }"
       }
     ]
   },
@@ -80,6 +85,11 @@
           "minimal": "Minimal"
         },
         "default": "barber-shop"
+      },
+      "hidePage": {
+        "title": "Hide everything but PACE until the page has fully loaded",
+        "type": "boolean",
+        "default": false
       }
     }
   }
