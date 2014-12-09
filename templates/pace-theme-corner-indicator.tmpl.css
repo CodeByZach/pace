@@ -1,6 +1,7 @@
 .pace {
   -webkit-pointer-events: none;
   pointer-events: none;
+
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
@@ -29,6 +30,8 @@
 
 .pace .pace-activity::before,
 .pace .pace-activity::after {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
     position: absolute;
     bottom: 30px;
     left: 50%;
@@ -44,8 +47,8 @@
     height: 80px;
     border-right-color: rgba(0, 0, 0, .2);
     border-left-color: rgba(0, 0, 0, .2);
-    -webkit-animation: pace-rotation 3s linear infinite;
-    animation: pace-rotation 3s linear infinite;
+    -webkit-animation: pace-theme-corner-indicator-spin 3s linear infinite;
+    animation: pace-theme-corner-indicator-spin 3s linear infinite;
 }
 
 .pace .pace-activity::after {
@@ -55,15 +58,15 @@
     height: 40px;
     border-top-color: rgba(0, 0, 0, .2);
     border-bottom-color: rgba(0, 0, 0, .2);
-    -webkit-animation: pace-rotation 1s linear infinite;
-    animation: pace-rotation 1s linear infinite;
+    -webkit-animation: pace-theme-corner-indicator-spin 1s linear infinite;
+    animation: pace-theme-corner-indicator-spin 1s linear infinite;
 }
 
-@-webkit-keyframes pace-rotation {
+@-webkit-keyframes pace-theme-corner-indicator-spin {
   0% { -webkit-transform: rotate(0deg); }
   100% { -webkit-transform: rotate(359deg); }
 }
-@keyframes pace-rotation {
+@keyframes pace-theme-corner-indicator-spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(359deg); }
 }
