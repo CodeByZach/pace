@@ -21,6 +21,7 @@
   "options": {
     "properties": {
       "color": {
+        "order": 0,
         "title": "Color",
         "type": "string",
         "enum": [
@@ -50,6 +51,7 @@
         "default": "blue"
       },
       "theme": {
+        "order": 1,
         "title": "Theme",
         "type": "string",
         "enum": [
@@ -87,6 +89,7 @@
         "default": "barber-shop"
       },
       "hidePage": {
+        "order": 2,
         "title": "Hide everything but PACE until the page has fully loaded",
         "type": "boolean",
         "default": false
