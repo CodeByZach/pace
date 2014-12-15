@@ -14,6 +14,7 @@
     -moz-animation: preloader-background linear 3.5s infinite;
     -o-animation: preloader-background linear 3.5s infinite;
     animation: preloader-background linear 3.5s infinite;
+    z-index: 2000;
 }
 .pace:before,
 .pace:after {
