@@ -20,9 +20,8 @@
   height: 5rem;
   width: 5rem;
   opacity: 1;
-  visibility: visible;
-  -webkit-transition: opacity 0.2s, visibility 0s 0.2s;
-          transition: opacity 0.2s, visibility 0s 0.2s;
+  -webkit-transition: opacity 0.1s;
+          transition: opacity 0.1s;
 
   -webkit-transform: translate3d(0, 0, 0) !important;
   -ms-transform: translate3d(0, 0, 0) !important;
@@ -31,7 +30,6 @@
 
 .pace-inactive .pace-progress,
 .pace-progress[data-progress="00"] {
-  visibility: hidden;
   opacity: 0;
 }
 
@@ -44,7 +42,7 @@
   display: block;
   font-size: 1.8rem;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-weight: lighter;
+  font-weight: 300;
 }
 
 .pace-progress .pace-progress-inner {
