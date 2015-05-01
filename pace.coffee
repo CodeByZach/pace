@@ -202,7 +202,7 @@ class Bar
       @el = document.createElement 'div'
       @el.className = "pace pace-active"
 
-      document.body.className = document.body.className.replace /pace-done/g, ''
+      document.body.className = document.body.className.replace / pace-done/g, ''
       document.body.className += ' pace-running'
 
       @el.innerHTML = '''
@@ -221,10 +221,10 @@ class Bar
   finish: ->
     el = @getElement()
 
-    el.className = el.className.replace 'pace-active', ''
+    el.className = el.className.replace / pace-active/g, ''
     el.className += ' pace-inactive'
 
-    document.body.className = document.body.className.replace 'pace-running', ''
+    document.body.className = document.body.className.replace / pace-running/g, ''
     document.body.className += ' pace-done'
 
   update: (prog) ->
