@@ -79,6 +79,9 @@ requestAnimationFrame = window.requestAnimationFrame or window.mozRequestAnimati
 
 cancelAnimationFrame = window.cancelAnimationFrame or window.mozCancelAnimationFrame
 
+addEventListener = (obj, event, callback) ->
+  obj.addEventListener?(event, callback, false) or obj["on#{event}"] = callback
+
 if not requestAnimationFrame?
   requestAnimationFrame = (fn) ->
     setTimeout fn, 50
@@ -447,7 +450,7 @@ class XHRRequestTracker
       # We're dealing with a modern browser with progress event support
 
       size = null
-      request.addEventListener 'progress', (evt) =>
+      addEventListener request, 'progress', (evt) =>
         if evt.lengthComputable
           @progress = 100 * evt.loaded / evt.total
         else
@@ -458,7 +461,7 @@ class XHRRequestTracker
       , false
 
       for event in ['load', 'abort', 'timeout', 'error']
-        request.addEventListener event, =>
+        addEventListener request, event, =>
           @progress = 100
         , false
 
@@ -477,7 +480,7 @@ class SocketRequestTracker
     @progress = 0
 
     for event in ['error', 'open']
-      request.addEventListener event, =>
+      addEventListener request, event, =>
         @progress = 100
       , false
 
