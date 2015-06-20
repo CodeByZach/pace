@@ -1,13 +1,16 @@
 {
-  "name": "PACE",
-  "main": "pace.js",
-  "version": "1.0.2",
+  "name": "pace",
+  "version": "2.0.0",
+  "description": "Automatic page load progress bar",
   "homepage": "http://github.hubspot.com/pace/docs/welcome",
   "authors": [
     "Zack Bloom <zackbloom@gmail.com>",
     "Adam Schwartz <adam.flynn.schwartz@gmail.com>"
   ],
-  "description": "Automatic page load progress bar",
+  "maintainers": [
+    "Nicholas Hwang <nick.joosung.hwang@gmail.com>"
+  ],
+  "main": "dist/js/pace.js",
   "keywords": [
     "loading",
     "load",
