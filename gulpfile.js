@@ -28,18 +28,18 @@ gulp.task('clean', function() {
 
 // Javascript
 gulp.task('js', function() {
-  gulp.src('./src/js/drop.js')
+  gulp.src('./src/js/**/*.js')
     .pipe(babel())
-    .pipe(umd(umdOptions))
-    .pipe(header(banner))
+    // .pipe(umd(umdOptions))
+    // .pipe(header(banner))
 
     // Original
     .pipe(gulp.dest(distDir + '/js'))
 
     // Minified
-    .pipe(uglify())
-    .pipe(rename({suffix: '.min'}))
-    .pipe(gulp.dest(distDir + '/js'));
+    // .pipe(uglify())
+    // .pipe(rename({suffix: '.min'}))
+    // .pipe(gulp.dest(distDir + '/js'));
 });
 
 
