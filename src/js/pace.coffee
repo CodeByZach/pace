@@ -1,38 +1,3 @@
-class Evented
-  on: (event, handler, ctx, once=false) ->
-    @bindings ?= {}
-    @bindings[event] ?= []
-    @bindings[event].push {handler, ctx, once}
-
-  once: (event, handler, ctx) ->
-    @on(event, handler, ctx, true)
-
-  off: (event, handler) ->
-    return unless @bindings?[event]?
-
-    if not handler?
-      delete @bindings[event]
-    else
-      i = 0
-      while i < @bindings[event].length
-        if @bindings[event][i].handler is handler
-          @bindings[event].splice i, 1
-        else
-          i++
-
-  trigger: (event, args...) ->
-    if @bindings?[event]
-      i = 0
-      while i < @bindings[event].length
-        {handler, ctx, once} = @bindings[event][i]
-
-        handler.apply(ctx ? @, args)
-
-        if once
-          @bindings[event].splice i, 1
-        else
-          i++
-
 Pace = window.Pace or {}
 window.Pace = Pace
 
@@ -44,120 +9,6 @@ for source in ['ajax', 'document', 'eventLag', 'elements']
   # true enables them without configuration, so we grab the config from the defaults
   if options[source] is true
     options[source] = defaultOptions[source]
-
-class NoTargetError extends Error
-
-class Bar
-  constructor: ->
-    @progress = 0
-
-  getElement: ->
-    if not @el?
-      targetElement = document.querySelector options.target
-
-      if not targetElement
-        throw new NoTargetError
-
-      @el = document.createElement 'div'
-      @el.className = "pace pace-active"
-
-      document.body.className = document.body.className.replace /pace-done/g, ''
-      document.body.className += ' pace-running'
-
-      @el.innerHTML = '''
-      <div class="pace-progress">
-        <div class="pace-progress-inner"></div>
-      </div>
-      <div class="pace-activity"></div>
-      '''
-      if targetElement.firstChild?
-        targetElement.insertBefore @el, targetElement.firstChild
-      else
-        targetElement.appendChild @el
-
-    @el
-
-  finish: ->
-    el = @getElement()
-
-    el.className = el.className.replace 'pace-active', ''
-    el.className += ' pace-inactive'
-
-    document.body.className = document.body.className.replace 'pace-running', ''
-    document.body.className += ' pace-done'
-
-  update: (prog) ->
-    @progress = prog
-
-    do @render
-
-  destroy: ->
-    try
-      @getElement().parentNode.removeChild(@getElement())
-    catch NoTargetError
-
-    @el = undefined
-
-  render: ->
-    if not document.querySelector(options.target)?
-      return false
-
-    el = @getElement()
-
-    transform = "translate3d(#{ @progress }%, 0, 0)"
-    for key in ['webkitTransform', 'msTransform', 'transform']
-      el.children[0].style[key] = transform
-
-    if not @lastRenderedProgress or @lastRenderedProgress|0 != @progress|0
-      # The whole-part of the number has changed
-
-      el.children[0].setAttribute 'data-progress-text', "#{ @progress|0 }%"
-
-      if @progress >= 100
-        # We cap it at 99 so we can use prefix-based attribute selectors
-        progressStr = '99'
-      else
-        progressStr = if @progress < 10 then "0" else ""
-        progressStr += @progress|0
-
-      el.children[0].setAttribute 'data-progress', "#{ progressStr }"
-
-    @lastRenderedProgress = @progress
-
-  done: ->
-    @progress >= 100
-
-class Events
-  constructor: ->
-    @bindings = {}
-
-  trigger: (name, val) ->
-    if @bindings[name]?
-      for binding in @bindings[name]
-        binding.call @, val
-
-  on: (name, fn) ->
-    @bindings[name] ?= []
-    @bindings[name].push fn
-
-_XMLHttpRequest = window.XMLHttpRequest
-_XDomainRequest = window.XDomainRequest
-_WebSocket = window.WebSocket
-
-extendNative = (to, from) ->
-  for key of from::
-    try
-      if not to[key]? and typeof from[key] isnt 'function'
-        if typeof Object.defineProperty is 'function'
-          Object.defineProperty(to, key, {
-             get: ->
-                 return from::[key];
-              ,
-              configurable: true,
-              enumerable: true })
-        else
-          to[key] = from::[key]
-    catch e
 
 ignoreStack = []
 
@@ -185,59 +36,10 @@ shouldTrack = (method='GET') ->
 
   return false
 
-# We should only ever instantiate one of these
-class RequestIntercept extends Events
-  constructor: ->
-    super
-
-    monitorXHR = (req) =>
-      _open = req.open
-      req.open = (type, url, async) =>
-        if shouldTrack(type)
-          @trigger 'request', {type, url, request: req}
-
-        _open.apply req, arguments
-
-    window.XMLHttpRequest = (flags) ->
-      req = new _XMLHttpRequest(flags)
-
-      monitorXHR req
-
-      req
-
-    try
-      extendNative window.XMLHttpRequest, _XMLHttpRequest
-
-    if _XDomainRequest?
-      window.XDomainRequest = ->
-        req = new _XDomainRequest
-
-        monitorXHR req
-
-        req
-
-      try
-        extendNative window.XDomainRequest, _XDomainRequest
-
-    if _WebSocket? and options.ajax.trackWebSockets
-      window.WebSocket = (url, protocols) =>
-        if protocols?
-          req = new _WebSocket(url, protocols)
-        else
-          req = new _WebSocket(url)
-
-        if shouldTrack('socket')
-          @trigger 'request', {type: 'socket', url, protocols, request: req}
-
-        req
-
-      try
-        extendNative window.WebSocket, _WebSocket
-
 _intercept = null
 getIntercept = ->
   if not _intercept?
-    _intercept = new RequestIntercept
+    _intercept = new RequestIntercept(options, shouldTrack)
   _intercept
 
 shouldIgnoreURL = (url) ->
@@ -399,7 +201,7 @@ class EventLagMonitor
       if samples.length > options.eventLag.sampleCount
         samples.shift()
 
-      avg = avgAmplitude samples
+      avg = average samples
 
       if ++points >= options.eventLag.minSamples and avg < options.eventLag.lagThreshold
         @progress = 100
@@ -501,7 +303,7 @@ do init = ->
   for source in options.extraSources ? []
     sources.push new source(options)
 
-  Pace.bar = bar = new Bar
+  Pace.bar = bar = new Bar(options)
 
   # Each source of progress data has it's own scaler to smooth its output
   scalers = []

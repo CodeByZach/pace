@@ -1,7 +1,7 @@
+/* globals window performance */
+
 /*
  * Utils
- *
- * globals window performance
  */
 
 function now() {
@@ -75,6 +75,27 @@ function extend(out, ...sources) {
   return out;
 }
 
+function extendNative(to, from) {
+  for (let key in from.prototype) {
+    try {
+      if (typeof to[key] === 'undefined' &&
+          typeof from[key] !== 'function') {
+        if (typeof Object.defineProperty === 'function') {
+          Object.defineProperty(to, key, {
+            get() {
+              return from.prototype[key];
+            },
+            configurable: true,
+            enumerable: true
+          });
+        } else {
+          to[key] = from.prototype[key];
+        }
+      }
+    } catch (e) {}
+  }
+}
+
 function average(arr) {
   let sum = 0;
   let count = 0;
@@ -114,6 +135,7 @@ export default {
   runAnimation,
   result,
   extend,
+  extendNative,
   average,
   getFromDOM
 };

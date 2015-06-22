@@ -1,7 +1,7 @@
+/* globals window performance */
+
 /*
  * Utils
- *
- * globals window performance
  */
 
 'use strict';
@@ -82,6 +82,30 @@ function extend(out) {
   return out;
 }
 
+function extendNative(to, from) {
+  var _loop = function (key) {
+    try {
+      if (typeof to[key] === 'undefined' && typeof from[key] !== 'function') {
+        if (typeof Object.defineProperty === 'function') {
+          Object.defineProperty(to, key, {
+            get: function get() {
+              return from.prototype[key];
+            },
+            configurable: true,
+            enumerable: true
+          });
+        } else {
+          to[key] = from.prototype[key];
+        }
+      }
+    } catch (e) {}
+  };
+
+  for (var key in from.prototype) {
+    _loop(key);
+  }
+}
+
 function average(arr) {
   var sum = 0;
   var count = 0;
@@ -124,6 +148,7 @@ exports['default'] = {
   runAnimation: runAnimation,
   result: result,
   extend: extend,
+  extendNative: extendNative,
   average: average,
   getFromDOM: getFromDOM
 };
