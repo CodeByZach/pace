@@ -44,19 +44,19 @@ gulp.task('clean', function() {
 
 // Javascript
 gulp.task('js', function() {
-  gulp.src('./src/js/**/*.js')
+  gulp.src('./src/**/*.js')
     .pipe(plumber())
     .pipe(babel())
     .pipe(umd(umdOptions))
     .pipe(header(banner))
 
     // Original
-    .pipe(gulp.dest(distDir + '/js'))
+    .pipe(gulp.dest(distDir))
 
     // Minified
     .pipe(uglify())
     .pipe(rename({suffix: '.min'}))
-    .pipe(gulp.dest(distDir + '/js'));
+    .pipe(gulp.dest(distDir));
 });
 
 
@@ -74,7 +74,7 @@ gulp.task('themes', function(done) {
 
           var name = path.basename(file);
           name = name.replace('.tmpl', '');
-          var pathname = path.join('./themes_new', colorName, name);
+          var pathname = path.join('./themes', colorName, name);
           mkdirp.sync(path.dirname(pathname));
           fs.writeFileSync(pathname, body);
         });
@@ -100,7 +100,7 @@ for (var i = 0; i < VERSIONS.length; ++i){
 
 // Watch
 gulp.task('watch', ['js', 'themes'], function() {
-  gulp.watch('./src/js/**/*', ['js']);
+  gulp.watch('./src/**/*', ['js']);
   gulp.watch('./templates/**/*', ['themes']);
 });
 
