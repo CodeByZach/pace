@@ -16,7 +16,6 @@
     "url": "git://github.com/HubSpot/pace.git"
   },
   "devDependencies": {
-    "chai": "^3.0.0",
     "coffee-script": "~1.6.3",
     "color": "~0.4.4",
     "del": "^1.1.1",
@@ -35,9 +34,6 @@
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^2.0.1",
     "gulp-uglify": "^1.2.0",
-    "gulp-wrap-umd": "^0.2.1",
-    "mocha": "^2.2.5",
-    "sinon": "^1.15.3",
-    "sinon-chai": "^2.8.0"
+    "gulp-wrap-umd": "^0.2.1"
   }
 }

@@ -4,6 +4,7 @@ var babel       = require('gulp-babel');
 var bump        = require('gulp-bump');
 var header      = require('gulp-header');
 var minify      = require('gulp-minify-css');
+var plumber     = require('gulp-plumber');
 var prefixer    = require('gulp-autoprefixer');
 var rename      = require('gulp-rename');
 var uglify      = require('gulp-uglify');
@@ -16,7 +17,7 @@ var pkg = require('./package.json');
 var banner = ['/*!', pkg.name, pkg.version, '*/\n'].join(' ');
 var umdOptions = {
   exports: 'Pace',
-  namespace: 'Pace',
+  namespace: 'Pace'
 };
 
 
@@ -29,17 +30,18 @@ gulp.task('clean', function() {
 // Javascript
 gulp.task('js', function() {
   gulp.src('./src/js/**/*.js')
+    .pipe(plumber())
     .pipe(babel())
-    // .pipe(umd(umdOptions))
-    // .pipe(header(banner))
+    .pipe(umd(umdOptions))
+    .pipe(header(banner))
 
     // Original
     .pipe(gulp.dest(distDir + '/js'))
 
     // Minified
-    // .pipe(uglify())
-    // .pipe(rename({suffix: '.min'}))
-    // .pipe(gulp.dest(distDir + '/js'));
+    .pipe(uglify())
+    .pipe(rename({suffix: '.min'}))
+    .pipe(gulp.dest(distDir + '/js'));
 });
 
 
@@ -59,6 +61,9 @@ gulp.task('css', function() {
     .pipe(rename({suffix: '.min'}))
     .pipe(gulp.dest(distDir + '/css'));
 });
+
+
+// Themes
 
 
 // Version bump
