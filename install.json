@@ -21,7 +21,7 @@
   "options": {
     "properties": {
       "color": {
-        "order": 0,
+        "order": 1,
         "title": "Color",
         "type": "string",
         "enum": [
@@ -51,7 +51,7 @@
         "default": "blue"
       },
       "theme": {
-        "order": 1,
+        "order": 2,
         "title": "Theme",
         "type": "string",
         "enum": [
@@ -89,10 +89,38 @@
         "default": "barber-shop"
       },
       "hidePage": {
-        "order": 2,
+        "order": 3,
         "title": "Hide everything but PACE until the page has fully loaded",
         "type": "boolean",
         "default": false
+      },
+      "showAdvanced": {
+        "order": 3,
+        "title": "Show advanced options",
+        "type": "boolean",
+        "default": false
+      },
+      "advancedOptions": {
+        "order": 4,
+        "showIf": {
+          "showAdvanced": true
+        },
+        "notitle": true,
+        "type": "object",
+        "properties": {
+          "disableOnPushState": {
+            "order": 1,
+            "title": "Disable loading animations for <code class=\"inline\">pushState</code> navigations",
+            "type": "boolean",
+            "default": false
+          },
+          "disableOnAJAX": {
+            "order": 2,
+            "title": "Disable loading animations for AJAX requests",
+            "type": "boolean",
+            "default": false
+          }
+        }
       }
     }
   }
