@@ -3,6 +3,16 @@
     "head": [
       {
         "type": "script",
+        "if": "options.advancedOptions.disableOnPushState",
+        "contents": "window.paceOptions = window.paceOptions || {}; window.paceOptions.restartOnPushState = false;"
+      },
+      {
+        "type": "script",
+        "if": "options.advancedOptions.disableOnAJAX",
+        "contents": "window.paceOptions = window.paceOptions || {}; window.paceOptions.restartOnRequestAfter = false;"
+      },
+      {
+        "type": "script",
         "src": "./pace.js",
         "moduleType": "global",
         "exports": ["Pace"]
@@ -110,13 +120,13 @@
         "properties": {
           "disableOnPushState": {
             "order": 1,
-            "title": "Disable loading animations for <code class=\"inline\">pushState</code> navigations",
+            "title": "Don't restart the progress bar during <code class=\"inline\">pushState</code> navigations",
             "type": "boolean",
             "default": false
           },
           "disableOnAJAX": {
             "order": 2,
-            "title": "Disable loading animations for AJAX requests",
+            "title": "Don't restart the progress bar during long AJAX requests",
             "type": "boolean",
             "default": false
           }
