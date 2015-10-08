@@ -4,12 +4,14 @@
       {
         "type": "script",
         "if": "options.advancedOptions.disableOnPushState",
-        "contents": "window.paceOptions = window.paceOptions || {}; window.paceOptions.restartOnPushState = false;"
+        "contents": "window.paceOptions = window.paceOptions || {}; window.paceOptions.restartOnPushState = false;",
+        "moduleType": "global"
       },
       {
         "type": "script",
         "if": "options.advancedOptions.disableOnAJAX",
-        "contents": "window.paceOptions = window.paceOptions || {}; window.paceOptions.restartOnRequestAfter = false;"
+        "contents": "window.paceOptions = window.paceOptions || {}; window.paceOptions.restartOnRequestAfter = false;",
+        "moduleType": "global"
       },
       {
         "type": "script",
