@@ -118,13 +118,13 @@
         "properties": {
           "disableOnPushState": {
             "order": 1,
-            "title": "Don't restart the progress bar during <code class=\"inline\">pushState</code> navigations",
+            "title": "Don’t restart the progress bar during <code class=\"inline\">pushState</code> navigations",
             "type": "boolean",
             "default": false
           },
           "disableOnAJAX": {
             "order": 2,
-            "title": "Don't restart the progress bar during long AJAX requests",
+            "title": "Don’t restart the progress bar during long AJAX requests",
             "type": "boolean",
             "default": false
           }
