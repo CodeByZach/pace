@@ -340,7 +340,7 @@ class RequestIntercept extends Events
 
         _open.apply req, arguments
 
-    window.XMLHttpRequest = (flags) ->
+    window.XMLHttpRequest_ = (flags) ->
       req = new _XMLHttpRequest(flags)
 
       monitorXHR req
@@ -348,7 +348,7 @@ class RequestIntercept extends Events
       req
 
     try
-      extendNative window.XMLHttpRequest, _XMLHttpRequest
+      extendNative window.XMLHttpRequest_, _XMLHttpRequest
 
     if _XDomainRequest?
       window.XDomainRequest = ->
