@@ -434,14 +434,14 @@ class AjaxMonitor
     return if shouldIgnoreURL(url)
 
     if type is 'socket'
-      tracker = new SocketRequestTracker(request, this.complete)
+      tracker = new SocketRequestTracker(request, @complete)
     else
-      tracker = new XHRRequestTracker(request, this.complete)
+      tracker = new XHRRequestTracker(request, @complete)
 
     @elements.push tracker
 
   complete: (tracker) =>
-    @elements = @elements.filter (e) -> e != tracker
+    @elements = @elements.filter (e) -> e isnt tracker
 
 class XHRRequestTracker
   constructor: (request, completeCallback) ->
@@ -463,7 +463,7 @@ class XHRRequestTracker
 
       for event in ['load', 'abort', 'timeout', 'error']
         request.addEventListener event, =>
-          completeCallback(this)
+          completeCallback(@)
           @progress = 100
         , false
 
@@ -471,7 +471,7 @@ class XHRRequestTracker
       _onreadystatechange = request.onreadystatechange
       request.onreadystatechange = =>
         if request.readyState in [0, 4]
-          completeCallback(this)
+          completeCallback(@)
           @progress = 100
         else if request.readyState is 3
           @progress = 50
@@ -484,7 +484,7 @@ class SocketRequestTracker
 
     for event in ['error', 'open']
       request.addEventListener event, =>
-        completeCallback(this)
+        completeCallback(@)
         @progress = 100
       , false
 
@@ -494,10 +494,10 @@ class ElementMonitor
 
     options.selectors ?= []
     for selector in options.selectors
-      @elements.push new ElementTracker(selector, this.complete)
+      @elements.push new ElementTracker(selector, @complete)
 
   complete: (tracker) =>
-    @elements = @elements.filter (e) -> e != tracker
+    @elements = @elements.filter (e) -> e isnt tracker
 
 class ElementTracker
   constructor: (@selector, @completeCallback) ->
@@ -513,7 +513,7 @@ class ElementTracker
         options.elements.checkInterval
 
   done: ->
-    @completeCallback(this)
+    @completeCallback(@)
     @completeCallback = null
     @progress = 100
 
