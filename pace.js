@@ -245,7 +245,9 @@
         this.el = document.createElement('div');
         this.el.className = "pace pace-active";
         document.body.className = document.body.className.replace(/pace-done/g, '');
-        document.body.className += ' pace-running';
+        if (!/pace-running/.test(document.body.className)) {
+          document.body.className += ' pace-running';
+        }
         this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
         if (targetElement.firstChild != null) {
           targetElement.insertBefore(this.el, targetElement.firstChild);
@@ -434,14 +436,14 @@
           return _open.apply(req, arguments);
         };
       };
-      window.XMLHttpRequest = function(flags) {
+      window.XMLHttpRequest_ = function(flags) {
         var req;
         req = new _XMLHttpRequest(flags);
         monitorXHR(req);
         return req;
       };
       try {
-        extendNative(window.XMLHttpRequest, _XMLHttpRequest);
+        extendNative(window.XMLHttpRequest_, _XMLHttpRequest);
       } catch (_error) {}
       if (_XDomainRequest != null) {
         window.XDomainRequest = function() {
