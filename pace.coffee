@@ -151,13 +151,11 @@ addClass = (el, className) ->
 
 removeClass = (el, className) ->
   classNamesArray = el.className.split(/ +/)
-  classNameIndex
-  for c, i in classNamesArray
-    if c == className
-      classNameIndex = i
-      break
-  classNamesArray.splice(classNameIndex, 1)
-  el.className = classNamesArray.join(' ')
+  cleanClassNamesArray = []
+  for c in classNamesArray
+    if c != className
+      cleanClassNamesArray.push(c)
+  el.className = cleanClassNamesArray.join(' ')
   return
 
 class Evented
