@@ -141,7 +141,11 @@ getFromDOM = (key='options', json=true) ->
 
 addClass = (el, className) ->
   classNamesArray = el.className.split(/ +/)
-  classNamesArray.push className
+  for c in classNamesArray
+    if c == className
+      el.className = classNamesArray.join(' ')
+      return
+  classNamesArray.push(className)
   el.className = classNamesArray.join(' ')
   return
 
