@@ -920,16 +920,16 @@
     }
   };
 
-  if (typeof define === 'function' && define.amd) {
-    define(['pace'], function() {
-      return Pace;
-    });
-  } else if (typeof exports === 'object') {
-    module.exports = Pace;
-  } else {
-    if (options.startOnPageLoad) {
-      Pace.start();
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define([], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        module.exports = factory();
+    } else {
+        root.Pace = factory();
     }
-  }
+}(this, function () {
+    return Pace;
+}));
 
 }).call(this);
