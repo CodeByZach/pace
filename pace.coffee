@@ -332,25 +332,25 @@ class RequestIntercept extends Events
   constructor: ->
     super
 
-    monitorXHR = (req) =>
-      _open = req.open
-      req.open = (type, url, async) =>
-        if shouldTrack(type)
-          @trigger 'request', {type, url, request: req}
+    oldOpen = _XMLHttpRequest.prototype.open
+    _XMLHttpRequest.prototype.open = (type, url, async) -> 
+      if shouldTrack(type)
+        _this.trigger 'request', {type, url, request: @}
 
-        _open.apply req, arguments
-
-    window.XMLHttpRequest = (flags) ->
-      req = new _XMLHttpRequest(flags)
-
-      monitorXHR req
-
-      req
+      oldOpen.apply(@, arguments)
 
     try
       extendNative window.XMLHttpRequest, _XMLHttpRequest
 
     if _XDomainRequest?
+      monitorXHR = (req) =>
+        _open = req.open
+        req.open = (type, url, async) =>
+          if shouldTrack(type)
+            @trigger 'request', {type, url, request: req}
+
+          _open.apply req, arguments
+
       window.XDomainRequest = ->
         req = new _XDomainRequest
 
