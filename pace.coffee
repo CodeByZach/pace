@@ -746,7 +746,7 @@ Pace.start = (_options) ->
 
 if typeof define is 'function' and define.amd
   # AMD
-  define ['pace'], -> Pace
+  define -> Pace
 else if typeof exports is 'object'
   # CommonJS
   module.exports = Pace
