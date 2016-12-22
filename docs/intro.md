@@ -172,7 +172,7 @@ whenever `pushState` or `replaceState` is called by default.
 
 - `Pace.track`: Explicitly track one or more requests, see Tracking below
 
-- `Pace.ignore`: Expliticly ignore one or more requests, see Tracking below
+- `Pace.ignore`: Explicitly ignore one or more requests, see Tracking below
 
 Events
 ------
