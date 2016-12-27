@@ -216,7 +216,9 @@ class Bar
         targetElement.insertBefore @el, targetElement.firstChild
       else
         targetElement.appendChild @el
-
+        
+      options.start() if options.start && typeof options.start is 'function'
+    
     @el
 
   finish: ->
@@ -224,6 +226,8 @@ class Bar
 
     el.className = el.className.replace 'pace-active', ''
     el.className += ' pace-inactive'
+    
+    options.stop() if options.stop && typeof options.stop is 'function'
 
     document.body.className = document.body.className.replace 'pace-running', ''
     document.body.className += ' pace-done'
