@@ -1,6 +1,6 @@
 {
   "name": "pace",
-  "version": "0.7.7",
+  "version": "0.7.8",
   "description": "Automatic page load progress bar",
   "authors": [
     "Zack Bloom <zackbloom@gmail.com>",
