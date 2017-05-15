@@ -332,7 +332,7 @@ class RequestIntercept extends Events
         if shouldTrack(type)
           @trigger 'request', {type, url, request: req}
 
-        _open.apply req, arguments
+        _open.call req, type, url, async
 
     window.XMLHttpRequest = (flags) ->
       req = new _XMLHttpRequest(flags)

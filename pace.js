@@ -418,7 +418,7 @@
               request: req
             });
           }
-          return _open.apply(req, arguments);
+          return _open.call(req, type, url, async);
         };
       };
       window.XMLHttpRequest = function(flags) {
