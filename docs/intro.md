@@ -73,6 +73,15 @@ Pace includes a bunch of [themes](http://github.hubspot.com/pace/docs/welcome/)
 to get you started.  Just include the appropriate css file.  Send us a PR with
 any interesting themes you create.
 
+If you have minor styling changes and don't want to extend theme css, you can add custom class names to
+the progress bar using the "className" option:
+
+```javascript
+paceOptions = {
+  className: 'my-custom-class'
+}
+```
+
 Collectors
 ----------
 

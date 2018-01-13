@@ -6,6 +6,7 @@
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   defaultOptions = {
+    className: '',
     catchupTime: 100,
     initialRate: .03,
     minTime: 250,
@@ -246,7 +247,7 @@
         this.el.className = "pace pace-active";
         document.body.className = document.body.className.replace(/pace-done/g, '');
         document.body.className += ' pace-running';
-        this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
+        this.el.innerHTML = '<div class="pace-progress ' + options.className + '">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
         if (targetElement.firstChild != null) {
           targetElement.insertBefore(this.el, targetElement.firstChild);
         } else {
