@@ -372,6 +372,7 @@
         e = _error;
       }
     }
+    to.prototype = Object.getPrototypeOf(new from);
     return _results;
   };
 
