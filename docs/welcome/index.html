@@ -3,26 +3,30 @@
 <!--[if IE 7]>    <html class="no-js ie7 ie9-and-less ie8-and-less ie7-and-less" lang="en"> <![endif]-->
 <!--[if IE 8]>    <html class="no-js ie8 ie9-and-less ie8-and-less" lang="en"> <![endif]-->
 <!--[if IE 9]>    <html class="no-js ie9 ie9-and-less" lang="en"> <![endif]-->
-<!--[if gt IE 9]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="chrome=1">
-        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-        <title>PACE — Automatic page load progress bars</title>
-        <meta name="description" content="Pace is a Javascript and CSS library to automatically add beautiful progress and activity indicators for page loads and ajax navigation. It is free and open source and was developed by HubSpot developers Adam Schwartz (@adamfschwartz) and Zack Bloom (@zackbloom).">
-        <link rel="icon" href="http://static.hubspot.com/favicon.ico">
-        <script type="text/javascript" src="//use.typekit.net/jbn8qxr.js"></script>
-        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
-        <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-        <script src="/pace/docs/lib/color.js"></script>
-        <script src="/pace/docs/lib/themes.js"></script>
-        <script src="/pace/pace.js"></script>
-        <link href="/pace/docs/resources/flash-white.css" rel="stylesheet" />
-    </head>
-    <body>
-        <style id="app-colors">
-            .section.colored, a.download-src-link, .button {
+<!--[if gt IE 9]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>PACE — Automatic page load progress bars</title>
+    <meta name="description" content="Pace is a Javascript and CSS library to automatically add beautiful progress and activity indicators for page loads and ajax navigation. It is free and open source and was developed by HubSpot developers Adam Schwartz (@adamfschwartz) and Zack Bloom (@zackbloom).">
+    <link rel="icon" href="http://static.hubspot.com/favicon.ico">
+    <script type="text/javascript" src="//use.typekit.net/jbn8qxr.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+    <script type="text/javascript">try { Typekit.load(); } catch (e) { }</script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script src="/pace/docs/lib/color.js"></script>
+    <script src="/pace/docs/lib/themes.js"></script>
+    <script src="/pace/pace.js"></script>
+    <link href="/pace/docs/resources/flash-white.css" rel="stylesheet" />
+</head>
+
+<body>
+    <style id="app-colors">
+        .section.colored, a.download-src-link, .button {
                 background: #29d;
             }
 
@@ -30,8 +34,8 @@
                 color: #29d;
             }
         </style>
-        <style>
-            html, body {
+    <style>
+        html, body {
                 margin: 0;
                 height: 100%;
                 color: #000;
@@ -413,215 +417,232 @@
             }
         </style>
 
-        <div class="section colored">
-            <div class="header">
-                <div class="title">
-                    <h1 class="title1"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
-                    <h1 class="title2"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
-                </div>
-                <div class="subtitle">
-                    <h3>Automatic page load progress bar</h3>
-                </div>
+    <div class="section colored">
+        <div class="header">
+            <div class="title">
+                <h1 class="title1"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span
+                        class="char4">e</span></h1>
+                <h1 class="title2"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span
+                        class="char4">e</span></h1>
             </div>
-            <div class="down-arrow">⇪</div>
+            <div class="subtitle">
+                <h3>Automatic page load progress bar</h3>
+            </div>
         </div>
+        <div class="down-arrow">⇪</div>
+    </div>
 
-        <div class="section">
-            <div class="page">
-                <h2>What is Pace?</h2>
-                <p style="text-align: left">Include pace.js and a CSS theme of your choice, and you get a beautiful progress indicator for your page load and ajax navigation.</p>
-                <p style="text-align: left">No need to hook into any of your code, progress is detected automatically.</p>
-                <br/>
-                <br/>
-                <h2>Download</h2>
-                <p>If you’re a developer, download Pace directly here:</p>
-                <p><a class="button" href="https://raw.github.com/HubSpot/pace/v1.0.0/pace.min.js">Pace.js</a></p>
-                <br/>
-                <h2>Themes</h2>
-                <label class="color-label" for="color-select">Enter a color:</label>
-                <input type="color" value="#2299dd" id="color-select"></input>
-                <div class="themes"></div>
-                <p class="block">Submit a theme! <a href="https://github.com/HubSpot/pace">Fork us on GitHub</a></p>
-                <p class="block"><a class="button" href="http://github.hubspot.com/pace/">Documentation</a></p>
-                <br/>
-                <p style="font-size: 0.6rem"><a href="http://dev.hubspot.com">HubSpot</a></p>
-                <br/>
-                <br/>
-                <script>
-                    $(function(){
-                        if (!Modernizr.inputtypes.color)
-                            $('.color-label').show();
+    <div class="section">
+        <div class="page">
+            <h2>What is Pace?</h2>
+            <p style="text-align: left">Include pace.js and a CSS theme of your choice, and you get a beautiful
+                progress indicator for your page load and ajax navigation.</p>
+            <p style="text-align: left">No need to hook into any of your code, progress is detected automatically.</p>
+            <br />
+            <br />
+            <h2>Download</h2>
+            <p>If you’re a developer, download Pace directly here:</p>
+            <p><a class="button" href="https://raw.github.com/HubSpot/pace/v1.0.0/pace.min.js">Pace.js</a></p>
+            <br />
+            <h2>Themes</h2>
+            <label class="color-label" for="color-select">Enter a color:</label>
+            <input type="color" value="#2299dd" id="color-select"></input>
+            <div class="themes"></div>
+            <p class="block">Submit a theme! <a href="https://github.com/HubSpot/pace">Fork us on GitHub</a></p>
+            <p class="block"><a class="button" href="http://github.hubspot.com/pace/">Documentation</a></p>
+            <br />
+            <p style="font-size: 0.6rem"><a href="http://dev.hubspot.com">HubSpot</a></p>
+            <br />
+            <br />
+            <script>
+                $(function () {
+                    if (!Modernizr.inputtypes.color)
+                        $('.color-label').show();
 
-                        var themes = [{
-                            name: 'minimal',
-                            title: 'Minimal',
-                            author: 'adamschwartz'
-                        }, {
-                            name: 'flash',
-                            title: 'Flash',
-                            author: 'adamschwartz'
-                        }, {
-                            name: 'barber-shop',
-                            title: 'Barber Shop',
-                            author: 'adamschwartz'
-                        }, {
-                            name: 'mac-osx',
-                            title: 'Mac OSX',
-                            author: 'adamschwartz'
-                        }, {
-                            name: 'fill-left',
-                            title: 'Fill Left',
-                            author: 'adamschwartz'
-                        }, {
-                            name: 'flat-top',
-                            title: 'Flat Top',
-                            author: 'adamschwartz'
-                        }, {
-                            name: 'big-counter',
-                            title: 'Big Counter',
-                            author: 'adamschwartz'
-                        }, {
-                            name: 'corner-indicator',
-                            title: 'Corner Indicator',
-                            author: 'adamschwartz'
-                        }, {
-                            name: 'bounce',
-                            title: 'Bounce',
-                            author: 'adamschwartz'
-                        }, {
-                            name: 'loading-bar',
-                            title: 'Loading Bar',
-                            author: 'gavJackson'
-                        }, {
-                            name: 'center-circle',
-                            title: 'Center Circle',
-                            author: 'adamschwartz'
-                        }, {
-                            name: 'center-atom',
-                            title: 'Center Atom',
-                            author: 'kennyglenn'
-                        }, {
-                            name: 'center-radar',
-                            title: 'Center Radar',
-                            author: 'kennyglenn'
-                        }, {
-                            name: 'center-simple',
-                            title: 'Center Simple',
-                            author: 'dineshgithub'
-                        }];
+                    var themes = [{
+                        name: 'minimal',
+                        title: 'Minimal',
+                        author: 'adamschwartz'
+                    }, {
+                        name: 'flash',
+                        title: 'Flash',
+                        author: 'adamschwartz'
+                    }, {
+                        name: 'barber-shop',
+                        title: 'Barber Shop',
+                        author: 'adamschwartz'
+                    }, {
+                        name: 'mac-osx',
+                        title: 'Mac OSX',
+                        author: 'adamschwartz'
+                    }, {
+                        name: 'fill-left',
+                        title: 'Fill Left',
+                        author: 'adamschwartz'
+                    }, {
+                        name: 'flat-top',
+                        title: 'Flat Top',
+                        author: 'adamschwartz'
+                    }, {
+                        name: 'big-counter',
+                        title: 'Big Counter',
+                        author: 'adamschwartz'
+                    }, {
+                        name: 'corner-indicator',
+                        title: 'Corner Indicator',
+                        author: 'adamschwartz'
+                    }, {
+                        name: 'bounce',
+                        title: 'Bounce',
+                        author: 'adamschwartz'
+                    }, {
+                        name: 'loading-bar',
+                        title: 'Loading Bar',
+                        author: 'gavJackson'
+                    }, {
+                        name: 'center-circle',
+                        title: 'Center Circle',
+                        author: 'adamschwartz'
+                    }, {
+                        name: 'center-atom',
+                        title: 'Center Atom',
+                        author: 'kennyglenn'
+                    }, {
+                        name: 'center-radar',
+                        title: 'Center Radar',
+                        author: 'kennyglenn'
+                    }, {
+                        name: 'center-simple',
+                        title: 'Center Simple',
+                        author: 'dineshgithub'
+                    }];
 
-                        var init = function() {
-                            $.each(themes, function(i, theme){
-                                $('.themes').append('<div class="theme ' + (i % 2 === 0 ? 'even' : 'odd') + '">'+
-                                    '<h3>' + theme.title + '</h3>' +
-                                    (theme.author ? '<br/><a class="author" href="https://github.com/' + theme.author + '" target="_blank" rel="nofollow">@' + theme.author + '</a></h4>' : '') +
-                                    '<p><a href="#" class="download-link" data-theme="' + theme.name + '">download</a></p>'+
-                                    '<div class="browser"><iframe data-theme="' + theme.name + '"></iframe></div>' +
+                    var init = function () {
+                        $.each(themes, function (i, theme) {
+                            $('.themes').append('<div class="theme ' + (i % 2 === 0 ? 'even' : 'odd') + '">' +
+                                '<h3>' + theme.title + '</h3>' +
+                                (theme.author ? '<br/><a class="author" href="https://github.com/' + theme.author + '" target="_blank" rel="nofollow">@' + theme.author + '</a></h4>' : '') +
+                                '<p><a href="#" class="download-link" data-theme="' + theme.name + '">copy to clipboard</a></p>' +
+                                '<div class="browser"><iframe data-theme="' + theme.name + '"></iframe></div>' +
                                 '</div>');
+                        });
+
+                        var $color = $('input[type="color"]');
+
+                        var cssCache = {};
+                        var initFrame = function (frame, color) {
+                            if ($color.val() != '#2299dd')
+                                color = $color.val();
+
+                            var $styleEl = $('<style>')
+                            $(frame).contents().find('body').append($styleEl);
+
+                            var context = {};
+                            if (color)
+                                context.color = color;
+
+                            var themeName = $(frame).data('theme')
+                            loadTheme(themeName, function (theme) {
+                                body = compileTheme(theme, context);
+
+                                cssCache[themeName] = body;
+
+                                $styleEl.html(body);
                             });
 
-                            var $color = $('input[type="color"]');
+                            $(frame).contents().find('.pace').addClass('pace-active');
+                        };
 
-                            var cssCache = {};
-                            var initFrame = function(frame, color){
-                                if ($color.val() != '#2299dd')
-                                    color = $color.val();
+                        var updateColor = function (color) {
+                            $('.browser iframe').each(function () {
+                                initFrame(this, color);
+                            });
+                        };
 
-                                var $styleEl = $('<style>')
-                                $(frame).contents().find('body').append($styleEl);
+                        var downloadTheme = function (theme, ele) {
+                            var textarea = document.createElement('textarea');
+                            document.body.appendChild(textarea);
+                            textarea.value = cssCache[theme];
+                            textarea.select();
+                            textarea.setSelectionRange(0, 999999); // Needed for iOS Safari
+                            try {
+                                document.execCommand('copy');
+                                ele.text('copied!');
+                                setTimeout(function () {
+                                    ele.text('copy to clipboard');
+                                }, 2500)
+                            } catch (err) {
+                                /* Ignore error */
+                            }
+                            document.body.removeChild(textarea);
+                        };
 
-                                var context = {};
-                                if (color)
-                                    context.color = color;
+                        $('.browser iframe').each(function () {
+                            var _this = this;
 
-                                var themeName = $(frame).data('theme')
-                                loadTheme(themeName, function(theme){
-                                    body = compileTheme(theme, context);
-
-                                    cssCache[themeName] = body;
-
-                                    $styleEl.html(body);
-                                });
-
-                                $(frame).contents().find('.pace').addClass('pace-active');
-                            };
-
-                            var updateColor = function(color){
-                                $('.browser iframe').each(function(){
-                                    initFrame(this, color);
-                                });
-                            };
-
-                            var downloadTheme = function(theme){
-                                location.href = 'data:text/css,' + encodeURIComponent(cssCache[theme]);
-                            };
-
-                            $('.browser iframe').each(function(){
-                                var _this = this;
-
-                                doc = (this.contentWindow || this.documentWindow).document;
-                                doc.open();
-                                doc.write('' +
-                                    '<div class="pace">' +
-                                        '<div class="pace-progress" data-progress="50" data-progress-text="50%" style="-webkit-transform: translate3d(50%, 0px, 0px); -ms-transform: translate3d(50%, 0px, 0px); transform: translate3d(50%, 0px, 0px);">' +
-                                            '<div class="pace-progress-inner"></div>' +
-                                        '</div>' +
-                                        '<div class="pace-activity"></div>' +
-                                    '</div>' +
+                            doc = (this.contentWindow || this.documentWindow).document;
+                            doc.open();
+                            doc.write('' +
+                                '<div class="pace">' +
+                                '<div class="pace-progress" data-progress="50" data-progress-text="50%" style="-webkit-transform: translate3d(50%, 0px, 0px); -ms-transform: translate3d(50%, 0px, 0px); transform: translate3d(50%, 0px, 0px);">' +
+                                '<div class="pace-progress-inner"></div>' +
+                                '</div>' +
+                                '<div class="pace-activity"></div>' +
+                                '</div>' +
                                 '');
-                                doc.close();
+                            doc.close();
 
-                                // For some strange reason, the Color library we depend on defines itself
-                                // asyncronously
-                                setTimeout(function(){
-                                    initFrame(_this);
-                                }, 0);
-                            });
+                            // For some strange reason, the Color library we depend on defines itself
+                            // asyncronously
+                            setTimeout(function () {
+                                initFrame(_this);
+                            }, 0);
+                        });
 
-                            $color.on('change keyup', function(){
-                                var color = $(this).val();
-                                updateColor(color);
+                        $color.on('change keyup', function () {
+                            var color = $(this).val();
+                            updateColor(color);
 
-                                var css = '.section.colored, a.button { background: ' + color + '; } a, a:hover, a:active, .header .title .title2:before { color: ' + color + '; }';
-                                if ($('html').hasClass('ie8-and-less')) {
-                                    $('#app-colors').get(0).styleSheet.cssText = css
-                                } else {
-                                    $('#app-colors').html(css);
-                                }
-                            });
+                            var css = '.section.colored, a.button { background: ' + color + '; } a, a:hover, a:active, .header .title .title2:before { color: ' + color + '; }';
+                            if ($('html').hasClass('ie8-and-less')) {
+                                $('#app-colors').get(0).styleSheet.cssText = css
+                            } else {
+                                $('#app-colors').html(css);
+                            }
+                        });
 
-                            $('a.download-link').click(function(e){
-                                e.preventDefault();
+                        $('a.download-link').click(function (e) {
+                            e.preventDefault();
 
-                                var theme = $(this).data('theme');
+                            var theme = $(this).data('theme');
 
-                                downloadTheme(theme);
-                            });
-                        };
+                            downloadTheme(theme, $(this));
+                        });
+                    };
 
-                        var initTimeout = setTimeout(function(){
-                            $(window).unbind('scroll', scrollOnce);
-                            init();
-                        }, 3000);
+                    var initTimeout = setTimeout(function () {
+                        $(window).unbind('scroll', scrollOnce);
+                        init();
+                    }, 3000);
 
-                        var scrollOnce = function() {
-                            $(window).unbind('scroll', scrollOnce);
-                            clearTimeout(initTimeout);
-                            init();
-                        };
+                    var scrollOnce = function () {
+                        $(window).unbind('scroll', scrollOnce);
+                        clearTimeout(initTimeout);
+                        init();
+                    };
 
-                        $(window).bind('scroll', scrollOnce);
-                    });
-                </script>
-            </div>
+                    $(window).bind('scroll', scrollOnce);
+                });
+            </script>
         </div>
+    </div>
 
-        <script>setTimeout(function(){ document.body.className = 'page-loaded' }, 0);</script>
+    <script>setTimeout(function () { document.body.className = 'page-loaded' }, 0);</script>
 
-        <!-- Share -->
+    <!-- Share -->
 
-        <style>
-            #retweet_button {
+    <style>
+        #retweet_button {
                 position: fixed;
                 bottom: 30px;
                 left: 30px;
@@ -654,46 +675,51 @@
                 -webkit-filter: none;
             }
         </style>
-        <div id="retweet_button">
-            <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://github.hubspot.com/pace/docs/welcome" data-text="pace.js - Add an automatic page load progress bar to your site" data-count="horizontal" data-via="HubSpotDev">Tweet</a>
-            <script>
-              if (Math.random() >= 0.5)
+    <div id="retweet_button">
+        <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://github.hubspot.com/pace/docs/welcome"
+            data-text="pace.js - Add an automatic page load progress bar to your site" data-count="horizontal" data-via="HubSpotDev">Tweet</a>
+        <script>
+            if (Math.random() >= 0.5)
                 var recommends = ['hubspotdev', 'zackbloom', 'adamfschwartz'];
-              else
+            else
                 var recommends = ['hubspotdev', 'adamfschwartz', 'zackbloom'];
 
-              var $button = $('.twitter-share-button');
-              if ($button.length)
+            var $button = $('.twitter-share-button');
+            if ($button.length)
                 $button.data('related', recommends.join(','));
-            </script>
-            <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
-        </div>
-        <div id="github_stars">
-            <iframe src="http://ghbtns.com/github-btn.html?user=HubSpot&amp;repo=pace&amp;type=watch&amp;count=true&amp;size=small" allowtransparency="true" frameborder="0" scrolling="0" width="200" height="20"></iframe>
-        </div>
-
-        <!-- Start of Async HubSpot Analytics Code -->
-        <script type="text/javascript">
-            (function(d,s,i,r) {
-                if (d.getElementById(i)){return;}
-                var n=d.createElement(s),e=d.getElementsByTagName(s)[0];
-                n.id=i;n.src='//js.hubspot.com/analytics/'+(Math.ceil(new Date()/r)*r)+'/51294.js';
-                e.parentNode.insertBefore(n, e);
-            })(document,"script","hs-analytics",300000);
         </script>
-        <!-- End of Async HubSpot Analytics Code -->
+        <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+    </div>
+    <div id="github_stars">
+        <iframe src="http://ghbtns.com/github-btn.html?user=HubSpot&amp;repo=pace&amp;type=watch&amp;count=true&amp;size=small"
+            allowtransparency="true" frameborder="0" scrolling="0" width="200" height="20"></iframe>
+    </div>
 
-        <script>
-          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    <!-- Start of Async HubSpot Analytics Code -->
+    <script type="text/javascript">
+        (function (d, s, i, r) {
+            if (d.getElementById(i)) { return; }
+            var n = d.createElement(s), e = d.getElementsByTagName(s)[0];
+            n.id = i; n.src = '//js.hubspot.com/analytics/' + (Math.ceil(new Date() / r) * r) + '/51294.js';
+            e.parentNode.insertBefore(n, e);
+        })(document, "script", "hs-analytics", 300000);
+    </script>
+    <!-- End of Async HubSpot Analytics Code -->
 
-          ga('create', 'UA-45159009-1', 'hubspot.com');
-          ga('send', 'pageview');
-        </script>
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date(); a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
-        <!-- Force 3d acceleration always and forever :) -->
-        <div style="-webkit-transform: translateZ(0)"></div>
-    </body>
+        ga('create', 'UA-45159009-1', 'hubspot.com');
+        ga('send', 'pageview');
+    </script>
+
+    <!-- Force 3d acceleration always and forever :) -->
+    <div style="-webkit-transform: translateZ(0)"></div>
+</body>
+
 </html>
