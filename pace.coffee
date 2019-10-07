@@ -79,6 +79,9 @@ requestAnimationFrame = window.requestAnimationFrame or window.mozRequestAnimati
 
 cancelAnimationFrame = window.cancelAnimationFrame or window.mozCancelAnimationFrame
 
+addEventListener = (obj, event, callback) ->
+  obj.addEventListener?(event, callback, false) or obj["on#{event}"] = callback
+
 if not requestAnimationFrame?
   requestAnimationFrame = (fn) ->
     setTimeout fn, 50
@@ -202,9 +205,7 @@ class Bar
       @el = document.createElement 'div'
       @el.className = "pace pace-active"
 
-      document.body.className = document.body.className.replace /pace-done/g, ''
-      if not /pace-running/.test document.body.className
-        document.body.className += ' pace-running'
+      document.body.className = document.body.className.replace /(pace-done)|/, 'pace-running'
 
       @el.innerHTML = '''
       <div class="pace-progress">
@@ -222,11 +223,9 @@ class Bar
   finish: ->
     el = @getElement()
 
-    el.className = el.className.replace 'pace-active', ''
-    el.className += ' pace-inactive'
+    el.className = el.className.replace 'pace-active', 'pace-inactive'
 
-    document.body.className = document.body.className.replace 'pace-running', ''
-    document.body.className += ' pace-done'
+    document.body.className = document.body.className.replace 'pace-running', 'pace-done'
 
   update: (prog) ->
     @progress = prog
@@ -411,7 +410,7 @@ getIntercept().on 'request', ({type, request, url}) ->
 
     setTimeout ->
       if type is 'socket'
-        stillActive = request.readyState < 2
+        stillActive = request.readyState < 1
       else
         stillActive = 0 < request.readyState < 4
 
@@ -434,21 +433,24 @@ class AjaxMonitor
     return if shouldIgnoreURL(url)
 
     if type is 'socket'
-      tracker = new SocketRequestTracker(request)
+      tracker = new SocketRequestTracker(request, @complete)
     else
-      tracker = new XHRRequestTracker(request)
+      tracker = new XHRRequestTracker(request, @complete)
 
     @elements.push tracker
 
+  complete: (tracker) =>
+    @elements = @elements.filter (e) -> e isnt tracker
+
 class XHRRequestTracker
-  constructor: (request) ->
+  constructor: (request, completeCallback) ->
     @progress = 0
 
     if window.ProgressEvent?
       # We're dealing with a modern browser with progress event support
 
       size = null
-      request.addEventListener 'progress', (evt) =>
+      addEventListener request, 'progress', (evt) =>
         if evt.lengthComputable
           @progress = 100 * evt.loaded / evt.total
         else
@@ -459,7 +461,8 @@ class XHRRequestTracker
       , false
 
       for event in ['load', 'abort', 'timeout', 'error']
-        request.addEventListener event, =>
+        addEventListener request, event, =>
+          completeCallback(@)
           @progress = 100
         , false
 
@@ -467,6 +470,7 @@ class XHRRequestTracker
       _onreadystatechange = request.onreadystatechange
       request.onreadystatechange = =>
         if request.readyState in [0, 4]
+          completeCallback(@)
           @progress = 100
         else if request.readyState is 3
           @progress = 50
@@ -474,11 +478,12 @@ class XHRRequestTracker
         _onreadystatechange?(arguments...)
 
 class SocketRequestTracker
-  constructor: (request) ->
+  constructor: (request, completeCallback) ->
     @progress = 0
 
     for event in ['error', 'open']
-      request.addEventListener event, =>
+      addEventListener request, event, =>
+        completeCallback(@)
         @progress = 100
       , false
 
@@ -488,10 +493,13 @@ class ElementMonitor
 
     options.selectors ?= []
     for selector in options.selectors
-      @elements.push new ElementTracker selector
+      @elements.push new ElementTracker(selector, @complete)
+
+  complete: (tracker) =>
+    @elements = @elements.filter (e) -> e isnt tracker
 
 class ElementTracker
-  constructor: (@selector) ->
+  constructor: (@selector, @completeCallback) ->
     @progress = 0
 
     @check()
@@ -504,6 +512,8 @@ class ElementTracker
         options.elements.checkInterval
 
   done: ->
+    @completeCallback(@)
+    @completeCallback = null
     @progress = 100
 
 class DocumentMonitor
@@ -746,7 +756,7 @@ Pace.start = (_options) ->
 
 if typeof define is 'function' and define.amd
   # AMD
-  define ['pace'], -> Pace
+  define -> Pace
 else if typeof exports is 'object'
   # CommonJS
   module.exports = Pace
