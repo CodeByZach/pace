@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<title>PACE</title>
+	<script src="/pace/assets/assets/js/pace.min.js"></script>
+	<link rel="stylesheet" href="/pace/assets/assets/css/barber-pole-orange.css">
+	<link rel="stylesheet" href="/pace/assets/assets/css/hubspot_public_assets.css">
+	<link rel="stylesheet" href="/pace/assets/assets/css/navigation.css">
+	<link rel="stylesheet" href="/pace/assets/assets/css/print.css">
+	<link rel="stylesheet" href="/pace/assets/assets/css/highlight-theme-github.css">
+	<link rel="stylesheet" href="/pace/assets/assets/css/navigation-tweaks.css">
+	<link rel="stylesheet" href="/pace/assets/assets/css/documentation.css">
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<link rel="stylesheet" href="/pace/assets/assets/css/codemirror.css">
+	<link rel="stylesheet" href="/pace/assets/assets/css/executr.css">
+	<script src="/pace/assets/assets/js/codemirror.js"></script>
+	<script src="/pace/assets/assets/js/executr-coffeescript.js"></script>
+	<script src="/pace/assets/assets/js/executr-javascript.js"></script>
+	<script src="/pace/assets/assets/js/coffee-script.js"></script>
+	<script src="/pace/assets/assets/js/underscore.min.js"></script>
+	<script src="/pace/assets/assets/js/js2coffee.min.js"></script>
+	<script src="/pace/assets/assets/js/executr.js"></script>
+	<script src="/pace/assets/assets/js/executr-run.js"></script>
+</head>
+
+<body>
+	<div id="hs-nav-v3" class="nav-width-flex signed-out-nav">
+		<div class="hs-nav-section main-nav">
+			<div class="nav-section-inner">
+				<ul class="nav-links-left">
+					<li class="first"><a class="nav-logo" href="http://www.hubspot.com/"><img height="34" src="https://static.hubspot.com/style-guide/img/nav-sprocket.png" width="29"></a></li>
+					<li>
+						<a href="http://dev.hubspot.com">
+							HubSpot Dev &amp; Design
+						</a>
+					</li>
+					<li>
+						<a class="current-nav-item" href="http://hubspot.github.com">
+							Open Source
+						</a>
+					</li>
+					<li>
+						<a href="http://dev.hubspot.com/blog">
+							Blog
+						</a>
+					</li>
+				</ul>
+				<ul class="nav-links-right">
+					<li class="first">
+						<a href="http://dev.hubspot.com/jobs/" class="sign-in">We're Hiring Engineers</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="hs-doc-marquee">
+		<div class="hs-page-width-normal">
+			<div class="row-fluid">
+				<div class="span6">
+					<h1>PACE</h1>
+					<h3 class="hs-doc-marquee-description">Automatic page load progress bar</h3>
+					<p class="hs-doc-marquee-release">1.0.2</p>
+					<p class="hs-doc-marquee-stars"><iframe src="http://ghbtns.com/github-btn.html?user=EatBreatheCode&repo=PACE&type=watch&count=true&size=large" allowtransparency="true" frameborder="0" scrolling="0" width="240" height="30"></iframe></p>
+				</div>
+				<div class="span6">
+					<div class="hs-doc-marquee-buttons"><a class="hs-doc-marquee-button" href="https://github.com/EatBreatheCode/pace/">Star on GitHub</a><a class="hs-doc-marquee-button" href="https://github.com/EatBreatheCode/pace/archive/master.zip">Download ZIP (v1.0.2)</a></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="hs-page-width-normal">
+		<div class="row-fluid">
+			<div class="span3">
+				<div class="hs-doc-sidenav">
+					<nav>
+						<ul class="hs-public-sidenav">
+							<li class="current-nav-item"><a href="">Home</a></li>
+						</ul>
+					</nav>
+				</div>
+			</div>
+			<div class="span9">
+				<div class="hs-doc-content">
+					<h1 id="pace">pace</h1>
+					<p>Include <a href="https://raw.githubusercontent.com/EatBreatheCode/pace/master/pace.min.js">pace.js</a> and the
+						<a href="https://eatbreathecode.github.io/pace/">theme</a> css of your choice on your page
+						(as early as is possible), and you&#39;re done!</p>
+					<p>Pace will automatically monitor your ajax requests, event loop lag, document
+						ready state, and elements on your page to decide the progress. On ajax navigation
+						it will begin again!</p>
+					<p>If you use AMD or Browserify, require in pace.js and call <code>pace.start()</code> as early in
+						the loading process as is possible.</p>
+
+					<h2 id="wordpress">Install on Wordpress</h2>
+					<p>You can add PACE to your Wordpress site by installing the <a href="https://wordpress.org/plugins/pace" target="_blank">Wordpress Plugin</a>.</p>
+
+					<h2 id="example">Example</h2>
+					<pre><code class="lang-html"><span class="tag">&lt;<span class="title">head</span>&gt;</span>
+	<span class="tag">&lt;<span class="title">script</span> <span class="attribute">src</span>=<span class="value">"/pace/pace.js"</span>&gt;</span><span class="javascript"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span>
+	<span class="tag">&lt;<span class="title">link</span> <span class="attribute">href</span>=<span class="value">"/pace/themes/pace-theme-barber-shop.css"</span> <span class="attribute">rel</span>=<span class="value">"stylesheet"</span> /&gt;</span>
+<span class="tag">&lt;/<span class="title">head</span>&gt;</span></code></pre>
+					<h2 id="configuration">Configuration</h2>
+					<p>Pace is fully automatic, no configuration is necessary to get started.</p>
+					<p>If you would like to make some tweaks, here&#39;s how:</p>
+					<p>You can set <code>window.paceOptions</code> before bringing in the file:</p>
+					<pre><code class="lang-javascript">paceOptions = {
+	<span class="comment">// Disable the 'elements' source</span>
+	elements: <span class="literal">false</span>,
+
+	<span class="comment">// Only show the progress on regular and ajax-y page navigation,</span>
+	<span class="comment">// not every request</span>
+	restartOnRequestAfter: <span class="literal">false</span>
+}</code></pre>
+					<p>You can also put options on the script tag:</p>
+					<pre><code class="lang-html"><span class="tag">&lt;<span class="title">script</span> <span class="attribute">data-pace-options</span>=<span class="value">'{ "ajax": false }'</span> <span class="attribute">src</span>=<span class="value">'pace.js'</span>&gt;</span><span class="javascript"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span></code></pre>
+					<p>If you&#39;re using AMD or Browserify, you can pass your options to <code>start</code>:</p>
+					<pre><code class="lang-javascript">define([<span class="string">'pace'</span>], <span class="keyword">function</span>(pace){
+	pace.start({
+	document: <span class="literal">false</span>
+	});
+});</code></pre>
+					<h2 id="themes">Themes</h2>
+					<p>Pace includes a bunch of <a href="http://github.hubspot.com/pace/docs/welcome/">themes</a>
+						to get you started. Just include the appropriate css file. Send us a PR with
+						any interesting themes you create.</p>
+					<h2 id="collectors">Collectors</h2>
+					<p>Collectors are the bits of code which gather progress information. Pace includes four default collectors:</p>
+					<ul>
+						<li>
+							<p>Ajax</p>
+							<p>Monitors all ajax requests on the page</p>
+						</li>
+						<li>
+							<p>Elements</p>
+							<p>Checks for the existance of specific elements on the page</p>
+						</li>
+						<li>
+							<p>Document</p>
+							<p>Checks the document readyState</p>
+						</li>
+						<li>
+							<p>Event Lag</p>
+							<p>Checks for event loop lag signaling that javascript is being executed</p>
+						</li>
+					</ul>
+					<p>They can each be configured or disabled through configuration options of the same name.</p>
+					<pre><code class="lang-javascript">paceOptions = {
+	ajax: <span class="literal">false</span>, <span class="comment">// disabled</span>
+	document: <span class="literal">false</span>, <span class="comment">// disabled</span>
+	eventLag: <span class="literal">false</span>, <span class="comment">// disabled</span>
+	elements: {
+	selectors: [<span class="string">'.my-page'</span>]
+	}
+};</code></pre>
+					<p>Add your own classes to <code>paceOptions.extraSources</code> to add more sources. Each source should either
+						have a <code>.progress</code> property, or a <code>.elements</code> property which is a list of objects with
+						<code>.progress</code> properties. Pace will automatically handle all scaling to make the progress
+						changes look smooth to the user.</p>
+					<h2 id="elements">Elements</h2>
+					<p>Elements being rendered to the screen is one way for us to decide that the page has been
+						rendered. If you would like to use that source of information (not required at all),
+						specify one or more selectors. You can comma seperate the selectors to propertly handle
+						error states, where the progress bar should disappear, but the element we are looking for
+						may never appear:</p>
+					<pre><code class="lang-javascript">paceOptions = {
+	elements: {
+	selectors: [<span class="string">'.timeline,.timeline-error'</span>, <span class="string">'.user-profile,.profile-error'</span>]
+	}
+}</code></pre>
+					<p>Pace will consider the elements test successful when each selector matches something. For
+						this example, when either <code>.timeline</code> or <code>.timeline-error</code> exist, and either <code>.user-profile</code>
+						or <code>.profile-error</code> exist.</p>
+					<h2 id="restart-rules">Restart Rules</h2>
+					<p>Most users want the progress bar to automatically restart when a pushState event occurs
+						(generally means ajax navigation is occuring). You can disable this:</p>
+					<pre><code class="lang-javascript">paceOptions = {
+	restartOnPushState: <span class="literal">false</span>
+}</code></pre>
+					<p>You can also have pace restart on every ajax request which lasts longer than x ms. You&#39;ll want to
+						disable this if you make ajax requests the user doesn&#39;t need to know about, like precaching:</p>
+					<pre><code class="lang-javascript">paceOptions = {
+	restartOnRequestAfter: <span class="literal">false</span>
+}</code></pre>
+					<p>You can always trigger a restart manually by calling <code>Pace.restart()</code></p>
+					<p>See <a href="https://github.com/HubSpot/pace/blob/master/pace.js">the source</a> for a full list of all options.</p>
+					<h2 id="api">API</h2>
+					<p>Pace exposes the following methods:</p>
+					<ul>
+						<li>
+							<p><code>Pace.start</code>: Show the progress bar and start updating. Called automatically if you don&#39;t use AMD or CommonJS.</p>
+						</li>
+						<li>
+							<p><code>Pace.restart</code>: Show the progress bar if it&#39;s hidden and start reporting the progress from scratch. Called automatically
+								whenever <code>pushState</code> or <code>replaceState</code> is called by default.</p>
+						</li>
+						<li>
+							<p><code>Pace.stop</code>: Hide the progress bar and stop updating it.</p>
+						</li>
+						<li>
+							<p><code>Pace.track</code>: Explicitly track one or more requests, see Tracking below</p>
+						</li>
+						<li>
+							<p><code>Pace.ignore</code>: Expliticly ignore one or more requests, see Tracking below</p>
+						</li>
+					</ul>
+					<h2 id="events">Events</h2>
+					<p>Pace fires the following events:</p>
+					<ul>
+						<li><code>start</code>: When pace is initially started, or as a part of a restart</li>
+						<li><code>stop</code>: When pace is manually stopped, or as a part of a restart</li>
+						<li><code>restart</code>: When pace is restarted (manually, or by a new AJAX request)</li>
+						<li><code>done</code>: When pace is finished</li>
+						<li><code>hide</code>: When the pace is hidden (can be later than <code>done</code>, based on <code>ghostTime</code> and <code>minTime</code>)</li>
+					</ul>
+					<p>You can bind onto events using the <code>on</code>, <code>off</code> and <code>once</code> methods:</p>
+					<ul>
+						<li><code>Pace.on(event, handler, [context])</code>: Call <code>handler</code> (optionally with context) when <code>event</code> is triggered</li>
+						<li><code>Pace.off(event, [handler])</code>: Unbind the provided <code>event</code> and <code>handler</code> combination.</li>
+						<li><code>Pace.once(event, handler, [context])</code>: Bind <code>handler</code> to the next (and only the next) incidence of <code>event</code></li>
+					</ul>
+					<h2 id="tracking">Tracking</h2>
+					<p>By default, Pace will show any ajax requests which begin as a part of a normal or ajax-y page load, or which last longer than
+						500ms.</p>
+					<p>You can disable all ajax tracking by setting <code>ajax</code> to false:</p>
+					<pre><code class="lang-javascript">Pace.options = {
+	ajax: <span class="literal">false</span>
+}</code></pre>
+					<p>You can disable ajax tracking except on page navigation by setting <code>restartOnRequestAfter</code> to false:</p>
+					<pre><code class="lang-javascript">Pace.options = {
+	restartOnRequestAfter: <span class="literal">false</span>
+}</code></pre>
+					<p>You can manually disable tracking for a specific request or requests by triggering them within a <code>Pace.ignore</code> callback:</p>
+					<pre><code class="lang-javascript">Pace.ignore(<span class="keyword">function</span>(){
+	$.ajax(...)
+});</code></pre>
+					<p>You can force the progress bar to be shown for a specific request by triggering them within a <code>Pace.track</code> callback:</p>
+					<pre><code class="lang-javascript">Pace.track(<span class="keyword">function</span>(){
+	$.ajax(...)
+});</code></pre>
+					<p>You can also ignore URLs based on a pattern:</p>
+					<pre><code class="lang-javascript">Pace.options = {
+	ajax: {
+	ignoreURLs: [<span class="string">'some-substring'</span>, <span class="regexp">/some-regexp/</span>]
+	}
+}</code></pre>
+					<h2 id="dependencies">Dependencies</h2>
+					<p>None!</p>
+					<h2 id="support">Support</h2>
+					<p>Pace is designed to support IE8+ (standards mode), FF 3.5+, Chrome, Safari 4+, Opera 10.5+, and all modern
+						mobile browsers. If you run into a compatibility issue, or can make a case for supporting something else,
+						please create an issue.</p>
+					<h2 id="size">Size</h2>
+					<p>pace.js is 4kb minified and gzipped. The themes vary between 0.5 and 4kb.</p>
+					<h2 id="issues">Issues</h2>
+					<p>We have obviously not tested this on every website. If you run into an issue, or find a way the automatic
+						detection could be better, please <a href="https://github.com/HubSpot/pace/issues/new">create an Issue</a>. If you can include a test case, that&#39;s even better.</p>
+					<h2 id="contributing">Contributing</h2>
+					<p>PRs Welcome!</p>
+					<p>Building requires node.js.</p>
+					<pre><code class="lang-bash">npm install
+grunt</code></pre>
+					<p>You can also run <code>grunt watch</code> to have it automatically build as you make changes.</p>
+					<p>There is no need to include compiled files in PRs.</p>
+					<h2 id="credits">Credits</h2>
+					<p><a href="http://dev.hubspot.com">HubSpot</a></p>
+					<p>Javascript by <a href="http://twitter.com/zackbloom">Zack Bloom</a>
+						CSS by <a href="http://twitter.com/adamfschwartz">Adam Schwartz</a></p>
+					<p>Themes inspired by <a href="http://tympanus.net/codrops/2013/09/18/creative-loading-effects/">Mary Lou</a></p>
+					<p>Project inspired by <a href="http://ricostacruz.com/nprogress/">nprogress</a></p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="hs3-public-footer">
+		<div class="row-fluid hs-page-width-normal">
+			<div class="span3 hidden-phone">
+				<h3>HubSpot</h3>
+				<ul>
+					<li><a href="http://www.hubspot.com">Home</a></li>
+					<li><a href="http://www.hubspot.com/software">Products</a></li>
+					<li><a href="http://www.hubspot.com/internet-marketing-company/">About</a></li>
+				</ul>
+			</div>
+			<div class="span3">
+				<h3>Projects</h3>
+				<ul>
+					<li><a href="http://github.hubspot.com/messenger">Messenger</a></li>
+					<li><a href="http://github.hubspot.com/facewall">Facewall</a></li>
+					<li><a href="http://github.hubspot.com/jquery-zoomer">jQuery Zoomer</a></li>
+					<li><a href="http://github.hubspot.com/humanize">Humanize</a></li>
+					<li><a href="http://github.hubspot.com/teeble">Teeble</a></li>
+				</ul>
+			</div>
+			<div class="span3">
+				<h3>Development Team</h3>
+				<ul>
+					<li><a href="http://dev.hubspot.com">Home</a></li>
+					<li><a href="http://dev.hubspot.com/teams">Teams</a></li>
+					<li><a href="http://dev.hubspot.com/people">People</a></li>
+					<li><a href="http://dev.hubspot.com/jobs">Jobs</a></li>
+				</ul>
+			</div>
+			<div class="span3 hidden-phone">
+				<h3>Developer API</h3>
+				<ul>
+					<li><a href="http://developers.hubspot.com/">Developer Documentation</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

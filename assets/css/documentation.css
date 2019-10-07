@@ -1,0 +1,357 @@
+::selection {
+    background: #495b67;
+    color: #fff;
+    text-shadow: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 1.5em;
+    color: #333;
+}
+
+h1, h2 {
+    margin-top: 1em;
+    margin-bottom: .5em;
+}
+
+h1 + h2, h1 + h3, h2 + h3 {
+    margin-top: .5em;
+}
+
+.hs-doc-marquee {
+    font-family: "proxima-nova", sans-serif;
+    background-color: #eee;
+    border: 0;
+    padding-top: 2.5em;
+    padding-bottom: 2.5em;
+    position: relative;
+    margin-top: -26px;
+    margin-bottom: 36px;
+    z-index: 1; /* Behind nav selected item arrow */
+}
+
+.hs-doc-marquee * {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.hs-doc-marquee h1 {
+    font-size: 40px;
+}
+
+.hs-doc-marquee .hs-doc-marquee-stars {
+    margin-top: 20px;
+}
+
+.hs-doc-marquee .hs-doc-marquee-description {
+    margin-top: 5px;
+}
+
+.hs-doc-marquee .hs-doc-marquee-buttons {
+    margin-top: 20px;
+    text-align: right
+}
+
+@media (max-width: 768px) {
+    .hs-doc-marquee .hs-doc-marquee-buttons {
+        display: none;
+    }
+}
+
+.hs-doc-marquee .hs-doc-marquee-button {
+    display: inline-block;
+    padding: 15px 20px;
+    margin-left: 15px;
+    background: #fff;
+    color: #999
+}
+
+.hs-doc-marquee .hs-doc-marquee-button:first-child {
+    margin-left: 0
+}
+
+.hs-doc-marquee .hs-doc-marquee-button:hover {
+    text-decoration: none;
+    background: #888;
+    color: #fff
+}
+
+.hs-doc-homepage-link {
+    color: inherit
+}
+
+.hs-doc-slim-github-link-wrapper {
+    float: right
+}
+
+.hs-doc-slim-github-link {
+    font-family: "proxima-nova", sans-serif;
+    display: inline-block;
+    font-size: 90%;
+    padding: .5em 1em;
+    background: #eee;
+    color: #999;
+}
+
+.hs-doc-slim-github-link:hover {
+    text-decoration: none;
+    background: #888;
+    color: #fff
+}
+
+.hs-public-sidenav li.current-nav-item a {
+    color: #333;
+}
+
+@media (max-width: 767px) {
+    .hs-public-sidenav {
+        background: #fff;
+        border-color: #eee;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .hs-public-sidenav:hover li.current-nav-item:first-child,
+    .hs-public-sidenav:hover li.current-nav-item:last-child {
+        border-radius: 0;
+    }
+
+    .hs-public-sidenav:hover li.current-nav-item {
+        border-color: #eee;
+        background: #eee;
+    }
+}
+
+h1 {
+    margin: 0 0 20px;
+}
+
+h1.hs-doc-page-header {
+    font-size: 30px;
+}
+
+code, pre {
+    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+}
+
+pre {
+    background-color: #eee;
+    color: #333;
+    padding: 8px 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 14px;
+    line-height: 24px;
+    white-space: pre;
+    word-wrap: normal;
+}
+
+code {
+    font-size: 0.8em;
+    padding: 2px 4px;
+    background: #eee;
+}
+
+pre > code {
+    font-size: inherit;
+    background: transparent;
+    padding: 0;
+}
+
+.hs-doc-sidenav {
+    margin-right: 20px;
+    margin-bottom: 40px;
+}
+
+.hs-doc-content {
+    margin-bottom: 40px;
+    min-height: 600px;
+    position: relative;
+}
+
+.hs-doc-content h1,
+.hs-doc-content h2,
+.hs-doc-content h3,
+.hs-doc-content h4,
+.hs-doc-content h5,
+.hs-doc-content h6 {
+    font-weight: 600;
+}
+
+.hs-doc-content ul,
+.hs-doc-content ol {
+    margin-left: 2em;
+}
+
+.hs-doc-content > *:first-child {
+    margin-top: 0;
+    line-height: 40px;
+}
+
+.hs-doc-content > p:first-child {
+    line-height: 1.5em;
+}
+
+.hs-doc-content table {
+    background: #fff;
+    border: 4px solid #eee;
+}
+
+.hs-doc-content table th {
+    text-align: left;
+    background: #eee;
+}
+
+.hs-doc-content table th {
+    padding: 4px 12px 8px;
+}
+
+.hs-doc-content table td {
+    padding: 4px 12px;
+}
+
+.hs-doc-content table tr:first-child td {
+    padding-top: 8px;
+}
+
+.hs-doc-content table tr:last-child td {
+    padding-bottom: 8px;
+}
+
+.hs-doc-content table.zebra-striped tr:nth-child(odd) td {
+    background: #f6f6f6;
+}
+
+.hs-public-sidenav li.current-nav-item {
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    background: #eee;
+    border-color: #eee;
+}
+
+.hs-public-sidenav li.current-nav-item:after,
+.hs-public-sidenav li.current-nav-item:before {
+    border-left-color: #eee;
+}
+
+.hs-public-sidenav li * {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hs-public-sidenav li b {
+    font-size: 13px;
+    font-weight: normal;
+    font-family: "proxima-nova", sans-serif;
+    text-transform: uppercase;
+    color: #999;
+    background: #fff;
+    padding-right: 10px;
+}
+
+.hs-public-sidenav li b:after {
+    width: 100%;
+    height: 2px;
+    display: block;
+    content: " ";
+    position: absolute;
+    top: 19px;
+    z-index: -1;
+    background: #eee;
+}
+
+/* http://getbootstrap.com/assets/css/docs.css */
+
+/* Callouts */
+
+.hs-doc-callout {
+    margin: 20px 0;
+    padding: 15px 30px 15px 15px;
+    border-left: 5px solid #eee;
+}
+
+.hs-doc-callout h4 {
+    margin-top: 0;
+    margin-bottom: 0.5em;
+}
+
+.hs-doc-callout h4 + p {
+    margin-top: 0;
+}
+
+.hs-doc-callout p:last-child {
+    margin-bottom: 0;
+}
+
+.hs-doc-callout code,
+.hs-doc-callout .highlight {
+    background-color: #fff;
+}
+
+/* Callout variations */
+
+.hs-doc-callout-danger {
+    background-color: #fcf2f2;
+    border-color: #dFb5b4;
+}
+
+.hs-doc-callout-warning {
+    background-color: #fefbed;
+    border-color: #f1e7bc;
+}
+
+.hs-doc-callout-info {
+    background-color: #f0f7fd;
+    border-color: #d0e3f0;
+}
+
+/* Public Assets Reset */
+
+.hs-brand-button {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    text-shadow: none !important;
+}
+
+.hs-brand-button:active, .hs-brand-button.orange:active {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Wistia video background (shows while loading) */
+
+#wistia_video {
+    background: #ccc;
+}
+
+/* Executr switch */
+
+.executr-switch-outer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.executr-switch-outer .executr-switch {
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+    background: #eee;
+    font-size: 90%;
+    padding: .5em 1em;
+    cursor: pointer;
+    color: #999;
+}
+
+.executr-switch-outer .executr-switch.selected {
+    background: #444;
+    color: #fff;
+}
