@@ -142,25 +142,6 @@ getFromDOM = (key='options', json=true) ->
   catch e
     console?.error "Error parsing inline pace options", e
 
-addClass = (el, className) ->
-  classNamesArray = el.className.split(/ +/)
-  for c in classNamesArray
-    if c == className
-      el.className = classNamesArray.join(' ')
-      return
-  classNamesArray.push(className)
-  el.className = classNamesArray.join(' ')
-  return
-
-removeClass = (el, className) ->
-  classNamesArray = el.className.split(/ +/)
-  cleanClassNamesArray = []
-  for c in classNamesArray
-    if c != className
-      cleanClassNamesArray.push(c)
-  el.className = cleanClassNamesArray.join(' ')
-  return
-
 class Evented
   on: (event, handler, ctx, once=false) ->
     @bindings ?= {}
@@ -224,8 +205,9 @@ class Bar
       @el = document.createElement 'div'
       @el.className = "pace pace-active"
 
-      removeClass document.body, 'pace-done'
-      addClass document.body, 'pace-running'
+      document.body.className = document.body.className.replace /pace-done/g, ''
+      if not /pace-running/.test document.body.className
+        document.body.className += ' pace-running'
 
       @el.innerHTML = '''
       <div class="pace-progress">
@@ -243,11 +225,11 @@ class Bar
   finish: ->
     el = @getElement()
 
-    removeClass el, 'pace-active'
-    addClass el, 'pace-inactive'
+    el.className = el.className.replace 'pace-active', ''
+    el.className += ' pace-inactive'
 
-    removeClass document.body, 'pace-running'
-    addClass document.body, 'pace-done'
+    document.body.className = document.body.className.replace /pace-running/g, ''
+    document.body.className += ' pace-done'
 
   update: (prog) ->
     @progress = prog
