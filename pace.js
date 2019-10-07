@@ -249,10 +249,7 @@
         }
         this.el = document.createElement('div');
         this.el.className = "pace pace-active";
-        document.body.className = document.body.className.replace(/pace-done/g, '');
-        if (!/pace-running/.test(document.body.className)) {
-          document.body.className += ' pace-running';
-        }
+        document.body.className = document.body.className.replace(/(pace-done)|/, 'pace-running');
         this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
         if (targetElement.firstChild != null) {
           targetElement.insertBefore(this.el, targetElement.firstChild);
@@ -266,10 +263,8 @@
     Bar.prototype.finish = function() {
       var el;
       el = this.getElement();
-      el.className = el.className.replace('pace-active', '');
-      el.className += ' pace-inactive';
-      document.body.className = document.body.className.replace(/pace-running/g, '');
-      return document.body.className += ' pace-done';
+      el.className = el.className.replace('pace-active', 'pace-inactive');
+      return document.body.className = document.body.className.replace('pace-running', 'pace-done');
     };
 
     Bar.prototype.update = function(prog) {
