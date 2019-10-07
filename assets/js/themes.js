@@ -8,7 +8,7 @@
 
   loadTheme = function(name, cb) {
     return $.ajax({
-      url: "/pace/templates/pace-theme-" + name + ".tmpl.css",
+      url: "/pace/assets/css/templates/pace-theme-" + name + ".tmpl.css",
       success: cb
     });
   };
