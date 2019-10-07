@@ -437,14 +437,17 @@ class AjaxMonitor
     return if shouldIgnoreURL(url)
 
     if type is 'socket'
-      tracker = new SocketRequestTracker(request)
+      tracker = new SocketRequestTracker(request, @complete)
     else
-      tracker = new XHRRequestTracker(request)
+      tracker = new XHRRequestTracker(request, @complete)
 
     @elements.push tracker
 
+  complete: (tracker) =>
+    @elements = @elements.filter (e) -> e isnt tracker
+
 class XHRRequestTracker
-  constructor: (request) ->
+  constructor: (request, completeCallback) ->
     @progress = 0
 
     if window.ProgressEvent?
@@ -463,6 +466,7 @@ class XHRRequestTracker
 
       for event in ['load', 'abort', 'timeout', 'error']
         addEventListener request, event, =>
+          completeCallback(@)
           @progress = 100
         , false
 
@@ -470,6 +474,7 @@ class XHRRequestTracker
       _onreadystatechange = request.onreadystatechange
       request.onreadystatechange = =>
         if request.readyState in [0, 4]
+          completeCallback(@)
           @progress = 100
         else if request.readyState is 3
           @progress = 50
@@ -477,11 +482,12 @@ class XHRRequestTracker
         _onreadystatechange?(arguments...)
 
 class SocketRequestTracker
-  constructor: (request) ->
+  constructor: (request, completeCallback) ->
     @progress = 0
 
     for event in ['error', 'open']
       addEventListener request, event, =>
+        completeCallback(@)
         @progress = 100
       , false
 
@@ -491,10 +497,13 @@ class ElementMonitor
 
     options.selectors ?= []
     for selector in options.selectors
-      @elements.push new ElementTracker selector
+      @elements.push new ElementTracker(selector, @complete)
+
+  complete: (tracker) =>
+    @elements = @elements.filter (e) -> e isnt tracker
 
 class ElementTracker
-  constructor: (@selector) ->
+  constructor: (@selector, @completeCallback) ->
     @progress = 0
 
     @check()
@@ -507,6 +516,8 @@ class ElementTracker
         options.elements.checkInterval
 
   done: ->
+    @completeCallback(@)
+    @completeCallback = null
     @progress = 100
 
 class DocumentMonitor
