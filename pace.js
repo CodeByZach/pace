@@ -12,6 +12,7 @@
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   defaultOptions = {
+    className: '',
     catchupTime: 100,
     initialRate: .03,
     minTime: 250,
@@ -255,7 +256,8 @@
         this.el = document.createElement('div');
         this.el.className = "pace pace-active";
         document.body.className = document.body.className.replace(/(pace-done)|/, 'pace-running');
-        this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
+        var _custom_class_name = (options.className !== '') ? ' '+options.className : '';
+        this.el.innerHTML = '<div class="pace-progress'+_custom_class_name+'">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
         if (targetElement.firstChild != null) {
           targetElement.insertBefore(this.el, targetElement.firstChild);
         } else {
