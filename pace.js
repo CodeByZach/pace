@@ -3,7 +3,8 @@
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   defaultOptions = {
     catchupTime: 100,
@@ -555,6 +556,7 @@
 
   AjaxMonitor = (function() {
     function AjaxMonitor() {
+      this.complete = __bind(this.complete, this);
       var _this = this;
       this.elements = [];
       getIntercept().on('request', function() {
@@ -569,11 +571,17 @@
         return;
       }
       if (type === 'socket') {
-        tracker = new SocketRequestTracker(request);
+        tracker = new SocketRequestTracker(request, this.complete);
       } else {
-        tracker = new XHRRequestTracker(request);
+        tracker = new XHRRequestTracker(request, this.complete);
       }
       return this.elements.push(tracker);
+    };
+
+    AjaxMonitor.prototype.complete = function(tracker) {
+      return this.elements = this.elements.filter(function(e) {
+        return e !== tracker;
+      });
     };
 
     return AjaxMonitor;
@@ -581,7 +589,7 @@
   })();
 
   XHRRequestTracker = (function() {
-    function XHRRequestTracker(request) {
+    function XHRRequestTracker(request, completeCallback) {
       var event, size, _j, _len1, _onreadystatechange, _ref2,
         _this = this;
       this.progress = 0;
@@ -598,6 +606,7 @@
         for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
           event = _ref2[_j];
           addEventListener(request, event, function() {
+            completeCallback(_this);
             return _this.progress = 100;
           }, false);
         }
@@ -606,6 +615,7 @@
         request.onreadystatechange = function() {
           var _ref3;
           if ((_ref3 = request.readyState) === 0 || _ref3 === 4) {
+            completeCallback(_this);
             _this.progress = 100;
           } else if (request.readyState === 3) {
             _this.progress = 50;
@@ -620,7 +630,7 @@
   })();
 
   SocketRequestTracker = (function() {
-    function SocketRequestTracker(request) {
+    function SocketRequestTracker(request, completeCallback) {
       var event, _j, _len1, _ref2,
         _this = this;
       this.progress = 0;
@@ -628,6 +638,7 @@
       for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
         event = _ref2[_j];
         addEventListener(request, event, function() {
+          completeCallback(_this);
           return _this.progress = 100;
         }, false);
       }
@@ -643,6 +654,7 @@
       if (options == null) {
         options = {};
       }
+      this.complete = __bind(this.complete, this);
       this.elements = [];
       if (options.selectors == null) {
         options.selectors = [];
@@ -650,17 +662,24 @@
       _ref2 = options.selectors;
       for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
         selector = _ref2[_j];
-        this.elements.push(new ElementTracker(selector));
+        this.elements.push(new ElementTracker(selector, this.complete));
       }
     }
+
+    ElementMonitor.prototype.complete = function(tracker) {
+      return this.elements = this.elements.filter(function(e) {
+        return e !== tracker;
+      });
+    };
 
     return ElementMonitor;
 
   })();
 
   ElementTracker = (function() {
-    function ElementTracker(selector) {
+    function ElementTracker(selector, completeCallback) {
       this.selector = selector;
+      this.completeCallback = completeCallback;
       this.progress = 0;
       this.check();
     }
@@ -677,6 +696,8 @@
     };
 
     ElementTracker.prototype.done = function() {
+      this.completeCallback(this);
+      this.completeCallback = null;
       return this.progress = 100;
     };
 
