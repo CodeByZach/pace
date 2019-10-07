@@ -3,9 +3,7 @@
     "head": [
       {
         "type": "script",
-        "src": "./pace.js",
-        "moduleType": "global",
-        "exports": ["Pace"]
+        "src": "./pace.js"
       },
       {
         "type": "style",

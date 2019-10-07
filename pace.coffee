@@ -206,7 +206,8 @@ class Bar
       @el.className = "pace pace-active"
 
       document.body.className = document.body.className.replace /pace-done/g, ''
-      document.body.className += ' pace-running'
+      if not /pace-running/.test document.body.className
+        document.body.className += ' pace-running'
 
       @el.innerHTML = '''
       <div class="pace-progress">
@@ -413,7 +414,7 @@ getIntercept().on 'request', ({type, request, url}) ->
 
     setTimeout ->
       if type is 'socket'
-        stillActive = request.readyState < 2
+        stillActive = request.readyState < 1
       else
         stillActive = 0 < request.readyState < 4
 
@@ -748,7 +749,7 @@ Pace.start = (_options) ->
 
 if typeof define is 'function' and define.amd
   # AMD
-  define ['pace'], -> Pace
+  define -> Pace
 else if typeof exports is 'object'
   # CommonJS
   module.exports = Pace

@@ -249,7 +249,9 @@
         this.el = document.createElement('div');
         this.el.className = "pace pace-active";
         document.body.className = document.body.className.replace(/pace-done/g, '');
-        document.body.className += ' pace-running';
+        if (!/pace-running/.test(document.body.className)) {
+          document.body.className += ' pace-running';
+        }
         this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
         if (targetElement.firstChild != null) {
           targetElement.insertBefore(this.el, targetElement.firstChild);
@@ -528,7 +530,7 @@
       return setTimeout(function() {
         var stillActive, _j, _len1, _ref2, _ref3, _results;
         if (type === 'socket') {
-          stillActive = request.readyState < 2;
+          stillActive = request.readyState < 1;
         } else {
           stillActive = (0 < (_ref2 = request.readyState) && _ref2 < 4);
         }
@@ -925,7 +927,7 @@
   };
 
   if (typeof define === 'function' && define.amd) {
-    define(['pace'], function() {
+    define(function() {
       return Pace;
     });
   } else if (typeof exports === 'object') {
