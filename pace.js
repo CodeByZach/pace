@@ -310,7 +310,7 @@
         }
         el.children[0].setAttribute('data-progress', "" + progressStr);
       }
-      Pace.trigger('change');
+      Pace.trigger('change', this.progress);
       return this.lastRenderedProgress = this.progress;
     };
 
