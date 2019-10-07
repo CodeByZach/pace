@@ -526,7 +526,7 @@
       return setTimeout(function() {
         var stillActive, _j, _len1, _ref2, _ref3, _results;
         if (type === 'socket') {
-          stillActive = request.readyState < 2;
+          stillActive = request.readyState < 1;
         } else {
           stillActive = (0 < (_ref2 = request.readyState) && _ref2 < 4);
         }

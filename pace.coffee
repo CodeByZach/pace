@@ -411,7 +411,7 @@ getIntercept().on 'request', ({type, request, url}) ->
 
     setTimeout ->
       if type is 'socket'
-        stillActive = request.readyState < 2
+        stillActive = request.readyState < 1
       else
         stillActive = 0 < request.readyState < 4
 
