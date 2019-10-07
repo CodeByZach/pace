@@ -1,3 +1,0 @@
-title: "Pace"
-source: "pace.coffee"
-assets: "{templates/*,themes/*,docs/welcome/*,docs/lib/*,docs/resources/*.css,*.js}"
