@@ -923,7 +923,7 @@
   };
 
   if (typeof define === 'function' && define.amd) {
-    define(['pace'], function() {
+    define(function() {
       return Pace;
     });
   } else if (typeof exports === 'object') {
