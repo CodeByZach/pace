@@ -29,6 +29,11 @@
     Pace.on('hide', function(){
       console.log('done');
     });
+    
+    Pace.on('change', function(){
+        currentProgress = document.querySelector('.pace-progress').getAttribute('data-progress-text');
+        console.log(currentProgress);
+    });
   </script>
 
 <body>
