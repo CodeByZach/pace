@@ -1,5 +1,5 @@
 (function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Evented, Events, NoTargetError, Pace, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, ignoreStack, init, now, options, requestAnimationFrame, result, runAnimation, scalers, shouldIgnoreURL, shouldTrack, source, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _i, _intercept, _len, _pushState, _ref, _ref1, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Evented, Events, NoTargetError, Pace, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, addEventListener, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, ignoreStack, init, now, options, requestAnimationFrame, result, runAnimation, scalers, shouldIgnoreURL, shouldTrack, source, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _i, _intercept, _len, _pushState, _ref, _ref1, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -40,6 +40,10 @@
   requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
   cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+
+  addEventListener = function(obj, event, callback) {
+    return (typeof obj.addEventListener === "function" ? obj.addEventListener(event, callback, false) : void 0) || (obj["on" + event] = callback);
+  };
 
   if (requestAnimationFrame == null) {
     requestAnimationFrame = function(fn) {
@@ -583,7 +587,7 @@
       this.progress = 0;
       if (window.ProgressEvent != null) {
         size = null;
-        request.addEventListener('progress', function(evt) {
+        addEventListener(request, 'progress', function(evt) {
           if (evt.lengthComputable) {
             return _this.progress = 100 * evt.loaded / evt.total;
           } else {
@@ -593,7 +597,7 @@
         _ref2 = ['load', 'abort', 'timeout', 'error'];
         for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
           event = _ref2[_j];
-          request.addEventListener(event, function() {
+          addEventListener(request, event, function() {
             return _this.progress = 100;
           }, false);
         }
@@ -623,7 +627,7 @@
       _ref2 = ['error', 'open'];
       for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
         event = _ref2[_j];
-        request.addEventListener(event, function() {
+        addEventListener(request, event, function() {
           return _this.progress = 100;
         }, false);
       }
