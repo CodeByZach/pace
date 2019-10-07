@@ -1,13 +1,13 @@
+Disclaimer, We no longer use this library internally and are focusing our efforts on open sourcing and maintaining projects that we do use and can meaningfully contribute to. Sorry for any frustrations with this project (we're happy to link to any fork that has an excited, commited maintainer).
+
 pace
 ====
-
-<a href="https://eager.io/app/kYKTiQjoVjQk/install?source=button">
-  <img src="https://install.eager.io/install-button.png" border="0" width="126">
-</a>
 
 An automatic web page progress bar.
 
 Include [pace.js](https://raw.github.com/HubSpot/pace/v1.0.2/pace.min.js) and a [theme](http://github.hubspot.com/pace/docs/welcome/) of your choice to your page and you are done!
+
+We also have a [Wordpress Plugin](https://wordpress.org/plugins/pace).
 
 Pace will automatically monitor your Ajax requests, event loop lag, document ready state and elements on your page to decide on the progress.
 
