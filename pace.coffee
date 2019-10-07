@@ -79,6 +79,9 @@ requestAnimationFrame = window.requestAnimationFrame or window.mozRequestAnimati
 
 cancelAnimationFrame = window.cancelAnimationFrame or window.mozCancelAnimationFrame
 
+addEventListener = (obj, event, callback) ->
+  obj.addEventListener?(event, callback, false) or obj["on#{event}"] = callback
+
 if not requestAnimationFrame?
   requestAnimationFrame = (fn) ->
     setTimeout fn, 50
@@ -203,7 +206,8 @@ class Bar
       @el.className = "pace pace-active"
 
       document.body.className = document.body.className.replace /pace-done/g, ''
-      document.body.className += ' pace-running'
+      if not /pace-running/.test document.body.className
+        document.body.className += ' pace-running'
 
       @el.innerHTML = '''
       <div class="pace-progress">
@@ -288,10 +292,16 @@ _WebSocket = window.WebSocket
 extendNative = (to, from) ->
   for key of from::
     try
-      val = from::[key]
-
-      if not to[key]? and typeof val isnt 'function'
-        to[key] = val
+      if not to[key]? and typeof from[key] isnt 'function'
+        if typeof Object.defineProperty is 'function'
+          Object.defineProperty(to, key, {
+             get: ->
+                 return from::[key];
+              ,
+              configurable: true,
+              enumerable: true })
+        else
+          to[key] = from::[key]
     catch e
 
 ignoreStack = []
@@ -404,7 +414,7 @@ getIntercept().on 'request', ({type, request, url}) ->
 
     setTimeout ->
       if type is 'socket'
-        stillActive = request.readyState < 2
+        stillActive = request.readyState < 1
       else
         stillActive = 0 < request.readyState < 4
 
@@ -441,7 +451,7 @@ class XHRRequestTracker
       # We're dealing with a modern browser with progress event support
 
       size = null
-      request.addEventListener 'progress', (evt) =>
+      addEventListener request, 'progress', (evt) =>
         if evt.lengthComputable
           @progress = 100 * evt.loaded / evt.total
         else
@@ -452,7 +462,7 @@ class XHRRequestTracker
       , false
 
       for event in ['load', 'abort', 'timeout', 'error']
-        request.addEventListener event, =>
+        addEventListener request, event, =>
           @progress = 100
         , false
 
@@ -471,7 +481,7 @@ class SocketRequestTracker
     @progress = 0
 
     for event in ['error', 'open']
-      request.addEventListener event, =>
+      addEventListener request, event, =>
         @progress = 100
       , false
 
@@ -739,7 +749,7 @@ Pace.start = (_options) ->
 
 if typeof define is 'function' and define.amd
   # AMD
-  define ['pace'], -> Pace
+  define -> Pace
 else if typeof exports is 'object'
   # CommonJS
   module.exports = Pace
