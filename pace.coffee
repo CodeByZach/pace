@@ -230,7 +230,7 @@ class Bar
 
   update: (prog) ->
     @progress = prog
-
+    @trigger 'progress', prog
     do @render
 
   destroy: ->
