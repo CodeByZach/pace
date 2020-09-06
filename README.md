@@ -1,5 +1,6 @@
 PACE
 ====
+[![Latest Release](https://img.shields.io/github/tag/EatBreatheCode/pace.svg?label=version)](https://github.com/EatBreatheCode/pace/releases)
 
 An automatic web page progress bar.
 
