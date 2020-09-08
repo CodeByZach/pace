@@ -21,8 +21,8 @@ Example
 
 ```html
 <head>
-  <script src="/pace/pace.js"></script>
-  <link href="/pace/themes/pace-theme-barber-shop.css" rel="stylesheet" />
+  <script src="/pace/pace.min.js"></script>
+  <link href="/pace/themes/pace-theme-default.min.css" rel="stylesheet" />
 </head>
 ```
 
