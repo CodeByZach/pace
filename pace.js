@@ -1,5 +1,5 @@
 /*!
- * pace.js v1.2.1
+ * pace.js v1.2.2
  * https://github.com/EatBreatheCode/pace/
  * Licensed MIT © HubSpot, Inc.
  */
@@ -276,6 +276,7 @@
 
 		Bar.prototype.update = function(prog) {
 			this.progress = prog;
+			this.trigger('progress', prog);
 			return this.render();
 		};
 
