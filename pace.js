@@ -245,7 +245,9 @@
         this.el = document.createElement('div');
         this.el.className = "pace pace-active";
         document.body.className = document.body.className.replace(/pace-done/g, '');
-        document.body.className += ' pace-running';
+        if (!/pace-running/.test(document.body.className)) {
+          document.body.className += ' pace-running';
+        }
         this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
         if (targetElement.firstChild != null) {
           targetElement.insertBefore(this.el, targetElement.firstChild);
@@ -356,9 +358,11 @@
         if ((to[key] == null) && typeof from[key] !== 'function') {
           if (typeof Object.defineProperty === 'function') {
             _results.push(Object.defineProperty(to, key, {
-              get: function() {
-                return from.prototype[key];
-              },
+              get: (function(key) {
+                return function() {
+                  return from.prototype[key];
+                };
+              })(key),
               configurable: true,
               enumerable: true
             }));
