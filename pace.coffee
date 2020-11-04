@@ -292,8 +292,8 @@ extendNative = (to, from) ->
       if not to[key]? and typeof from[key] isnt 'function'
         if typeof Object.defineProperty is 'function'
           Object.defineProperty(to, key, {
-             get: ->
-                 return from::[key];
+             get: do(key) ->
+               -> return from::[key];
               ,
               configurable: true,
               enumerable: true })
