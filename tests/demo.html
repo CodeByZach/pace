@@ -42,3 +42,13 @@
       document.querySelector('.pace-progress').setAttribute('style', '-webkit-transform: translate3d(' + range.value + '%, 0px, 0px)');
     });
   </script>
+  <script>
+    // should be moved to a proper test suite
+    console.log('is XMLHttpRequest.DONE===4 ?', XMLHttpRequest.DONE===4);
+    console.log('is new XMLHttpRequest() instanceof XMLHttpRequest ?' ,
+                new XMLHttpRequest() instanceof XMLHttpRequest);
+    console.log('is typeof XMLHttpRequest.prototype.send === "function" ?',
+                typeof XMLHttpRequest.prototype.send === "function");
+    console.log('is XMLHttpRequest.send === undefined ?',
+                XMLHttpRequest.send === undefined);
+  </script>

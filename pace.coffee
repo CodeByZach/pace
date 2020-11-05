@@ -287,19 +287,21 @@ _XDomainRequest = window.XDomainRequest
 _WebSocket = window.WebSocket
 
 extendNative = (to, from) ->
-  for key of from::
+  for key of from
     try
       if not to[key]? and typeof from[key] isnt 'function'
         if typeof Object.defineProperty is 'function'
           Object.defineProperty(to, key, {
              get: do(key) ->
-               -> return from::[key];
+               -> return from[key];
               ,
               configurable: true,
               enumerable: true })
         else
-          to[key] = from::[key]
-    catch e
+          to[key] = from[key]
+    catch
+  to.prototype = from.prototype
+  return
 
 ignoreStack = []
 
