@@ -1,5 +1,5 @@
 /*!
- * pace.js v1.2.2
+ * pace.js v1.2.3
  * https://github.com/EatBreatheCode/pace/
  * Licensed MIT © HubSpot, Inc.
  */
