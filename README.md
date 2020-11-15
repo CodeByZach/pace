@@ -1,13 +1,14 @@
-pace
+PACE
 ====
+[![Latest Release](https://img.shields.io/github/tag/CodeByZach/pace.svg?label=version)](https://github.com/CodeByZach/pace/releases)
 
 An automatic web page progress bar.
 
-### [Demo](https://eatbreathecode.github.io/pace/)
-### [Documentation](https://eatbreathecode.github.io/pace/docs/)
+### [Demo](https://codebyzach.github.io/pace/)
+### [Documentation](https://codebyzach.github.io/pace/docs/)
 
-Include [pace.js](https://raw.github.com/EatBreatheCode/pace/master/pace.min.js) and the
-[theme](https://eatbreathecode.github.io/pace/) css of your choice on your page
+Include [pace.js](https://raw.github.com/CodeByZach/pace/master/pace.min.js) and the
+[theme](https://codebyzach.github.io/pace/) css of your choice on your page
 (as early as is possible), and you're done!
 
 Pace will automatically monitor your ajax requests, event loop lag, document
@@ -21,8 +22,8 @@ Example
 
 ```html
 <head>
-  <script src="/pace/pace.min.js"></script>
-  <link href="/pace/themes/pace-theme-default.min.css" rel="stylesheet" />
+  <script src="/pace/pace.js"></script>
+  <link href="/pace/themes/pace-theme-barber-shop.css" rel="stylesheet" />
 </head>
 ```
 
@@ -65,7 +66,7 @@ define(['pace'], function(pace){
 Themes
 ------
 
-Pace includes a bunch of [themes](https://eatbreathecode.github.io/pace/)
+Pace includes a bunch of [themes](https://codebyzach.github.io/pace/)
 to get you started.  Just include the appropriate css file.  Send us a PR with
 any interesting themes you create.
 
@@ -161,7 +162,7 @@ paceOptions = {
 
 You can always trigger a restart manually by calling `Pace.restart()`
 
-See [the source](https://github.com/EatBreatheCode/pace/blob/master/pace.js) for a full list of all options.
+See [the source](https://github.com/CodeByZach/pace/blob/master/pace.js) for a full list of all options.
 
 API
 ---
@@ -265,23 +266,7 @@ Issues
 ------
 
 We have obviously not tested this on every website.  If you run into an issue, or find a way the automatic
-detection could be better, please [create an Issue](https://github.com/EatBreatheCode/pace/issues/new).  If you can include a test case, that's even better.
-
-Contributing
-------------
-
-PRs Welcome!
-
-Building requires node.js.
-
-```bash
-npm install
-grunt
-```
-
-You can also run `grunt watch` to have it automatically build as you make changes.
-
-There is no need to include compiled files in PRs.
+detection could be better, please [create an Issue](https://github.com/CodeByZach/pace/issues/new).  If you can include a test case, that's even better.
 
 Credits
 -------
