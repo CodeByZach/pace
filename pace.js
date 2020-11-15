@@ -367,9 +367,11 @@
 				if ((to[key] == null) && typeof from[key] !== 'function') {
 					if (typeof Object.defineProperty === 'function') {
 						_results.push(Object.defineProperty(to, key, {
-							get: function() {
-								return from.prototype[key];
-							},
+							get: (function(key) {
+								return function() {
+									return from.prototype[key];
+								};
+							})(key),
 							configurable: true,
 							enumerable: true
 						}));
