@@ -369,9 +369,9 @@
 						_results.push(Object.defineProperty(to, key, {
 							get: (function(key) {
 								return function() {
-								return from.prototype[key];
-							};
-						})(key),
+									return from.prototype[key];
+								};
+							})(key),
 							configurable: true,
 							enumerable: true
 						}));
