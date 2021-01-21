@@ -1,5 +1,7 @@
+/*!
+ * executr-javascript
+ */
 // TODO actually recognize syntax of TypeScript constructs
-
 CodeMirror.defineMode("javascript", function(config, parserConfig) {
 	var indentUnit = config.indentUnit;
 	var jsonMode = parserConfig.json;

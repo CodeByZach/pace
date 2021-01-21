@@ -1,7 +1,6 @@
 /*!
  * CodeMirror version 3.02
  */
-
 // CodeMirror is the only global var we claim
 window.CodeMirror = (function() {
 	"use strict";

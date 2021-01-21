@@ -1,3 +1,6 @@
+/*!
+ * executr-run
+ */
 $(function(){
 	var codeSelector, switcherHTML, $docContent, options;
 

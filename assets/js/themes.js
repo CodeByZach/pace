@@ -1,3 +1,6 @@
+/*!
+ * themes
+ */
 (function() {
 	var Color, compileTheme, loadTheme, vm;
 
