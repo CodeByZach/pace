@@ -1,3 +1,6 @@
+/*!
+ * navigation-tweaks
+ */
 @media(max-width: 1080px) {
 	#hs-nav-v3.nav-width-flex .nav-section-inner {
 		min-width: 0px;
