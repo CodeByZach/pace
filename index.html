@@ -213,8 +213,8 @@
 						$('.browser iframe').each(function(){
 							var _this = this;
 
-							var doc = (this.contentWindow || this.documentWindow).document;
-							doc.src = getGeneratedPageURL('<div class="pace"><div class="pace-progress" data-progress="50" data-progress-text="50%" style="-webkit-transform: translate3d(50%, 0px, 0px); -ms-transform: translate3d(50%, 0px, 0px); transform: translate3d(50%, 0px, 0px);"><div class="pace-progress-inner"></div></div><div class="pace-activity"></div></div>');
+							// var doc = (this.contentWindow || this.documentWindow).document;
+							_this.src = getGeneratedPageURL('<div class="pace"><div class="pace-progress" data-progress="50" data-progress-text="50%" style="-webkit-transform: translate3d(50%, 0px, 0px); -ms-transform: translate3d(50%, 0px, 0px); transform: translate3d(50%, 0px, 0px);"><div class="pace-progress-inner"></div></div><div class="pace-activity"></div></div>');
 							// doc.open();
 							// doc.write('' +
 							// 	'<div class="pace">' +
