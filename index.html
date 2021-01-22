@@ -66,214 +66,224 @@
 			<p class="block"><a class="button" href="https://codebyzach.github.io/pace/docs/">Documentation</a></p>
 			<br/>
 			<br/>
-			<script>
-				$(function(){
-					if (!Modernizr.inputtypes.color) {
-						$('.color-label').show();
-					}
-
-					var themes = [
-						{
-							name: 'minimal',
-							title: 'Minimal',
-							author: 'adamschwartz'
-						},
-						{
-							name: 'flash',
-							title: 'Flash',
-							author: 'adamschwartz'
-						},
-						{
-							name: 'barber-shop',
-							title: 'Barber Shop',
-							author: 'adamschwartz'
-						},
-						{
-							name: 'mac-osx',
-							title: 'Mac OSX',
-							author: 'adamschwartz'
-						},
-						{
-							name: 'fill-left',
-							title: 'Fill Left',
-							author: 'adamschwartz'
-						},
-						{
-							name: 'flat-top',
-							title: 'Flat Top',
-							author: 'adamschwartz'
-						},
-						{
-							name: 'big-counter',
-							title: 'Big Counter',
-							author: 'adamschwartz'
-						},
-						{
-							name: 'corner-indicator',
-							title: 'Corner Indicator',
-							author: 'adamschwartz'
-						},
-						{
-							name: 'bounce',
-							title: 'Bounce',
-							author: 'adamschwartz'
-						},
-						{
-							name: 'loading-bar',
-							title: 'Loading Bar',
-							author: 'gavJackson'
-						},
-						{
-							name: 'center-circle',
-							title: 'Center Circle',
-							author: 'adamschwartz'
-						},
-						{
-							name: 'center-atom',
-							title: 'Center Atom',
-							author: 'kennyglenn'
-						},
-						{
-							name: 'center-radar',
-							title: 'Center Radar',
-							author: 'kennyglenn'
-						},
-						{
-							name: 'center-simple',
-							title: 'Center Simple',
-							author: 'dineshgithub'
-						}
-					];
-
-					var init = function() {
-						$.each(themes, function(i, theme){
-							$('.themes').append('<div class="theme ' + (i % 2 === 0 ? 'even' : 'odd') + '">'+
-								'<h3>' + theme.title + '</h3>' +
-								(theme.author ? '<br/><a class="author" href="https://github.com/' + theme.author + '" target="_blank" rel="nofollow">@' + theme.author + '</a></h4>' : '') +
-								'<p><a href="#" class="download-link" data-theme="' + theme.name + '">download</a></p>'+
-								'<div class="browser"><iframe data-theme="' + theme.name + '"></iframe></div>' +
-							'</div>');
-						});
-
-						var $color = $('input[type="color"]');
-
-						var cssCache = {};
-						var initFrame = function(frame, color){
-							if ($color.val() != '#2299dd'){
-								color = $color.val();
-							}
-
-							var $styleEl = $('<style>')
-							$(frame).contents().find('body').append($styleEl);
-
-							var context = {};
-							if (color){
-								context.color = color;
-							}
-
-							var themeName = $(frame).data('theme')
-							loadTheme(themeName, function(theme){
-								body = compileTheme(theme, context);
-
-								cssCache[themeName] = body;
-
-								$styleEl.html(body);
-							});
-
-							$(frame).contents().find('.pace').addClass('pace-active');
-						};
-
-						var updateColor = function(color){
-							$('.browser iframe').each(function(){
-								initFrame(this, color);
-							});
-						};
-
-						var downloadTheme = function(theme){
-							location.href = 'data:text/css,' + encodeURIComponent(cssCache[theme]);
-						};
-
-						var getGeneratedPageURL = function(html) {
-							const getBlobURL = (code, type) => {
-								const blob = new Blob([code], { type });
-								return URL.createObjectURL(blob);
-							 }
-
-							const source = `
-								<html>
-									<body>
-										${html}
-									</body>
-								</html>
-							`;
-
-							return getBlobURL(source, 'text/html');
-						};
-
-						$('.browser iframe').each(function(){
-							var _this = this;
-
-							// var doc = (this.contentWindow || this.documentWindow).document;
-							_this.src = getGeneratedPageURL('<div class="pace"><div class="pace-progress" data-progress="50" data-progress-text="50%" style="-webkit-transform: translate3d(50%, 0px, 0px); -ms-transform: translate3d(50%, 0px, 0px); transform: translate3d(50%, 0px, 0px);"><div class="pace-progress-inner"></div></div><div class="pace-activity"></div></div>');
-							// doc.open();
-							// doc.write('' +
-							// 	'<div class="pace">' +
-							// 		'<div class="pace-progress" data-progress="50" data-progress-text="50%" style="-webkit-transform: translate3d(50%, 0px, 0px); -ms-transform: translate3d(50%, 0px, 0px); transform: translate3d(50%, 0px, 0px);">' +
-							// 			'<div class="pace-progress-inner"></div>' +
-							// 		'</div>' +
-							// 		'<div class="pace-activity"></div>' +
-							// 	'</div>' +
-							// '');
-							// doc.close();
-
-							// For some strange reason, the Color library we depend on defines itself asyncronously
-							setTimeout(function(){
-								initFrame(_this);
-							}, 0);
-						});
-
-						$color.on('change keyup', function(){
-							var color = $(this).val();
-							updateColor(color);
-
-							var css = '.section.colored, a.button { background: ' + color + '; } a, a:hover, a:active, .header .title .title2:before { color: ' + color + '; }';
-							if ($('html').hasClass('ie8-and-less')) {
-								$('#app-colors').get(0).styleSheet.cssText = css
-							} else {
-								$('#app-colors').html(css);
-							}
-						});
-
-						$('a.download-link').click(function(e){
-							e.preventDefault();
-
-							var theme = $(this).data('theme');
-
-							downloadTheme(theme);
-						});
-					};
-
-					var initTimeout = setTimeout(function(){
-						$(window).unbind('scroll', scrollOnce);
-						init();
-					}, 3000);
-
-					var scrollOnce = function() {
-						$(window).unbind('scroll', scrollOnce);
-						clearTimeout(initTimeout);
-						init();
-					};
-
-					$(window).bind('scroll', scrollOnce);
-				});
-			</script>
 		</div>
 	</div>
 
 	<!-- Force 3d acceleration always and forever :) -->
 	<div style="-webkit-transform: translateZ(0)"></div>
 
+
 	<script>
+		(function(console) {
+			console.save = function(data, filename, mime_type) {
+				if (data === undefined || data === null) {
+					console.error('console.save: No data');
+					return;
+				}
+				filename  = (filename === undefined || filename === null) ? 'console.txt' : filename;
+				mime_type = (mime_type === undefined || mime_type === null) ? 'text/plain' : mime_type;
+
+				let blob = new Blob([data], { type: mime_type });
+				let e    = document.createEvent('MouseEvents');
+				let a    = document.createElement('a');
+
+				a.download            = filename;
+				a.href                = window.URL.createObjectURL(blob);
+				a.dataset.downloadurl = [mime_type, a.download, a.href].join(':');
+				e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+				a.dispatchEvent(e);
+			}
+		})(console);
+
+
+		$(function(){
+			if (!Modernizr.inputtypes.color) {
+				$('.color-label').show();
+			}
+
+			var themes = [
+				{
+					name: 'minimal',
+					title: 'Minimal',
+					author: 'adamschwartz'
+				},
+				{
+					name: 'flash',
+					title: 'Flash',
+					author: 'adamschwartz'
+				},
+				{
+					name: 'barber-shop',
+					title: 'Barber Shop',
+					author: 'adamschwartz'
+				},
+				{
+					name: 'mac-osx',
+					title: 'Mac OSX',
+					author: 'adamschwartz'
+				},
+				{
+					name: 'fill-left',
+					title: 'Fill Left',
+					author: 'adamschwartz'
+				},
+				{
+					name: 'flat-top',
+					title: 'Flat Top',
+					author: 'adamschwartz'
+				},
+				{
+					name: 'big-counter',
+					title: 'Big Counter',
+					author: 'adamschwartz'
+				},
+				{
+					name: 'corner-indicator',
+					title: 'Corner Indicator',
+					author: 'adamschwartz'
+				},
+				{
+					name: 'bounce',
+					title: 'Bounce',
+					author: 'adamschwartz'
+				},
+				{
+					name: 'loading-bar',
+					title: 'Loading Bar',
+					author: 'gavJackson'
+				},
+				{
+					name: 'center-circle',
+					title: 'Center Circle',
+					author: 'adamschwartz'
+				},
+				{
+					name: 'center-atom',
+					title: 'Center Atom',
+					author: 'kennyglenn'
+				},
+				{
+					name: 'center-radar',
+					title: 'Center Radar',
+					author: 'kennyglenn'
+				},
+				{
+					name: 'center-simple',
+					title: 'Center Simple',
+					author: 'dineshgithub'
+				}
+			];
+
+			var init = function() {
+				$.each(themes, function(i, theme){
+					$('.themes').append('<div class="theme ' + (i % 2 === 0 ? 'even' : 'odd') + '">'+
+						'<h3>' + theme.title + '</h3>' +
+						(theme.author ? '<br/><a class="author" href="https://github.com/' + theme.author + '" target="_blank" rel="nofollow">@' + theme.author + '</a></h4>' : '') +
+						'<p><a href="#" class="download-link" data-theme="' + theme.name + '">download</a></p>'+
+						'<div class="browser"><iframe data-theme="' + theme.name + '"></iframe></div>' +
+					'</div>');
+				});
+
+				var $color = $('input[type="color"]');
+
+				var cssCache = {};
+				var initFrame = function(frame, color){
+					if ($color.val() != '#2299dd'){
+						color = $color.val();
+					}
+
+					var $styleEl = $('<style>')
+					$(frame).contents().find('body').append($styleEl);
+
+					var context = {};
+					if (color){
+						context.color = color;
+					}
+
+					var themeName = $(frame).data('theme')
+					loadTheme(themeName, function(theme){
+						body = compileTheme(theme, context);
+						cssCache[themeName] = body;
+						$styleEl.html(body);
+					});
+
+					$(frame).contents().find('.pace').addClass('pace-active');
+				};
+
+				var updateColor = function(color){
+					$('.browser iframe').each(function(){
+						initFrame(this, color);
+					});
+				};
+
+				var downloadTheme = function(theme){
+					// location.href = 'data:text/css,' + encodeURIComponent(cssCache[theme]);
+					console.save(cssCache[theme], theme+'.css', 'text/css');
+				};
+
+				var getGeneratedPageURL = function(html) {
+					let getBlobURL = (code, type) => {
+						let blob = new Blob([code], { type });
+						return URL.createObjectURL(blob);
+					}
+
+					let source = `
+						<html>
+							<body>
+								${html}
+							</body>
+						</html>
+					`;
+
+					return getBlobURL(source, 'text/html');
+				};
+
+				$('.browser iframe').each(function(){
+					this.src = getGeneratedPageURL('' +
+						'<div class="pace">' +
+							'<div class="pace-progress" data-progress="50" data-progress-text="50%" style="-webkit-transform: translate3d(50%, 0px, 0px); -ms-transform: translate3d(50%, 0px, 0px); transform: translate3d(50%, 0px, 0px);">' +
+								'<div class="pace-progress-inner"></div>' +
+							'</div>' +
+							'<div class="pace-activity"></div>' +
+						'</div>' +
+					'');
+					initFrame(this);
+				});
+
+				$color.on('change keyup', function(){
+					var color = $(this).val();
+					updateColor(color);
+
+					var css = '.section.colored, a.button { background: ' + color + '; } a, a:hover, a:active, .header .title .title2:before { color: ' + color + '; }';
+					if ($('html').hasClass('ie8-and-less')) {
+						$('#app-colors').get(0).styleSheet.cssText = css;
+					} else {
+						$('#app-colors').html(css);
+					}
+				});
+
+				$('a.download-link').click(function(e){
+					e.preventDefault();
+					var theme = $(this).data('theme');
+					downloadTheme(theme);
+				});
+			};
+
+			var initTimeout = setTimeout(function(){
+				$(window).unbind('scroll', scrollOnce);
+				init();
+			}, 3000);
+
+			var scrollOnce = function() {
+				$(window).unbind('scroll', scrollOnce);
+				clearTimeout(initTimeout);
+				init();
+			};
+
+			$(window).bind('scroll', scrollOnce);
+		});
+
+
 		setTimeout(function(){ document.body.className = 'page-loaded' }, 0);
 	</script>
 </body>
