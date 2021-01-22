@@ -239,7 +239,8 @@
 				};
 
 				$('.browser iframe').each(function(){
-					this.src = getGeneratedPageURL('' +
+					let current_iframe = this;
+					current_iframe.src = getGeneratedPageURL('' +
 						'<div class="pace">' +
 							'<div class="pace-progress" data-progress="50" data-progress-text="50%" style="-webkit-transform: translate3d(50%, 0px, 0px); -ms-transform: translate3d(50%, 0px, 0px); transform: translate3d(50%, 0px, 0px);">' +
 								'<div class="pace-progress-inner"></div>' +
@@ -247,7 +248,9 @@
 							'<div class="pace-activity"></div>' +
 						'</div>' +
 					'');
-					initFrame(this);
+					setTimeout(function(){
+						initFrame(current_iframe);
+					}, 500);
 				});
 
 				$color.on('change keyup', function(){
