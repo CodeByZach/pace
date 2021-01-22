@@ -1,6 +1,6 @@
 PACE
 ====
-[![Latest Release](https://img.shields.io/github/tag/CodeByZach/pace.svg?label=version)](https://github.com/CodeByZach/pace/releases)
+[![Latest Release](https://img.shields.io/github/tag/CodeByZach/pace.svg?label=version)](https://github.com/CodeByZach/pace/releases/latest)
 
 An automatic web page progress bar.
 
@@ -22,8 +22,8 @@ Example
 
 ```html
 <head>
-  <script src="/pace/pace.js"></script>
-  <link href="/pace/themes/pace-theme-barber-shop.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.3/pace.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.3/pace-theme-default.min.css" rel="stylesheet" />
 </head>
 ```
 
@@ -130,7 +130,7 @@ may never appear:
 ```javascript
 paceOptions = {
   elements: {
-    selectors: ['.timeline,.timeline-error', '.user-profile,.profile-error']
+    selectors: ['.timeline, .timeline-error', '.user-profile, .profile-error']
   }
 }
 ```
@@ -222,7 +222,7 @@ Pace.options = {
 You can manually disable tracking for a specific request or requests by triggering them within a `Pace.ignore` callback:
 
 ```javascript
-Pace.ignore(function(){
+Pace.ignore(function() {
   $.ajax(...)
 });
 ```
@@ -230,7 +230,7 @@ Pace.ignore(function(){
 You can force the progress bar to be shown for a specific request by triggering them within a `Pace.track` callback:
 
 ```javascript
-Pace.track(function(){
+Pace.track(function() {
   $.ajax(...)
 });
 ```
