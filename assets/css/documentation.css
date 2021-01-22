@@ -21,6 +21,10 @@ h1 + h2, h1 + h3, h2 + h3 {
 	margin-top: .5em;
 }
 
+.hs-text-align-middle {
+	vertical-align: middle;
+}
+
 .hs-doc-marquee {
 	font-family: "proxima-nova", sans-serif;
 	background-color: #eee;
