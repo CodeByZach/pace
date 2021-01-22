@@ -342,6 +342,10 @@ input[type="color"]:active::after {
 	margin: 0 auto;
 }
 
+.page a.main-download-btn:hover {
+	color: rgba(255, 255, 255, 0.4);
+}
+
 .themes a,
 .themes a:hover,
 .themes a:active {
