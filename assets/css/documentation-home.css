@@ -342,7 +342,7 @@ input[type="color"]:active::after {
 	margin: 0 auto;
 }
 
-.page a.main-download-btn:hover {
+a.primary-btn-hover:hover {
 	color: rgba(255, 255, 255, 0.4);
 }
 
