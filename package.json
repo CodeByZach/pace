@@ -24,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/CodeByZach/pace/issues"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "homepage": "https://github.com/CodeByZach/pace#readme"
 }
