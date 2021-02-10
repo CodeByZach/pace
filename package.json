@@ -1,11 +1,15 @@
 {
-  "name": "pace",
+  "name": "pace-js",
   "version": "1.2.3",
   "description": "Automatically add a progress bar to your site.",
-  "homepage": "https://codebyzach.github.io/pace/",
-  "authors": [
-    "CodeByZach <codebyzach@gmail.com>",
-  ],
+  "main": "pace.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodeByZach/pace.git"
+  },
   "keywords": [
     "pace",
     "pace-js",
@@ -15,19 +19,10 @@
     "loading-indicator",
     "loading-animation"
   ],
+  "author": "CodeByZach <codebyzach@gmail.com>",
   "license": "MIT",
-  "main": "pace.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/CodeByZach/pace/"
+  "bugs": {
+    "url": "https://github.com/CodeByZach/pace/issues"
   },
-  "devDependencies": {
-    "grunt-contrib-coffee": "~0.7.0",
-    "coffee-script": "~1.6.3",
-    "grunt-contrib-uglify": "~0.2.4",
-    "grunt-cli": "~0.1.9",
-    "grunt": "~0.4.1",
-    "grunt-contrib-watch": "~0.5.3",
-    "color": "~0.4.4"
-  }
+  "homepage": "https://github.com/CodeByZach/pace#readme"
 }

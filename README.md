@@ -162,7 +162,7 @@ paceOptions = {
 
 You can always trigger a restart manually by calling `Pace.restart()`
 
-See [the source](https://github.com/CodeByZach/pace/blob/master/pace.js) for a full list of all options.
+See [the source](https://github.com/CodeByZach/pace/blob/master/pace.js) for a full list of options.
 
 API
 ---
