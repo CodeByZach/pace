@@ -12,7 +12,7 @@ Include [pace.js](https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js) and t
 (as early as is possible), and you're done!
 
 Pace will automatically monitor your ajax requests, event loop lag, document
-ready state, and elements on your page to decide the progress.  On ajax navigation
+ready state, and elements on your page to decide the progress. On ajax navigation
 it will begin again!
 
 If you use AMD or Browserify, require pace.js and call `pace.start()` as early in the loading process as is possible.
@@ -67,7 +67,7 @@ Themes
 ------
 
 Pace includes a bunch of [themes](https://codebyzach.github.io/pace/)
-to get you started.  Just include the appropriate css file.  Send us a PR with
+to get you started. Just include the appropriate css file. Send us a PR with
 any interesting themes you create.
 
 If you have minor styling changes and don't want to extend theme css, you can add custom class names to
@@ -82,7 +82,7 @@ paceOptions = {
 Collectors
 ----------
 
-Collectors are the bits of code which gather progress information.  Pace includes four default collectors:
+Collectors are the bits of code which gather progress information. Pace includes four default collectors:
 
 - Ajax
 
@@ -113,17 +113,17 @@ paceOptions = {
 };
 ```
 
-Add your own classes to `paceOptions.extraSources` to add more sources.  Each source should either
+Add your own classes to `paceOptions.extraSources` to add more sources. Each source should either
 have a `.progress` property, or a `.elements` property which is a list of objects with
-`.progress` properties.  Pace will automatically handle all scaling to make the progress
+`.progress` properties. Pace will automatically handle all scaling to make the progress
 changes look smooth to the user.
 
 Elements
 --------
 
 Elements being rendered to the screen is one way for us to decide that the page has been
-rendered.  If you would like to use that source of information (not required at all),
-specify one or more selectors.  You can comma separate the selectors to propertly handle
+rendered. If you would like to use that source of information (not required at all),
+specify one or more selectors. You can comma separate the selectors to propertly handle
 error states, where the progress bar should disappear, but the element we are looking for
 may never appear:
 
@@ -135,7 +135,7 @@ paceOptions = {
 }
 ```
 
-Pace will consider the elements test successful when each selector matches something.  For
+Pace will consider the elements test successful when each selector matches something. For
 this example, when either `.timeline` or `.timeline-error` exist, and either `.user-profile`
 or `.profile-error` exist.
 
@@ -143,7 +143,7 @@ Restart Rules
 -------------
 
 Most users want the progress bar to automatically restart when a pushState event occurs
-(generally means ajax navigation is occuring).  You can disable this:
+(generally means ajax navigation is occuring). You can disable this:
 
 ```javascript
 paceOptions = {
@@ -151,7 +151,7 @@ paceOptions = {
 }
 ```
 
-You can also have pace restart on every ajax request which lasts longer than x ms.  You'll want to
+You can also have pace restart on every ajax request which lasts longer than x ms. You'll want to
 disable this if you make ajax requests the user doesn't need to know about, like precaching:
 
 ```javascript
@@ -169,9 +169,9 @@ API
 
 Pace exposes the following methods:
 
-- `Pace.start`: Show the progress bar and start updating.  Called automatically if you don't use AMD or CommonJS.
+- `Pace.start`: Show the progress bar and start updating. Called automatically if you don't use AMD or CommonJS.
 
-- `Pace.restart`: Show the progress bar if it's hidden and start reporting the progress from scratch.  Called automatically
+- `Pace.restart`: Show the progress bar if it's hidden and start reporting the progress from scratch. Called automatically
 whenever `pushState` or `replaceState` is called by default.
 
 - `Pace.stop`: Hide the progress bar and stop updating it.
@@ -254,19 +254,19 @@ Support
 -------
 
 Pace is designed to support IE8+ (standards mode), FF 3.5+, Chrome, Safari 4+, Opera 10.5+, and all modern
-mobile browsers.  If you run into a compatibility issue, or can make a case for supporting something else,
+mobile browsers. If you run into a compatibility issue, or can make a case for supporting something else,
 please create an issue.
 
 Size
 ----
 
-pace.js is 4kb minified and gzipped.  The themes vary between 0.5 and 4kb.
+pace.js is 4kb minified and gzipped. The themes vary between 0.5 and 4kb.
 
 Issues
 ------
 
-We have obviously not tested this on every website.  If you run into an issue, or find a way the automatic
-detection could be better, please [create an Issue](https://github.com/CodeByZach/pace/issues/new).  If you can include a test case, that's even better.
+We have obviously not tested this on every website. If you run into an issue, or find a way the automatic
+detection could be better, please [create an Issue](https://github.com/CodeByZach/pace/issues/new). If you can include a test case, that's even better.
 
 Credits
 -------
