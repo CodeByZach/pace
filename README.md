@@ -7,7 +7,7 @@ An automatic web page progress bar.
 ### [Demo](https://codebyzach.github.io/pace/)
 ### [Documentation](https://codebyzach.github.io/pace/docs/)
 
-Include [pace.js](https://raw.github.com/CodeByZach/pace/master/pace.min.js) and the
+Include [pace.js](https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js) and the
 [theme](https://codebyzach.github.io/pace/) css of your choice on your page
 (as early as is possible), and you're done!
 
@@ -22,8 +22,8 @@ Example
 
 ```html
 <head>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.3/pace.min.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.3/pace-theme-default.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/pace-js@latest/pace-theme-default.min.css">
 </head>
 ```
 
@@ -50,7 +50,7 @@ paceOptions = {
 You can also put options on the script tag:
 
 ```html
-<script data-pace-options='{ "ajax": false }' src='pace.js'></script>
+<script data-pace-options='{ "ajax": false }' src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"></script>
 ```
 
 If you're using AMD or Browserify, you can pass your options to `start`:
@@ -272,6 +272,7 @@ Credits
 -------
 
 [HubSpot](http://dev.hubspot.com)
+[CodeByZach](https://github.com/CodeByZach)
 
 Javascript by [Zack Bloom](http://twitter.com/zackbloom)
 CSS by [Adam Schwartz](http://twitter.com/adamfschwartz)
