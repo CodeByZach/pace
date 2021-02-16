@@ -393,3 +393,8 @@ a.button {
 .text-left {
 	text-align: left;
 }
+#get-started-snippet {
+	font-size: initial;
+	text-align: left;
+	overflow-x: scroll;
+}

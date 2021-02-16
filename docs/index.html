@@ -74,7 +74,7 @@
 					<h2 id="example">Example</h2>
 <pre><code class="lang-html"><span class="tag">&lt;<span class="title">head</span>&gt;</span>
     <span class="tag">&lt;<span class="title">script</span> <span class="attribute">src</span>=<span class="value">"pace.min.js"</span>&gt;</span><span class="javascript"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span>
-    <span class="tag">&lt;<span class="title">link</span> <span class="attribute">href</span>=<span class="value">"pace-theme-default.min.css"</span> <span class="attribute">rel</span>=<span class="value">"stylesheet"</span> /&gt;</span>
+    <span class="tag">&lt;<span class="title">link</span> <span class="attribute">href</span>=<span class="value">"pace-theme-default.min.css"</span></span>
 <span class="tag">&lt;/<span class="title">head</span>&gt;</span></code></pre>
 
 
@@ -90,7 +90,7 @@
     restartOnRequestAfter: <span class="literal">false</span>
 }</code></pre>
 					<p>You can also put options on the script tag:</p>
-<pre><code class="lang-html"><span class="tag">&lt;<span class="title">script</span> <span class="attribute">data-pace-options</span>=<span class="value">'{ "ajax": false }'</span> <span class="attribute">src</span>=<span class="value">'pace.js'</span>&gt;</span><span class="javascript"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span></code></pre>
+<pre><code class="lang-html"><span class="tag">&lt;<span class="title">script</span> <span class="attribute">data-pace-options</span>=<span class="value">'{ "ajax": false }'</span> <span class="attribute">src</span>=<span class="value">"pace.min.js"</span>&gt;</span><span class="javascript"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span></code></pre>
 					<p>If you&#39;re using AMD or Browserify, you can pass your options to <code>start</code>:</p>
 <pre><code class="lang-javascript">define([<span class="string">'pace'</span>], <span class="keyword">function</span>(pace) {
         pace.start({
@@ -257,15 +257,14 @@
 
 					<h2 id="contributing">Contributing</h2>
 					<p><a href="https://github.com/CodeByZach/pace/pulls">Pull requests</a> welcome!</p>
-					<p>Building requires <a href="https://nodejs.org">node.js</a>.</p>
-					<pre><code class="lang-bash">npm install grunt</code></pre>
-					<p>You can also run <code>grunt watch</code> to have it automatically build as you make changes.</p>
-					<p>There is no need to include compiled files in Pull requests.</p>
 
 
 					<h2 id="credits">Credits</h2>
 					<p>
 						<a href="https://dev.hubspot.com">HubSpot</a>
+					</p>
+					<p>
+						<a href="https://github.com/CodeByZach">CodeByZach</a>
 					</p>
 					<p>
 						Javascript by <a href="https://twitter.com/zackbloom">Zack Bloom</a> CSS by <a href="https://twitter.com/adamfschwartz">Adam Schwartz</a>
