@@ -23,7 +23,7 @@ Example
 ```html
 <head>
   <script src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/pace-js@latest/pace-theme-default.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@latest/pace-theme-default.min.css">
 </head>
 ```
 
@@ -272,6 +272,7 @@ Credits
 -------
 
 [HubSpot](http://dev.hubspot.com)
+
 [CodeByZach](https://github.com/CodeByZach)
 
 Javascript by [Zack Bloom](http://twitter.com/zackbloom)
