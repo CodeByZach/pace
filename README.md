@@ -22,8 +22,8 @@ Example
 
 ```html
 <head>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.3/pace.min.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.3/pace-theme-default.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@latest/pace-theme-default.min.css">
 </head>
 ```
 
