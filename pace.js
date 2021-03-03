@@ -1,5 +1,5 @@
 /*!
- * pace.js v1.2.3
+ * pace.js v1.2.4
  * https://github.com/CodeByZach/pace/
  * Licensed MIT © HubSpot, Inc.
  */
@@ -49,7 +49,25 @@
 	cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
 	addEventListener = function(obj, event, callback) {
-		return (typeof obj.addEventListener === "function" ? obj.addEventListener(event, callback, false) : void 0) || (obj["on" + event] = callback);
+		if (typeof obj.addEventListener === "function") {
+			return obj.addEventListener(event, callback, false);
+		} else {
+			return function() {
+				if (typeof obj["on" + event] !== "function" || typeof obj["on" + event].eventListeners !== "object") {
+					var eventListeners = new Events();
+					if (typeof obj["on" + event] === "function") {
+						eventListeners.on(event, obj["on" + event]);
+					}
+					obj["on" + event] = function(evt) {
+						return eventListeners.trigger(event, evt);
+					};
+					obj["on" + event].eventListeners = eventListeners;
+				} else {
+					var eventListeners = obj["on" + event].eventListeners;
+				}
+				eventListeners.on(event, callback);
+			}();
+		}
 	};
 
 	if (requestAnimationFrame == null) {
