@@ -1,6 +1,6 @@
 {
   "name": "pace-js",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Automatically add a progress bar to your site.",
   "main": "pace.js",
   "scripts": {
