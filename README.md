@@ -272,6 +272,7 @@ Credits
 -------
 
 [HubSpot](http://dev.hubspot.com)
+
 [CodeByZach](https://github.com/CodeByZach)
 
 Javascript by [Zack Bloom](http://twitter.com/zackbloom)
