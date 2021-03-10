@@ -412,7 +412,7 @@
 		ignoreStack.shift();
 		return ret;
 	};
-  
+
 	Pace.track = function() {
 		var args, fn, ret;
 		fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
