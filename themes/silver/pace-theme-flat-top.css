@@ -16,8 +16,8 @@
   -ms-transform: translate3d(0, -50px, 0);
   transform: translate3d(0, -50px, 0);
 
-  -webkit-transition: -webkit-transform .5s ease-out;
-  -ms-transition: -webkit-transform .5s ease-out;
+  -webkit-transition: transform .5s ease-out;
+  -ms-transition: transform .5s ease-out;
   transition: transform .5s ease-out;
 }
 

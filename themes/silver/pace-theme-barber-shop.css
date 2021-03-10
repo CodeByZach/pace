@@ -29,6 +29,7 @@
   right: 100%;
   width: 100%;
   overflow: hidden;
+  height: 12px;
 }
 
 .pace .pace-activity {
@@ -37,6 +38,7 @@
   right: -32px;
   bottom: 0;
   left: 0;
+  height: 12px;
 
   -webkit-transform: translate3d(0, 0, 0);
   -moz-transform: translate3d(0, 0, 0);

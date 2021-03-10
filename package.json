@@ -1,24 +1,28 @@
 {
-  "name": "pace-progress",
-  "version": "1.0.2",
-  "description": "Automatic page load progress bar",
-  "authors": [
-    "Zack Bloom <zackbloom@gmail.com>",
-    "Adam Schwartz <adam.flynn.schwartz@gmail.com>"
-  ],
-  "license": "MIT",
+  "name": "pace-js",
+  "version": "1.2.4",
+  "description": "Automatically add a progress bar to your site.",
   "main": "pace.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "repository": {
     "type": "git",
-    "url": "git://github.com/HubSpot/pace.git"
+    "url": "git+https://github.com/CodeByZach/pace.git"
   },
-  "devDependencies": {
-    "grunt-contrib-coffee": "~0.7.0",
-    "coffee-script": "~1.6.3",
-    "grunt-contrib-uglify": "~0.2.4",
-    "grunt-cli": "~0.1.9",
-    "grunt": "~0.4.1",
-    "grunt-contrib-watch": "~0.5.3",
-    "color": "~0.4.4"
-  }
+  "keywords": [
+    "pace",
+    "pace-js",
+    "pace.js",
+    "progress-bar",
+    "loading-bar",
+    "loading-indicator",
+    "loading-animation"
+  ],
+  "author": "CodeByZach <codebyzach@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CodeByZach/pace/issues"
+  },
+  "homepage": "https://github.com/CodeByZach/pace#readme"
 }
