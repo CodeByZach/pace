@@ -1,6 +1,6 @@
 PACE
 ====
-[![Latest Release](https://img.shields.io/github/tag/CodeByZach/pace.svg?label=version)](https://github.com/CodeByZach/pace/releases/latest)
+[![Latest Release](https://img.shields.io/github/tag/CodeByZach/pace.svg?label=release)](https://github.com/CodeByZach/pace/releases/latest) [![Stars](https://img.shields.io/github/stars/CodeByZach/pace.svg)](https://github.com/CodeByZach/pace/stargazers) [![Forks](https://img.shields.io/github/forks/CodeByZach/pace.svg)](https://github.com/CodeByZach/pace/network/members) [![License](https://img.shields.io/github/license/CodeByZach/pace.svg)](LICENSE)
 
 An automatic web page progress bar.
 
