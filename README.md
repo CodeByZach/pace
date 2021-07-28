@@ -1,6 +1,6 @@
 PACE
 ====
-[![Latest Release](https://img.shields.io/github/tag/CodeByZach/pace.svg?label=version)](https://github.com/CodeByZach/pace/releases/latest)
+[![Latest Release](https://img.shields.io/github/tag/CodeByZach/pace.svg?label=release)](https://github.com/CodeByZach/pace/releases/latest) [![Stars](https://img.shields.io/github/stars/CodeByZach/pace.svg)](https://github.com/CodeByZach/pace/stargazers) [![Forks](https://img.shields.io/github/forks/CodeByZach/pace.svg)](https://github.com/CodeByZach/pace/network/members) [![License](https://img.shields.io/github/license/CodeByZach/pace.svg)](LICENSE)
 
 An automatic web page progress bar.
 
@@ -22,8 +22,12 @@ Example
 
 ```html
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@latest/pace-theme-default.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"
+          integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0="
+          crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@latest/pace-theme-default.min.css"
+        integrity="sha256-KdiO+aE9eOyh7GCm3HafZtpw2YaPl+tRW9bkfAXsMvk="
+        crossorigin="anonymous">
 </head>
 ```
 
@@ -50,7 +54,10 @@ paceOptions = {
 You can also put options on the script tag:
 
 ```html
-<script data-pace-options='{ "ajax": false }' src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"></script>
+<script data-pace-options='{ "ajax": false }'
+        src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"
+        integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0="
+        crossorigin="anonymous"></script>
 ```
 
 If you're using AMD or Browserify, you can pass your options to `start`:
