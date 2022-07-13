@@ -9,13 +9,13 @@ An automatic web page progress bar.
 
 Include [pace.js](https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js) and the
 [theme](https://codebyzach.github.io/pace/) css of your choice on your page
-(as early as is possible), and you're done!
+(as early as possible), and you're done!
 
 Pace will automatically monitor your ajax requests, event loop lag, document
 ready state, and elements on your page to decide the progress. On ajax navigation
 it will begin again!
 
-If you use AMD or Browserify, require pace.js and call `pace.start()` as early in the loading process as is possible.
+If you use AMD or Browserify, require pace.js and call `pace.start()` as early in the loading process as possible.
 
 Example
 -------
@@ -90,7 +90,7 @@ Collectors are the bits of code which gather progress information. Pace includes
 
 - Elements
 
-  Checks for the existance of specific elements on the page
+  Checks for the existence of specific elements on the page
 
 - Document
 
@@ -123,7 +123,7 @@ Elements
 
 Elements being rendered to the screen is one way for us to decide that the page has been
 rendered. If you would like to use that source of information (not required at all),
-specify one or more selectors. You can comma separate the selectors to propertly handle
+specify one or more selectors. You can comma separate the selectors to properly handle
 error states, where the progress bar should disappear, but the element we are looking for
 may never appear:
 
