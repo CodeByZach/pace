@@ -302,11 +302,7 @@
 			try {
 				this.getElement().parentNode.removeChild(this.getElement());
 			} catch (_error) {
-				if (_error instanceof NoTargetError) {
-				   // This is ok
-				 } else {
-				   throw _error
-				 }
+				// This is ok
 			}
 			return this.el = void 0;
 		};
@@ -965,11 +961,7 @@
 		try {
 			bar.render();
 		} catch (_error) {
-			if (_error instanceof NoTargetError) {
-			   // This is ok
-			 } else {
-			   throw _error
-			 }
+			// This is ok
 		}
 		if (!document.querySelector('.pace')) {
 			return setTimeout(Pace.start, 50);
