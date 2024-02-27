@@ -1,0 +1,55 @@
+.pace {
+  padding:10px;
+  opacity:0.8;
+  -webkit-pointer-events: none;
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  padding:5px;
+  z-index: 2000;
+  position: fixed;
+  margin: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 45px;
+  width: 400px;
+  background: #000;
+  border: 2px solid #000;
+  border-radius:10px;
+}
+
+.pace .pace-progress {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  box-sizing: border-box;
+
+  -webkit-transition: width 1s ease-in-out 1s linear;
+  -moz-transition: width 1s ease-in-out 1s linear;
+  -ms-transition: width 1s ease-in-out 1s linear;
+  -o-transition: width 1s ease-in-out 1s linear;
+  transition: width 1s ease-in-out 1s linear;
+
+  -webkit-transform: translate3d(0, 0, 0);
+  -moz-transform: translate3d(0, 0, 0);
+  -ms-transform: translate3d(0, 0, 0);
+  -o-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+
+  max-width: 400px;
+  position: fixed;
+  z-index: 2000;
+  display: block;
+  position: absolute;
+  height: 45px;
+  background: purple;
+  border-radius:7px
+}
+
+.pace.pace-inactive {
+  display: none;
+}
