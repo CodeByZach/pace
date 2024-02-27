@@ -378,32 +378,28 @@
 	_WebSocket = window.WebSocket;
 
 	extendNative = function(to, from) {
-		var e, key, _results;
-		_results = [];
-		for (key in from.prototype) {
+		var key;
+		for (key in from) {
 			try {
 				if ((to[key] == null) && typeof from[key] !== 'function') {
 					if (typeof Object.defineProperty === 'function') {
-						_results.push(Object.defineProperty(to, key, {
+						Object.defineProperty(to, key, {
 							get: (function(key) {
 								return function() {
-									return from.prototype[key];
+									return from[key];
 								};
 							})(key),
 							configurable: true,
 							enumerable: true
-						}));
+						});
 					} else {
-						_results.push(to[key] = from.prototype[key]);
+						to[key] = from[key];
 					}
-				} else {
-					_results.push(void 0);
 				}
 			} catch (_error) {
-				e = _error;
 			}
 		}
-		return _results;
+		to.prototype = from.prototype;
 	};
 
 	ignoreStack = [];
