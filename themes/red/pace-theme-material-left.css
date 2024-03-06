@@ -1,0 +1,242 @@
+/* This is a compiled file, you should be editing the file in the templates directory */
+.pace {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding-top: 8px;
+    width: 100%;
+    background-color: #159756;
+    opacity: 0;
+    -webkit-transition: opacity .2s;
+    -moz-transition: opacity .2s;
+    -o-transition: opacity .2s;
+    transition: opacity .2s;
+    -webkit-animation: preloader-background linear 3.5s infinite;
+    -moz-animation: preloader-background linear 3.5s infinite;
+    -o-animation: preloader-background linear 3.5s infinite;
+    animation: preloader-background linear 3.5s infinite;
+    z-index: 2000;
+}
+.pace:before,
+.pace:after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    z-index: 2;
+    width: 0;
+    height: 8px;
+    background: #afa;
+    -webkit-animation: preloader-front linear 3.5s infinite;
+    -moz-animation: preloader-front linear 3.5s infinite;
+    -o-animation: preloader-front linear 3.5s infinite;
+    animation: preloader-front linear 3.5s infinite;
+}
+.pace:before {
+    left: 0;
+}
+/*
+.pace:after {
+    left: 50%;
+}
+*/
+.pace.pace-active {
+    opacity: 1;
+}
+.pace.pace-inactive {
+    opacity: 0;
+}
+
+@-webkit-keyframes preloader-background {
+    0%, 24.9% {
+        background-color: #4caf50;
+    }
+    25%, 49.9% {
+        background-color: #026ed2;
+    }
+    50%, 74.9% {
+        background-color: #f44336;
+    }
+    75%, 100% {
+        background-color: #ffeb3b;
+    }
+}
+@-moz-keyframes preloader-background {
+    0%, 24.9% {
+        background-color: #4caf50;
+    }
+    25%, 49.9% {
+        background-color: #026ed2;
+    }
+    50%, 74.9% {
+        background-color: #f44336;
+    }
+    75%, 100% {
+        background-color: #ffeb3b;
+    }
+}
+@-o-keyframes preloader-background {
+    0%, 24.9% {
+        background-color: #4caf50;
+    }
+    25%, 49.9% {
+        background-color: #026ed2;
+    }
+    50%, 74.9% {
+        background-color: #f44336;
+    }
+    75%, 100% {
+        background-color: #ffeb3b;
+    }
+}
+@keyframes preloader-background {
+    0%, 24.9% {
+        background-color: #4caf50;
+    }
+    25%, 49.9% {
+        background-color: #026ed2;
+    }
+    50%, 74.9% {
+        background-color: #f44336;
+    }
+    75%, 100% {
+        background-color: #ffeb3b;
+    }
+}
+
+@-webkit-keyframes preloader-front {
+    0% {
+        width: 0;
+        background-color: #026ed2;
+    }
+    24.9% {
+        width: 100%;
+        background-color: #026ed2;
+    }
+    25% {
+        width: 0;
+        background-color: #f44336;
+    }
+    49.9% {
+        width: 100%;
+        background-color: #f44336;
+    }
+    50% {
+        width: 0;
+        background-color: #ffeb3b;
+    }
+    74.9% {
+        width: 100%;
+        background-color: #ffeb3b;
+    }
+    75% {
+        width: 0%;
+        background-color: #4caf50;
+    }
+    100% {
+        width: 100%;
+        background-color: #4caf50;
+    }
+}
+@-moz-keyframes preloader-front {
+    0% {
+        width: 0;
+        background-color: #026ed2;
+    }
+    24.9% {
+        width: 100%;
+        background-color: #026ed2;
+    }
+    25% {
+        width: 0;
+        background-color: #f44336;
+    }
+    49.9% {
+        width: 100%;
+        background-color: #f44336;
+    }
+    50% {
+        width: 0;
+        background-color: #ffeb3b;
+    }
+    74.9% {
+        width: 100%;
+        background-color: #ffeb3b;
+    }
+    75% {
+        width: 0%;
+        background-color: #4caf50;
+    }
+    100% {
+        width: 100%;
+        background-color: #4caf50;
+    }
+}
+@-o-keyframes preloader-front {
+    0% {
+        width: 0;
+        background-color: #026ed2;
+    }
+    24.9% {
+        width: 100%;
+        background-color: #026ed2;
+    }
+    25% {
+        width: 0;
+        background-color: #f44336;
+    }
+    49.9% {
+        width: 100%;
+        background-color: #f44336;
+    }
+    50% {
+        width: 0;
+        background-color: #ffeb3b;
+    }
+    74.9% {
+        width: 100%;
+        background-color: #ffeb3b;
+    }
+    75% {
+        width: 0%;
+        background-color: #4caf50;
+    }
+    100% {
+        width: 10050%;
+        background-color: #4caf50;
+    }
+}
+@keyframes preloader-front {
+    0% {
+        width: 0;
+        background-color: #026ed2;
+    }
+    24.9% {
+        width: 100%;
+        background-color: #026ed2;
+    }
+    25% {
+        width: 0;
+        background-color: #f44336;
+    }
+    49.9% {
+        width: 100%;
+        background-color: #f44336;
+    }
+    50% {
+        width: 0;
+        background-color: #ffeb3b;
+    }
+    74.9% {
+        width: 100%;
+        background-color: #ffeb3b;
+    }
+    75% {
+        width: 0%;
+        background-color: #4caf50;
+    }
+    100% {
+        width: 100%;
+        background-color: #4caf50;
+    }
+}
