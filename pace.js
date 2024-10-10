@@ -114,7 +114,7 @@
 			source = sources[_i];
 			if (source) {
 				for (key in source) {
-					if (!__hasProp.call(source, key)) continue;
+					if (!__hasProp.call(source, key) || key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
 					val = source[key];
 					if ((out[key] != null) && typeof out[key] === 'object' && (val != null) && typeof val === 'object') {
 						extend(out[key], val);
@@ -445,7 +445,7 @@
 	};
 
 	RequestIntercept = (function(_super) {
-		__extends(RequestIntercept, _super);
+		__s(RequestIntercept, _super);
 
 		function RequestIntercept() {
 			var monitorXHR,
