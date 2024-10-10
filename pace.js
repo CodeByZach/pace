@@ -273,7 +273,7 @@
 				}
 				this.el = document.createElement('div');
 				this.el.className = "pace pace-active";
-				document.body.className = document.body.className.replace(/(pace-done )|/, 'pace-running ');
+				document.body.className = document.body.className.replace(/(pace-done )/, 'pace-running ');
 				var _custom_class_name = (options.className !== '') ? ' '+options.className : '';
 				this.el.innerHTML = '<div class="pace-progress'+_custom_class_name+'">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
 				if (targetElement.firstChild != null) {
