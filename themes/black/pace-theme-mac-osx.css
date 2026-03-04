@@ -58,30 +58,10 @@
   -o-background-size: 28px 100%;
   background-size: 28px 100%;
 
-  -webkit-animation: pace-theme-mac-osx-motion 500ms linear infinite;
-  -moz-animation: pace-theme-mac-osx-motion 500ms linear infinite;
-  -ms-animation: pace-theme-mac-osx-motion 500ms linear infinite;
-  -o-animation: pace-theme-mac-osx-motion 500ms linear infinite;
   animation: pace-theme-mac-osx-motion 500ms linear infinite;
 }
 
-@-webkit-keyframes pace-theme-mac-osx-motion {
-  0% { -webkit-transform: none; transform: none; }
-  100% { -webkit-transform: translate(-28px, 0); transform: translate(-28px, 0); }
-}
-@-moz-keyframes pace-theme-mac-osx-motion {
-  0% { -moz-transform: none; transform: none; }
-  100% { -moz-transform: translate(-28px, 0); transform: translate(-28px, 0); }
-}
-@-o-keyframes pace-theme-mac-osx-motion {
-  0% { -o-transform: none; transform: none; }
-  100% { -o-transform: translate(-28px, 0); transform: translate(-28px, 0); }
-}
-@-ms-keyframes pace-theme-mac-osx-motion {
-  0% { -ms-transform: none; transform: none; }
-  100% { -ms-transform: translate(-28px, 0); transform: translate(-28px, 0); }
-}
 @keyframes pace-theme-mac-osx-motion {
-  0% { transform: none; transform: none; }
-  100% { transform: translate(-28px, 0); transform: translate(-28px, 0); }
+  0% { transform: none; }
+  100% { transform: translate(-28px, 0); }
 }

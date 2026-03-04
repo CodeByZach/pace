@@ -47,7 +47,6 @@
 	height: 80px;
 	border-right-color: rgba(0, 0, 0, .2);
 	border-left-color: rgba(0, 0, 0, .2);
-	-webkit-animation: pace-theme-corner-indicator-spin 3s linear infinite;
 	animation: pace-theme-corner-indicator-spin 3s linear infinite;
 }
 
@@ -58,14 +57,9 @@
 	height: 40px;
 	border-top-color: rgba(0, 0, 0, .2);
 	border-bottom-color: rgba(0, 0, 0, .2);
-	-webkit-animation: pace-theme-corner-indicator-spin 1s linear infinite;
 	animation: pace-theme-corner-indicator-spin 1s linear infinite;
 }
 
-@-webkit-keyframes pace-theme-corner-indicator-spin {
-	0% { -webkit-transform: rotate(0deg); }
-	100% { -webkit-transform: rotate(359deg); }
-}
 @keyframes pace-theme-corner-indicator-spin {
 	0% { transform: rotate(0deg); }
 	100% { transform: rotate(359deg); }

@@ -40,9 +40,6 @@
 	-moz-box-sizing: content-box;
 	box-sizing: content-box;
 
-	-webkit-animation: spin 1s linear infinite;
-	-moz-animation: spin 1s linear infinite;
-	-o-animation: spin 1s linear infinite;
 	animation: spin 1s linear infinite;
 }
 
@@ -62,18 +59,6 @@
 	-webkit-box-sizing: content-box;
 	-moz-box-sizing: content-box;
 	box-sizing: content-box;
-}
-
-@-webkit-keyframes spin {
-	100% { -webkit-transform: rotate(359deg); }
-}
-
-@-moz-keyframes spin {
-	100% { -moz-transform: rotate(359deg); }
-}
-
-@-o-keyframes spin {
-	100% { -moz-transform: rotate(359deg); }
 }
 
 @keyframes spin {

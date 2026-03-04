@@ -183,7 +183,6 @@
 .pace .pace-progress[data-progress-text="99%"]:after { right: -15.86px }
 .pace .pace-progress[data-progress-text="100%"]:after { right: -14px }
 
-
 .pace .pace-activity {
   position: absolute;
   width: 100%;
