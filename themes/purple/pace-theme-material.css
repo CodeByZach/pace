@@ -7,7 +7,7 @@
   -moz-user-select: none;
   -ms-user-select: none;
       user-select: none;
-  color: #7c60e0;
+  color: var(--pace-color, #7c60e0);
 }
 
 .pace-progress {

@@ -40,7 +40,7 @@
   line-height: 6rem;
   font-size: 2rem;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--pace-color, rgba(0, 0, 0, 0.8));
   color: #fff;
   font-family: "Helvetica Neue", sans-serif;
   font-weight: 100;

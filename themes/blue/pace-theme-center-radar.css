@@ -34,7 +34,7 @@
   display: block;
   border-width: 30px;
   border-style: double;
-  border-color: #2299dd transparent transparent;
+  border-color: var(--pace-color, #2299dd) transparent transparent;
   border-radius: 50%;
 
   -webkit-box-sizing: content-box;
@@ -57,7 +57,7 @@
   display: block;
   border-width: 10px;
   border-style: solid;
-  border-color: #2299dd transparent transparent;
+  border-color: var(--pace-color, #2299dd) transparent transparent;
   border-radius: 50%;
 
   -webkit-box-sizing: content-box;

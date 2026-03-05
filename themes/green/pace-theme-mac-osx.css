@@ -22,7 +22,7 @@
 }
 
 .pace .pace-progress {
-  background-color: #00E466;
+  background-color: var(--pace-color, #00E466);
   position: fixed;
   top: 0;
   right: 100%;
@@ -35,10 +35,10 @@
   -o-border-radius: 0 0 4px 0;
   border-radius: 0 0 4px 0;
 
-  -webkit-box-shadow: inset -1px 0 #009140, inset 0 -1px #009140, inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, .3);
-  -moz-box-shadow: inset -1px 0 #009140, inset 0 -1px #009140, inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, .3);
-  -o-box-shadow: inset -1px 0 #009140, inset 0 -1px #009140, inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, .3);
-  box-shadow: inset -1px 0 #009140, inset 0 -1px #009140, inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, .3);
+  -webkit-box-shadow: inset -1px 0 var(--pace-color, #009140), inset 0 -1px var(--pace-color, #009140), inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, .3);
+  -moz-box-shadow: inset -1px 0 var(--pace-color, #009140), inset 0 -1px var(--pace-color, #009140), inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, .3);
+  -o-box-shadow: inset -1px 0 var(--pace-color, #009140), inset 0 -1px var(--pace-color, #009140), inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, .3);
+  box-shadow: inset -1px 0 var(--pace-color, #009140), inset 0 -1px var(--pace-color, #009140), inset 0 2px rgba(255, 255, 255, 0.5), inset 0 6px rgba(255, 255, 255, .3);
 }
 
 .pace .pace-activity {

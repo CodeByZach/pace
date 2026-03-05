@@ -36,5 +36,5 @@
   font-size: 5rem;
   line-height: 1;
   text-align: right;
-  color: rgba(34, 153, 221, 0.19999999999999996);
+  color: var(--pace-color, rgba(34, 153, 221, 0.19999999999999996));
 }

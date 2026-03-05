@@ -37,7 +37,7 @@
   content: attr(data-progress-text);
   text-align: center;
   color: #fff;
-  background: #ee3148;
+  background: var(--pace-color, #ee3148);
   border-radius: 50%;
   font-family: "Helvetica Neue", sans-serif;
   font-size: 14px;
@@ -69,7 +69,7 @@
 
 .pace .pace-activity {
   border-radius: 50%;
-  border: 5px solid #ee3148;
+  border: 5px solid var(--pace-color, #ee3148);
   content: ' ';
   display: block;
   position: absolute;
@@ -81,7 +81,7 @@
 
 .pace .pace-activity:after {
   border-radius: 50%;
-  border: 5px solid #ee3148;
+  border: 5px solid var(--pace-color, #ee3148);
   content: ' ';
   display: block;
   position: absolute;
@@ -98,7 +98,7 @@
 
 .pace .pace-activity:before {
   border-radius: 50%;
-  border: 5px solid #ee3148;
+  border: 5px solid var(--pace-color, #ee3148);
   content: ' ';
   display: block;
   position: absolute;

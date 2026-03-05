@@ -30,7 +30,7 @@
   width: 140px;
   height: 140px;
   border-radius: 70px;
-  background: #eb7a55;
+  background: var(--pace-color, #eb7a55);
   position: absolute;
   top: 0;
   z-index: 1911;

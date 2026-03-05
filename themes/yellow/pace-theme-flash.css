@@ -12,7 +12,7 @@
 }
 
 .pace .pace-progress {
-  background: #fcd25a;
+  background: var(--pace-color, #fcd25a);
   position: fixed;
   z-index: 2000;
   top: 0;
@@ -27,7 +27,7 @@
   right: 0px;
   width: 100px;
   height: 100%;
-  box-shadow: 0 0 10px #fcd25a, 0 0 5px #fcd25a;
+  box-shadow: 0 0 10px var(--pace-color, #fcd25a), 0 0 5px var(--pace-color, #fcd25a);
   opacity: 1.0;
   -webkit-transform: rotate(3deg) translate(0px, -4px);
   -moz-transform: rotate(3deg) translate(0px, -4px);
@@ -45,8 +45,8 @@
   width: 14px;
   height: 14px;
   border: solid 2px transparent;
-  border-top-color: #fcd25a;
-  border-left-color: #fcd25a;
+  border-top-color: var(--pace-color, #fcd25a);
+  border-left-color: var(--pace-color, #fcd25a);
   border-radius: 10px;
   -webkit-animation: pace-spinner 400ms linear infinite;
   -moz-animation: pace-spinner 400ms linear infinite;
