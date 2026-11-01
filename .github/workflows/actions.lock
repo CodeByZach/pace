@@ -6,6 +6,9 @@ workflows:
     '.github/workflows/checks.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v7.1.0'
+    '.github/workflows/publish-npm.yml':
+        - 'actions/checkout@v7.0.1'
+        - 'actions/setup-node@v7.1.0'
 dependencies:
     'actions/checkout@v7.0.1':
         ref: 'v7.0.1'

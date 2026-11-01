@@ -1,0 +1,51 @@
+name: Publish to npm
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    environment: npm # waits for a maintainer's approval
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing (OIDC): no npm token is stored
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false # this job never pushes
+          fetch-depth: 0 # full history, for the master check below
+
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .tool-versions
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false # never use a cache in release builds
+
+      - name: Check that the tagged commit is on master
+        run: git merge-base --is-ancestor HEAD origin/master
+
+      - run: npm ci
+
+      - name: Check that generated files are up to date
+        run: npm run build && git add --intent-to-add . && git diff --exit-code # also catches new files
+
+      - run: npm run test:syntax
+
+      - name: Check that the tag matches the package version
+        run: test "v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME"
+
+      # Prereleases (e.g. 2.0.0-rc.1) go to the `next` dist-tag, never `latest`.
+      - name: Publish
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          if [[ "$version" == *-* ]]; then
+            npm publish --tag next
+          else
+            npm publish
+          fi
