@@ -3,8 +3,17 @@
   "version": "1.2.4",
   "description": "Automatically add a progress bar to your site.",
   "main": "pace.js",
+  "files": [
+    "pace.js",
+    "pace.min.js",
+    "pace-theme-default.css",
+    "pace-theme-default.min.css",
+    "templates/",
+    "themes/"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node scripts/build.mjs",
+    "test": "acorn --ecma5 --silent pace.js pace.min.js"
   },
   "repository": {
     "type": "git",
@@ -24,5 +33,16 @@
   "bugs": {
     "url": "https://github.com/CodeByZach/pace/issues"
   },
-  "homepage": "https://github.com/CodeByZach/pace#readme"
+  "homepage": "https://github.com/CodeByZach/pace#readme",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^26.0.0",
+      "onFail": "error"
+    }
+  },
+  "devDependencies": {
+    "acorn": "8.19.0",
+    "esbuild": "0.28.2"
+  }
 }

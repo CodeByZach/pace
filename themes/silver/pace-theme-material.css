@@ -6,7 +6,7 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-      user-select: none;
+  user-select: none;
   color: #d6d6d6;
 }
 
@@ -21,7 +21,7 @@
   width: 5rem;
   opacity: 1;
   -webkit-transition: opacity 0.1s;
-          transition: opacity 0.1s;
+  transition: opacity 0.1s;
 
   -webkit-transform: translate3d(0, 0, 0) !important;
   -ms-transform: translate3d(0, 0, 0) !important;
@@ -51,10 +51,10 @@
   width: 2.5rem;
   height: 5rem;
   -webkit-transform-origin: left center;
-      -ms-transform-origin: left center;
-          transform-origin: left center;
+  -ms-transform-origin: left center;
+  transform-origin: left center;
   -webkit-transition: -webkit-transform 0.1s;
-          transition: transform 0.1s;
+  transition: transform 0.1s;
   left: 2.5rem;
   top: 0;
 }
@@ -74,16 +74,16 @@
   border-right-color: transparent;
   border-bottom-color: transparent;
   -webkit-transform: rotate(135deg);
-      -ms-transform: rotate(135deg);
-          transform: rotate(135deg);
+  -ms-transform: rotate(135deg);
+  transform: rotate(135deg);
 }
 .pace-progress .pace-progress-inner:after {
   border-left-color: transparent;
   border-top-color: transparent;
   display: none;
   -webkit-transform: rotate(315deg);
-      -ms-transform: rotate(315deg);
-          transform: rotate(315deg);
+  -ms-transform: rotate(315deg);
+  transform: rotate(315deg);
 }
 
 .pace-progress[data-progress="00"] .pace-progress-inner:before { -webkit-transform: rotate(-45deg); -ms-transform: rotate(-45deg); transform: rotate(-45deg); }

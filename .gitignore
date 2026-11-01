@@ -1,0 +1,5 @@
+# npm install / npm ci
+/node_modules/
+
+# npm pack
+/pace-js-*.tgz
