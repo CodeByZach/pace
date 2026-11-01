@@ -3,3 +3,6 @@
 
 # npm pack
 /pace-js-*.tgz
+
+# npm run test:browsers (Playwright)
+/test-results/
