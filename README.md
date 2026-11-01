@@ -1,13 +1,13 @@
 PACE
 ====
-[![Latest Release](https://img.shields.io/github/tag/CodeByZach/pace.svg?label=release)](https://github.com/CodeByZach/pace/releases/latest) [![jsDelivr hits (npm)](https://img.shields.io/jsdelivr/npm/hm/pace-js?color=%23ff5627)](https://www.jsdelivr.com/package/npm/pace-js) [![Stars](https://img.shields.io/github/stars/CodeByZach/pace.svg)](https://github.com/CodeByZach/pace/stargazers) [![Forks](https://img.shields.io/github/forks/CodeByZach/pace.svg)](https://github.com/CodeByZach/pace/network/members) [![License](https://img.shields.io/github/license/CodeByZach/pace.svg)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/tag/CodeByZach/pace?label=release&sort=semver)](https://github.com/CodeByZach/pace/releases/latest) [![jsDelivr hits (npm)](https://img.shields.io/jsdelivr/npm/hm/pace-js?color=%23ff5627)](https://www.jsdelivr.com/package/npm/pace-js) [![Stars](https://img.shields.io/github/stars/CodeByZach/pace.svg)](https://github.com/CodeByZach/pace) [![Forks](https://img.shields.io/github/forks/CodeByZach/pace.svg)](https://github.com/CodeByZach/pace/network/members) [![License](https://img.shields.io/github/license/CodeByZach/pace.svg)](LICENSE)
 
 An automatic web page progress bar.
 
 ### [Demo](https://codebyzach.github.io/pace/)
 ### [Documentation](https://codebyzach.github.io/pace/docs/)
 
-Include [pace.js](https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js) and the
+Include [pace.js](https://cdn.jsdelivr.net/npm/pace-js@1/pace.min.js) and the
 [theme](https://codebyzach.github.io/pace/) css of your choice on your page
 (as early as possible), and you're done!
 
@@ -15,15 +15,15 @@ Pace will automatically monitor your ajax requests, event loop lag, document
 ready state, and elements on your page to decide the progress. On ajax navigation
 it will begin again!
 
-If you use AMD or Browserify, require pace.js and call `pace.start()` as early in the loading process as possible.
+If you use AMD or Browserify, require pace.js and call `Pace.start()` as early in the loading process as possible.
 
 Example
 -------
 
 ```html
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@latest/pace-theme-default.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1/pace.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@1/pace-theme-default.min.css">
 </head>
 ```
 
@@ -47,11 +47,14 @@ paceOptions = {
 }
 ```
 
-You can also put options on the script tag:
+You can also put options on the script tag (the value must be valid JSON):
 
 ```html
-<script data-pace-options='{ "ajax": false }' src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"></script>
+<script data-pace-options='{ "ajax": false }' src="https://cdn.jsdelivr.net/npm/pace-js@1/pace.min.js"></script>
 ```
+
+Pace reads its options once, when pace.js loads, so set them before including it.
+Assigning `Pace.options` afterwards has no effect.
 
 If you're using AMD or Browserify, you can pass your options to `start`:
 
@@ -86,7 +89,7 @@ Collectors are the bits of code which gather progress information. Pace includes
 
 - Ajax
 
-  Monitors all ajax requests on the page
+  Monitors ajax requests (XMLHttpRequest and WebSocket) on the page. Only `GET` requests are tracked by default, see Tracking below
 
 - Elements
 
@@ -151,8 +154,12 @@ paceOptions = {
 }
 ```
 
-You can also have pace restart on every ajax request which lasts longer than x ms. You'll want to
-disable this if you make ajax requests the user doesn't need to know about, like precaching:
+This also covers links whose scripts change the URL with `history.pushState` or `replaceState`
+(some tab, accordion and scrollspy plugins do).
+
+Pace also restarts for any tracked ajax request that is still running after `restartOnRequestAfter`
+milliseconds (500 by default). Set a different number, or `false` to turn this off if you make ajax
+requests the user doesn't need to know about, like precaching:
 
 ```javascript
 paceOptions = {
@@ -203,10 +210,20 @@ Tracking
 By default, Pace will show any ajax requests which begin as a part of a normal or ajax-y page load, or which last longer than
 500ms.
 
+Only `GET` requests are tracked by default. To also show the bar for other methods, such as form saves sent with `POST`:
+
+```javascript
+paceOptions = {
+  ajax: {
+    trackMethods: ['GET', 'POST']
+  }
+}
+```
+
 You can disable all ajax tracking by setting `ajax` to false:
 
 ```javascript
-Pace.options = {
+paceOptions = {
   ajax: false
 }
 ```
@@ -214,7 +231,7 @@ Pace.options = {
 You can disable ajax tracking except on page navigation by setting `restartOnRequestAfter` to false:
 
 ```javascript
-Pace.options = {
+paceOptions = {
   restartOnRequestAfter: false
 }
 ```
@@ -235,15 +252,31 @@ Pace.track(function() {
 });
 ```
 
+Both only affect requests opened directly inside the callback, not ones started later (for example from a timer or a promise).
+
 You can also ignore URLs based on a pattern:
 
 ```javascript
-Pace.options = {
+paceOptions = {
   ajax: {
     ignoreURLs: ['some-substring', /some-regexp/]
   }
 }
 ```
+
+A string matches any ajax request URL that contains it (case-sensitive); a regular expression is tested against
+the URL. These patterns only apply to ajax requests, not to links, images or other resources on the page.
+
+WebSocket connections are tracked too. To stop that, set `trackWebSockets: false` inside `ajax`.
+
+A few things Pace can't track:
+
+- Requests sent with `async: false` block the page until they finish, so the bar can't animate during them.
+- Downloads started by a plain link aren't ajax requests.
+
+Avoid calling `Pace.restart()` for every request, for example from jQuery's `ajaxStart`. It restarts the bar even for
+ignored requests, and parallel requests restart it several times. To show the bar for `POST` requests, add `POST` to
+`trackMethods` as shown above.
 
 Dependencies
 ------------
