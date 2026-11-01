@@ -26,7 +26,27 @@ jobs:
       - name: Check that generated files are up to date
         run: npm run build && git diff --exit-code
 
-      - run: npm test
+      - run: npm run test:syntax
 
       - name: List package contents
         run: npm pack --dry-run
+
+  browser-tests:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false # this job never pushes
+
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .tool-versions
+
+      - run: npm ci
+
+      # Not cached: Playwright's docs say restoring takes about as long as downloading.
+      - name: Install browsers
+        run: npx playwright install --with-deps --only-shell chromium firefox webkit
+
+      - run: npm run test:browsers
