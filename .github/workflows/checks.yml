@@ -24,7 +24,7 @@ jobs:
       - run: npm ci
 
       - name: Check that generated files are up to date
-        run: npm run build && git diff --exit-code
+        run: npm run build && git add --intent-to-add . && git diff --exit-code # also catches new files
 
       - run: npm run test:syntax
 
