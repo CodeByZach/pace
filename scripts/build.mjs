@@ -1,4 +1,5 @@
 // Builds every generated file from its source:
+//   package.json version    -> the headers of pace.js and pace-theme-default.css
 //   pace.js                 -> pace.min.js
 //   pace-theme-default.css  -> pace-theme-default.min.css
 //   templates/*.tmpl.css    -> themes/<color>/*.css
@@ -51,8 +52,21 @@ const compileTheme = (template, color) =>
 
 const withFinalNewline = (text) => text.trimEnd() + '\n';
 
-write('pace.min.js', minify(read('pace.js'), 'js'));
-write('pace-theme-default.min.css', minify(read('pace-theme-default.css'), 'css'));
+// package.json is the only place the version is set. This copies it into the
+// " * pace.js v…" header line of a source file and returns the updated source.
+const { version } = JSON.parse(read('package.json'));
+const VERSION_LINE = /^( \* pace\.js v)\S+/m;
+
+const stampVersion = (file) => {
+  const source = read(file);
+  if (!VERSION_LINE.test(source)) throw new Error(`${file}: no " * pace.js v…" header line`);
+  const stamped = source.replace(VERSION_LINE, `$1${version}`);
+  if (stamped !== source) write(file, stamped);
+  return stamped;
+};
+
+write('pace.min.js', minify(stampVersion('pace.js'), 'js'));
+write('pace-theme-default.min.css', minify(stampVersion('pace-theme-default.css'), 'css'));
 
 for (const template of fs.readdirSync(path.join(root, 'templates')).filter((f) => f.endsWith('.tmpl.css'))) {
   const source = read(path.join('templates', template));
