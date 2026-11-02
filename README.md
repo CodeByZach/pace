@@ -195,6 +195,7 @@ Pace fires the following events:
 - `start`: When pace is initially started, or as a part of a restart
 - `stop`: When pace is manually stopped, or as a part of a restart
 - `restart`: When pace is restarted (manually, or by a new AJAX request)
+- `progress`: On every frame while the bar is running, with the current progress (0–100)
 - `done`: When pace is finished
 - `hide`: When the pace is hidden (can be later than `done`, based on `ghostTime` and `minTime`)
 
