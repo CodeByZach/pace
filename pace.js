@@ -1,5 +1,5 @@
 /*!
- * pace.js v1.2.4
+ * pace.js v1.3.0
  * https://github.com/CodeByZach/pace/
  * Licensed MIT © HubSpot, Inc.
  */
@@ -115,6 +115,7 @@
       if (source) {
         for (key in source) {
           if (!__hasProp.call(source, key)) continue;
+          if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
           val = source[key];
           if ((out[key] != null) && typeof out[key] === 'object' && (val != null) && typeof val === 'object') {
             extend(out[key], val);
@@ -146,7 +147,7 @@
     if (json == null) {
       json = true;
     }
-    el = document.querySelector("[data-pace-" + key + "]");
+    el = document.querySelector("script[data-pace-" + key + "]");
     if (!el) {
       return;
     }
@@ -265,7 +266,7 @@
     }
 
     Bar.prototype.getElement = function() {
-      var targetElement;
+      var activity, inner, progress, targetElement;
       if (this.el == null) {
         targetElement = document.querySelector(options.target);
         if (!targetElement) {
@@ -274,8 +275,15 @@
         this.el = document.createElement('div');
         this.el.className = "pace pace-active";
         document.body.className = document.body.className.replace(/(pace-done )|/, 'pace-running ');
-        var _custom_class_name = (options.className !== '') ? ' '+options.className : '';
-        this.el.innerHTML = '<div class="pace-progress'+_custom_class_name+'">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
+        progress = document.createElement('div');
+        progress.className = 'pace-progress' + (options.className !== '' ? ' ' + options.className : '');
+        inner = document.createElement('div');
+        inner.className = 'pace-progress-inner';
+        progress.appendChild(inner);
+        activity = document.createElement('div');
+        activity.className = 'pace-activity';
+        this.el.appendChild(progress);
+        this.el.appendChild(activity);
         if (targetElement.firstChild != null) {
           targetElement.insertBefore(this.el, targetElement.firstChild);
         } else {
