@@ -762,7 +762,7 @@
   })();
 
   EventLagMonitor = (function() {
-    function EventLagMonitor() {
+    function EventLagMonitor(settings) {
       var avg, interval, last, points, samples,
         _this = this;
       this.progress = 0;
@@ -775,11 +775,11 @@
         diff = now() - last - 50;
         last = now();
         samples.push(diff);
-        if (samples.length > options.eventLag.sampleCount) {
+        if (samples.length > settings.sampleCount) {
           samples.shift();
         }
         avg = avgAmplitude(samples);
-        if (++points >= options.eventLag.minSamples && avg < options.eventLag.lagThreshold) {
+        if (++points >= settings.minSamples && avg < settings.lagThreshold) {
           _this.progress = 100;
           return clearInterval(interval);
         } else {

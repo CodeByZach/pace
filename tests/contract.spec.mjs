@@ -58,3 +58,11 @@ test('reads options from data-pace-options on its <script>', async ({ page, open
   await open({ paceAttributes: `data-pace-options='{ "className": "from-attribute" }'` });
   await expect(page.locator('.pace-progress')).toHaveClass('pace-progress from-attribute');
 });
+
+test('finishes when Pace.start() turns off eventLag', async ({ page, open }) => {
+  // As with a bundler: pace creates its collectors when it loads, and the options
+  // passed to Pace.start() arrive afterwards.
+  await open({ head: '<script>window.paceOptions = { startOnPageLoad: false };</script>' });
+  await page.evaluate(() => Pace.start({ eventLag: false }));
+  await idle(page);
+});
