@@ -311,7 +311,7 @@ input[type="color"]::after {
   right: -2px;
   height: 100%;
   font-size: .7rem;
-  line-height: 2rem;
+  line-height: calc(2.3rem - 12px); /* the input's height minus this border */
   color: #fcfcfc;
   color: rgba(255, 255, 255, 1);
   font-weight: 800;
