@@ -56,15 +56,26 @@ You can also put options on the script tag (the value must be valid JSON):
 Pace reads its options once, when pace.js loads, so set them before including it.
 Assigning `Pace.options` afterwards has no effect.
 
-If you're using AMD or Browserify, you can pass your options to `start`:
+If you load pace with a bundler or module loader (AMD or CommonJS), it doesn't start on its own:
+set `window.paceOptions` before pace loads, then call `Pace.start()`. `import` statements run
+before the rest of a file, so put the options in their own file and import it first:
 
 ```javascript
-define(['pace'], function(pace){
-  pace.start({
-    document: false
-  });
-});
+// pace-options.js
+window.paceOptions = {
+  document: false
+};
 ```
+
+```javascript
+// your entry file
+import './pace-options.js';
+import Pace from 'pace-js';
+
+Pace.start();
+```
+
+With RequireJS, set `window.paceOptions` in a `<script>` before calling `require(['pace'], ...)`.
 
 Themes
 ------
