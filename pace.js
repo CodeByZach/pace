@@ -1,5 +1,5 @@
 /*!
- * pace.js v1.3.0
+ * pace.js v1.3.1
  * https://github.com/CodeByZach/pace/
  * Licensed MIT © HubSpot, Inc.
  */
