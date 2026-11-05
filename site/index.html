@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PACE — Automatic page load progress bars</title>
+  <link rel="icon" href="data:,">
+
+  <link href="/pace/assets/css/flash-white.css" rel="stylesheet" />
+  <link href="/pace/assets/css/documentation-home.css" rel="stylesheet" />
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <script type="module">
+    import { Color } from '/pace/assets/js/color.js';
+    window.Color = Color;
+  </script>
+  <script src="/pace/assets/js/themes.js"></script>
+  <script src="/pace/assets/js/pace.min.js"></script>
+</head>
+<body>
+  <style id="app-colors">
+    .section.colored,
+    a.download-src-link,
+    .button {
+      background: #29d;
+    }
+
+    a,
+    a:hover,
+    a:active,
+    .header .title .title2:before {
+      color: #29d;
+    }
+  </style>
+
+  <div class="section colored">
+    <div class="header">
+      <div class="title">
+        <h1 class="title1"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
+        <h1 class="title2"><span class="char1">p</span><span class="char2">a</span><span class="char3">c</span><span class="char4">e</span></h1>
+      </div>
+      <div class="subtitle">
+        <h3>Automatic page load progress bar</h3>
+      </div>
+    </div>
+    <div class="down-arrow">⇪</div>
+  </div>
+
+  <div class="section">
+    <div class="page">
+      <h2>What is Pace?</h2>
+      <p class="text-left">Include pace.js and a CSS theme of your choice, and you get a beautiful progress indicator for your page load and ajax navigation.</p>
+      <p class="text-left">No need to hook into any of your code, progress is detected automatically.</p>
+      <br/>
+      <h2>Get Started</h2>
+<pre id="get-started-snippet"><code class="lang-html"><span class="tag">&lt;<span class="title">head</span>&gt;</span>
+    <span class="tag">&lt;<span class="title">script</span> <span class="attribute">src</span>=<span class="value">"https://cdn.jsdelivr.net/npm/pace-js@1/pace.min.js"</span>&gt;</span><span class="javascript"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span>
+    <span class="tag">&lt;<span class="title">link</span> <span class="attribute">rel</span>=<span class="value">"stylesheet"</span> <span class="attribute">href</span>=<span class="value">"https://cdn.jsdelivr.net/npm/pace-js@1/pace-theme-default.min.css"</span>&gt;</span>
+<span class="tag">&lt;/<span class="title">head</span>&gt;</span></code></pre>
+      <br/>
+      <h2>Themes</h2>
+      <p>Download a theme in the color of your choosing:</p>
+      <label class="color-label" for="color-select">Enter a color:</label>
+      <input type="color" value="#2299dd" id="color-select">
+      <div class="themes"></div>
+      <p class="block"><a href="https://github.com/CodeByZach/pace/">View on GitHub</a></p>
+      <p class="block"><a class="button primary-btn-hover" href="https://github.com/CodeByZach/pace#readme">Documentation</a></p>
+      <br/>
+      <br/>
+    </div>
+  </div>
+
+  <script>
+    // Saves `text` as a file named `filename`.
+    var saveFile = function(text, filename, type) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([text], { type: type }));
+      a.download = filename;
+      a.click();
+      // Released later: some browsers (Safari) fail the download if it's released right away.
+      setTimeout(function() { URL.revokeObjectURL(a.href); }, 60000);
+    };
+
+    $(function(){
+      var themes = [
+        {
+          name: 'minimal',
+          title: 'Minimal',
+          author: 'adamschwartz'
+        },
+        {
+          name: 'flash',
+          title: 'Flash',
+          author: 'adamschwartz'
+        },
+        {
+          name: 'barber-shop',
+          title: 'Barber Shop',
+          author: 'adamschwartz'
+        },
+        {
+          name: 'mac-osx',
+          title: 'Mac OSX',
+          author: 'adamschwartz'
+        },
+        {
+          name: 'fill-left',
+          title: 'Fill Left',
+          author: 'adamschwartz'
+        },
+        {
+          name: 'flat-top',
+          title: 'Flat Top',
+          author: 'adamschwartz'
+        },
+        {
+          name: 'big-counter',
+          title: 'Big Counter',
+          author: 'adamschwartz'
+        },
+        {
+          name: 'corner-indicator',
+          title: 'Corner Indicator',
+          author: 'adamschwartz'
+        },
+        {
+          name: 'bounce',
+          title: 'Bounce',
+          author: 'adamschwartz'
+        },
+        {
+          name: 'loading-bar',
+          title: 'Loading Bar',
+          author: 'gavJackson'
+        },
+        {
+          name: 'center-circle',
+          title: 'Center Circle',
+          author: 'adamschwartz'
+        },
+        {
+          name: 'center-atom',
+          title: 'Center Atom',
+          author: 'kennyglenn'
+        },
+        {
+          name: 'center-radar',
+          title: 'Center Radar',
+          author: 'kennyglenn'
+        },
+        {
+          name: 'center-simple',
+          title: 'Center Simple',
+          author: 'dineshgithub'
+        },
+        {
+          name: 'material',
+          title: 'Material',
+          author: 'dyatko'
+        }
+      ];
+
+      var init = function() {
+        $.each(themes, function(i, theme){
+          $('.themes').append('<div class="theme ' + (i % 2 === 0 ? 'even' : 'odd') + '">'+
+            '<h3>' + theme.title + '</h3>' +
+            (theme.author ? '<br/><a class="author" href="https://github.com/' + theme.author + '" target="_blank" rel="nofollow">@' + theme.author + '</a>' : '') +
+            '<p><a href="#" class="download-link" data-theme="' + theme.name + '">download</a></p>'+
+            '<div class="browser"><iframe data-theme="' + theme.name + '"></iframe></div>' +
+          '</div>');
+        });
+
+        var $color = $('input[type="color"]');
+
+        var cssCache = {};
+        var initFrame = function(frame, color){
+          color = color || $color.val();
+
+          var $styleEl = $('<style>')
+          $(frame).contents().find('body').append($styleEl);
+
+          var context = {};
+          if (color){
+            context.color = color;
+          }
+
+          var themeName = $(frame).data('theme')
+          loadTheme(themeName, function(theme){
+            var css = compileTheme(theme, context);
+            cssCache[themeName] = css;
+            $styleEl.html(css);
+          });
+
+          $(frame).contents().find('.pace').addClass('pace-active');
+        };
+
+        var updateColor = function(color){
+          $('.browser iframe').each(function(){
+            initFrame(this, color);
+          });
+        };
+
+        var downloadTheme = function(theme){
+          if (!cssCache[theme]) return; // the preview hasn't been built yet
+          saveFile(cssCache[theme], theme + '.css', 'text/css');
+        };
+
+        var getGeneratedPageURL = function(html) {
+          let getBlobURL = (code, type) => {
+            let blob = new Blob([code], { type });
+            return URL.createObjectURL(blob);
+          }
+
+          let source = `
+            <!DOCTYPE html>
+            <html>
+              <body>
+                ${html}
+              </body>
+            </html>
+          `;
+
+          return getBlobURL(source, 'text/html');
+        };
+
+        $('.browser iframe').each(function(){
+          let current_iframe = this;
+          current_iframe.src = getGeneratedPageURL('' +
+            '<div class="pace">' +
+              '<div class="pace-progress" data-progress="50" data-progress-text="50%" style="-webkit-transform: translate3d(50%, 0px, 0px); -ms-transform: translate3d(50%, 0px, 0px); transform: translate3d(50%, 0px, 0px);">' +
+                '<div class="pace-progress-inner"></div>' +
+              '</div>' +
+              '<div class="pace-activity"></div>' +
+            '</div>' +
+          '');
+          setTimeout(function(){
+            initFrame(current_iframe);
+          }, 500);
+        });
+
+        $color.on('change keyup', function(){
+          var color = $(this).val();
+          updateColor(color);
+
+          var css = '.section.colored, a.button { background: ' + color + '; } a, a:hover, a:active, .header .title .title2:before { color: ' + color + '; }';
+          $('#app-colors').html(css);
+        });
+
+        $('a.download-link').click(function(e){
+          e.preventDefault();
+          var theme = $(this).data('theme');
+          downloadTheme(theme);
+        });
+      };
+
+      var initTimeout = setTimeout(function(){
+        $(window).off('scroll', scrollOnce);
+        init();
+      }, 3000);
+
+      var scrollOnce = function() {
+        $(window).off('scroll', scrollOnce);
+        clearTimeout(initTimeout);
+        init();
+      };
+
+      $(window).on('scroll', scrollOnce);
+    });
+
+
+    setTimeout(function(){ document.body.classList.add('page-loaded'); }, 0);
+  </script>
+</body>
+</html>

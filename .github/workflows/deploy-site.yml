@@ -1,0 +1,57 @@
+name: Deploy site
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - site/**
+      - pace.min.js
+      - templates/**
+      - themes/white/pace-theme-flash.css
+      - scripts/color.mjs
+      - .github/workflows/deploy-site.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time; a deployment in progress is never cancelled.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15 # longer than deploy-pages' own 10-minute timeout
+    environment:
+      name: github-pages # deploys only from master
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false # this job never pushes
+
+      # The site uses the repo's pace.min.js, theme templates and color code,
+      # so it always shows the current version.
+      - name: Assemble the site
+        run: |
+          cp -R site _site
+          cp pace.min.js _site/assets/js/pace.min.js
+          cp scripts/color.mjs _site/assets/js/color.js
+          cp themes/white/pace-theme-flash.css _site/assets/css/flash-white.css
+          mkdir _site/assets/css/templates
+          cp templates/*.tmpl.css _site/assets/css/templates/
+
+      - uses: actions/configure-pages@v6.0.0
+
+      - uses: actions/upload-pages-artifact@v5.0.0
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v5.0.1

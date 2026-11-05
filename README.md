@@ -5,7 +5,6 @@ PACE
 An automatic web page progress bar.
 
 ### [Demo](https://codebyzach.github.io/pace/)
-### [Documentation](https://codebyzach.github.io/pace/docs/)
 
 Include [pace.js](https://cdn.jsdelivr.net/npm/pace-js@1/pace.min.js) and the
 [theme](https://codebyzach.github.io/pace/) css of your choice on your page
