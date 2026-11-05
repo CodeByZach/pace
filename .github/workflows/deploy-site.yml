@@ -23,7 +23,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-26.04
-    timeout-minutes: 5
+    timeout-minutes: 15 # longer than deploy-pages' own 10-minute timeout
     environment:
       name: github-pages # deploys only from master
       url: ${{ steps.deployment.outputs.page_url }}

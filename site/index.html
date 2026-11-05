@@ -77,7 +77,8 @@
       a.href = URL.createObjectURL(new Blob([text], { type: type }));
       a.download = filename;
       a.click();
-      URL.revokeObjectURL(a.href);
+      // Released later: some browsers (Safari) fail the download if it's released right away.
+      setTimeout(function() { URL.revokeObjectURL(a.href); }, 60000);
     };
 
     $(function(){
@@ -200,6 +201,7 @@
         };
 
         var downloadTheme = function(theme){
+          if (!cssCache[theme]) return; // the preview hasn't been built yet
           saveFile(cssCache[theme], theme + '.css', 'text/css');
         };
 
