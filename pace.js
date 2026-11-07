@@ -3,18 +3,11 @@
  * https://github.com/CodeByZach/pace/
  * Licensed MIT © HubSpot, Inc.
  */
-(function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Evented, Events, NoTargetError, Pace, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, addEventListener, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, ignoreStack, init, now, options, requestAnimationFrame, result, runAnimation, scalers, shouldIgnoreURL, shouldTrack, source, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _i, _intercept, _len, _pushState, _ref, _ref1, _replaceState,
-    __slice = [].slice,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  defaultOptions = {
+(function () {
+  const defaultOptions = {
     className: '',
     catchupTime: 100,
-    initialRate: .03,
+    initialRate: 0.03,
     minTime: 250,
     ghostTime: 100,
     maxProgressPerFrame: 20,
@@ -25,262 +18,171 @@
     target: 'body',
     elements: {
       checkInterval: 100,
-      selectors: ['body']
+      selectors: ['body'],
     },
     eventLag: {
       minSamples: 10,
       sampleCount: 3,
-      lagThreshold: 3
+      lagThreshold: 3,
     },
     ajax: {
       trackMethods: ['GET'],
       trackWebSockets: true,
-      ignoreURLs: []
-    }
+      ignoreURLs: [],
+    },
   };
 
-  now = function() {
-    var _ref;
-    return (_ref = typeof performance !== "undefined" && performance !== null ? typeof performance.now === "function" ? performance.now() : void 0 : void 0) != null ? _ref : +(new Date);
-  };
+  const now = () => performance.now();
 
-  requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+  const requestAnimationFrame = window.requestAnimationFrame;
+  const cancelAnimationFrame = window.cancelAnimationFrame;
 
-  cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
-
-  addEventListener = function(obj, event, callback) {
-    if (typeof obj.addEventListener === "function") {
-      return obj.addEventListener(event, callback, false);
-    } else {
-      return function() {
-        if (typeof obj["on" + event] !== "function" || typeof obj["on" + event].eventListeners !== "object") {
-          var eventListeners = new Events();
-          if (typeof obj["on" + event] === "function") {
-            eventListeners.on(event, obj["on" + event]);
-          }
-          obj["on" + event] = function(evt) {
-            return eventListeners.trigger(event, evt);
-          };
-          obj["on" + event].eventListeners = eventListeners;
-        } else {
-          var eventListeners = obj["on" + event].eventListeners;
-        }
-        eventListeners.on(event, callback);
-      }();
-    }
-  };
-
-  if (requestAnimationFrame == null) {
-    requestAnimationFrame = function(fn) {
-      return setTimeout(fn, 50);
-    };
-    cancelAnimationFrame = function(id) {
-      return clearTimeout(id);
-    };
-  }
-
-  runAnimation = function(fn) {
-    var last, tick;
-    last = now();
-    tick = function() {
-      var diff;
-      diff = now() - last;
+  const runAnimation = (fn) => {
+    let last = now();
+    const tick = () => {
+      const diff = now() - last;
       if (diff >= 33) {
         last = now();
-        return fn(diff, function() {
-          return requestAnimationFrame(tick);
-        });
-      } else {
-        return setTimeout(tick, 33 - diff);
+        return fn(diff, () => requestAnimationFrame(tick));
       }
+      return setTimeout(tick, 33 - diff);
     };
     return tick();
   };
 
-  result = function() {
-    var args, key, obj;
-    obj = arguments[0], key = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
+  const result = (obj, key, ...args) => {
     if (typeof obj[key] === 'function') {
       return obj[key].apply(obj, args);
-    } else {
-      return obj[key];
     }
+    return obj[key];
   };
 
-  extend = function() {
-    var key, out, source, sources, val, _i, _len;
-    out = arguments[0], sources = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-    for (_i = 0, _len = sources.length; _i < _len; _i++) {
-      source = sources[_i];
-      if (source) {
-        for (key in source) {
-          if (!__hasProp.call(source, key)) continue;
-          if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
-          val = source[key];
-          if ((out[key] != null) && typeof out[key] === 'object' && (val != null) && typeof val === 'object') {
-            extend(out[key], val);
-          } else {
-            out[key] = val;
-          }
+  const extend = (out, ...sources) => {
+    for (const source of sources) {
+      if (!source) {
+        continue;
+      }
+      for (const key in source) {
+        if (!Object.prototype.hasOwnProperty.call(source, key)) continue;
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+        const val = source[key];
+        if (out[key] != null && typeof out[key] === 'object' && val != null && typeof val === 'object') {
+          extend(out[key], val);
+        } else {
+          out[key] = val;
         }
       }
     }
     return out;
   };
 
-  avgAmplitude = function(arr) {
-    var count, sum, v, _i, _len;
-    sum = count = 0;
-    for (_i = 0, _len = arr.length; _i < _len; _i++) {
-      v = arr[_i];
+  const avgAmplitude = (arr) => {
+    let sum = 0;
+    let count = 0;
+    for (const v of arr) {
       sum += Math.abs(v);
       count++;
     }
     return sum / count;
   };
 
-  getFromDOM = function(key, json) {
-    var data, e, el;
-    if (key == null) {
-      key = 'options';
-    }
-    if (json == null) {
-      json = true;
-    }
-    el = document.querySelector("script[data-pace-" + key + "]");
+  const getFromDOM = (key = 'options', json = true) => {
+    const el = document.querySelector(`script[data-pace-${key}]`);
     if (!el) {
       return;
     }
-    data = el.getAttribute("data-pace-" + key);
+    const data = el.getAttribute(`data-pace-${key}`);
     if (!json) {
       return data;
     }
     try {
       return JSON.parse(data);
-    } catch (_error) {
-      e = _error;
-      return typeof console !== "undefined" && console !== null ? console.error("Error parsing inline pace options", e) : void 0;
+    } catch (e) {
+      console.error('Error parsing inline pace options', e);
     }
   };
 
-  Evented = (function() {
-    function Evented() {}
-
-    Evented.prototype.on = function(event, handler, ctx, once) {
-      var _base;
-      if (once == null) {
-        once = false;
-      }
-      if (this.bindings == null) {
-        this.bindings = {};
-      }
-      if ((_base = this.bindings)[event] == null) {
-        _base[event] = [];
-      }
-      return this.bindings[event].push({
-        handler: handler,
-        ctx: ctx,
-        once: once
-      });
-    };
-
-    Evented.prototype.once = function(event, handler, ctx) {
-      return this.on(event, handler, ctx, true);
-    };
-
-    Evented.prototype.off = function(event, handler) {
-      var i, _ref, _results;
-      if (((_ref = this.bindings) != null ? _ref[event] : void 0) == null) {
-        return;
-      }
-      if (handler == null) {
-        return delete this.bindings[event];
-      } else {
-        i = 0;
-        _results = [];
-        while (i < this.bindings[event].length) {
-          if (this.bindings[event][i].handler === handler) {
-            _results.push(this.bindings[event].splice(i, 1));
-          } else {
-            _results.push(i++);
-          }
-        }
-        return _results;
-      }
-    };
-
-    Evented.prototype.trigger = function() {
-      var args, ctx, event, handler, i, once, _ref, _ref1, _results;
-      event = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      if ((_ref = this.bindings) != null ? _ref[event] : void 0) {
-        i = 0;
-        _results = [];
-        while (i < this.bindings[event].length) {
-          _ref1 = this.bindings[event][i], handler = _ref1.handler, ctx = _ref1.ctx, once = _ref1.once;
-          handler.apply(ctx != null ? ctx : this, args);
-          if (once) {
-            _results.push(this.bindings[event].splice(i, 1));
-          } else {
-            _results.push(i++);
-          }
-        }
-        return _results;
-      }
-    };
-
-    return Evented;
-
-  })();
-
-  Pace = window.Pace || {};
+  const Pace = window.Pace || {};
 
   window.Pace = Pace;
 
-  extend(Pace, Evented.prototype);
+  Object.assign(Pace, {
+    on(event, handler, ctx, once) {
+      once ??= false;
+      this.bindings ??= {};
+      this.bindings[event] ??= [];
+      this.bindings[event].push({ handler, ctx, once });
+    },
 
-  options = Pace.options = extend({}, defaultOptions, window.paceOptions, getFromDOM());
+    once(event, handler, ctx) {
+      this.on(event, handler, ctx, true);
+    },
 
-  _ref = ['ajax', 'document', 'eventLag', 'elements'];
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    source = _ref[_i];
-    if (options[source] === true) {
-      options[source] = defaultOptions[source];
+    off(event, handler) {
+      if (this.bindings?.[event] == null) {
+        return;
+      }
+      if (handler == null) {
+        delete this.bindings[event];
+        return;
+      }
+      let i = 0;
+      while (i < this.bindings[event].length) {
+        if (this.bindings[event][i].handler === handler) {
+          this.bindings[event].splice(i, 1);
+        } else {
+          i++;
+        }
+      }
+    },
+
+    trigger(event, ...args) {
+      if (!this.bindings?.[event]) {
+        return;
+      }
+      let i = 0;
+      while (i < this.bindings[event].length) {
+        const { handler, ctx, once } = this.bindings[event][i];
+        handler.apply(ctx ?? this, args);
+        if (once) {
+          this.bindings[event].splice(i, 1);
+        } else {
+          i++;
+        }
+      }
+    },
+  });
+
+  const options = (Pace.options = extend({}, defaultOptions, window.paceOptions, getFromDOM()));
+
+  for (const key of ['ajax', 'document', 'eventLag', 'elements']) {
+    if (options[key] === true) {
+      options[key] = defaultOptions[key];
     }
   }
 
-  NoTargetError = (function(_super) {
-    __extends(NoTargetError, _super);
+  class NoTargetError extends Error {}
 
-    function NoTargetError() {
-      _ref1 = NoTargetError.__super__.constructor.apply(this, arguments);
-      return _ref1;
-    }
-
-    return NoTargetError;
-
-  })(Error);
-
-  Bar = (function() {
-    function Bar() {
+  class Bar {
+    constructor() {
       this.progress = 0;
     }
 
-    Bar.prototype.getElement = function() {
-      var activity, inner, progress, targetElement;
+    getElement() {
       if (this.el == null) {
-        targetElement = document.querySelector(options.target);
+        const targetElement = document.querySelector(options.target);
         if (!targetElement) {
-          throw new NoTargetError;
+          throw new NoTargetError();
         }
         this.el = document.createElement('div');
-        this.el.className = "pace pace-active";
+        this.el.className = 'pace pace-active';
         document.body.className = document.body.className.replace(/(pace-done )|/, 'pace-running ');
-        progress = document.createElement('div');
+        const progress = document.createElement('div');
         progress.className = 'pace-progress' + (options.className !== '' ? ' ' + options.className : '');
-        inner = document.createElement('div');
+        const inner = document.createElement('div');
         inner.className = 'pace-progress-inner';
         progress.appendChild(inner);
-        activity = document.createElement('div');
+        const activity = document.createElement('div');
         activity.className = 'pace-activity';
         this.el.appendChild(progress);
         this.el.appendChild(activity);
@@ -291,488 +193,349 @@
         }
       }
       return this.el;
-    };
+    }
 
-    Bar.prototype.finish = function() {
-      var el;
-      el = this.getElement();
+    finish() {
+      const el = this.getElement();
       el.className = el.className.replace('pace-active', 'pace-inactive');
-      return document.body.className = document.body.className.replace('pace-running ', 'pace-done ');
-    };
+      document.body.className = document.body.className.replace('pace-running ', 'pace-done ');
+    }
 
-    Bar.prototype.update = function(prog) {
+    update(prog) {
       this.progress = prog;
       Pace.trigger('progress', prog);
-      return this.render();
-    };
+      this.render();
+    }
 
-    Bar.prototype.destroy = function() {
+    destroy() {
       try {
         this.getElement().parentNode.removeChild(this.getElement());
-      } catch (_error) {
-        NoTargetError = _error;
+      } catch (error) {
+        NoTargetError = error;
       }
-      return this.el = void 0;
-    };
+      this.el = undefined;
+    }
 
-    Bar.prototype.render = function() {
-      var el, key, progressStr, transform, _j, _len1, _ref2;
+    render() {
       if (document.querySelector(options.target) == null) {
-        return false;
+        return;
       }
-      el = this.getElement();
-      transform = "translate3d(" + this.progress + "%, 0, 0)";
-      _ref2 = ['webkitTransform', 'msTransform', 'transform'];
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        key = _ref2[_j];
-        el.children[0].style[key] = transform;
-      }
+      const el = this.getElement();
+      el.children[0].style.transform = `translate3d(${this.progress}%, 0, 0)`;
       if (!this.lastRenderedProgress || this.lastRenderedProgress | 0 !== this.progress | 0) {
-        el.children[0].setAttribute('data-progress-text', "" + (this.progress | 0) + "%");
+        el.children[0].setAttribute('data-progress-text', `${this.progress | 0}%`);
+        let progressStr;
         if (this.progress >= 100) {
           progressStr = '99';
         } else {
-          progressStr = this.progress < 10 ? "0" : "";
+          progressStr = this.progress < 10 ? '0' : '';
           progressStr += this.progress | 0;
         }
-        el.children[0].setAttribute('data-progress', "" + progressStr);
+        el.children[0].setAttribute('data-progress', progressStr);
       }
       Pace.trigger('change', this.progress);
-      return this.lastRenderedProgress = this.progress;
-    };
+      this.lastRenderedProgress = this.progress;
+    }
 
-    Bar.prototype.done = function() {
+    done() {
       return this.progress >= 100;
-    };
+    }
+  }
 
-    return Bar;
-
-  })();
-
-  Events = (function() {
-    function Events() {
+  class Events {
+    constructor() {
       this.bindings = {};
     }
 
-    Events.prototype.trigger = function(name, val) {
-      var binding, _j, _len1, _ref2, _results;
+    trigger(name, val) {
       if (this.bindings[name] != null) {
-        _ref2 = this.bindings[name];
-        _results = [];
-        for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-          binding = _ref2[_j];
-          _results.push(binding.call(this, val));
+        // A copy, so listeners added while this runs wait for the next trigger.
+        for (const binding of this.bindings[name].slice()) {
+          binding.call(this, val);
         }
-        return _results;
       }
-    };
+    }
 
-    Events.prototype.on = function(name, fn) {
-      var _base;
-      if ((_base = this.bindings)[name] == null) {
-        _base[name] = [];
-      }
-      return this.bindings[name].push(fn);
-    };
+    on(name, fn) {
+      this.bindings[name] ??= [];
+      this.bindings[name].push(fn);
+    }
+  }
 
-    return Events;
+  const _XMLHttpRequest = window.XMLHttpRequest;
 
-  })();
+  const _WebSocket = window.WebSocket;
 
-  _XMLHttpRequest = window.XMLHttpRequest;
-
-  _XDomainRequest = window.XDomainRequest;
-
-  _WebSocket = window.WebSocket;
-
-  extendNative = function(to, from) {
-    var e, key, _results;
-    _results = [];
-    for (key in from.prototype) {
+  const extendNative = (to, from) => {
+    for (const key in from.prototype) {
       try {
-        if ((to[key] == null) && typeof from[key] !== 'function') {
-          if (typeof Object.defineProperty === 'function') {
-            _results.push(Object.defineProperty(to, key, {
-              get: (function(key) {
-                return function() {
-                  return from.prototype[key];
-                };
-              })(key),
-              configurable: true,
-              enumerable: true
-            }));
-          } else {
-            _results.push(to[key] = from.prototype[key]);
-          }
-        } else {
-          _results.push(void 0);
+        if (to[key] == null && typeof from[key] !== 'function') {
+          Object.defineProperty(to, key, {
+            get: () => from.prototype[key],
+            configurable: true,
+            enumerable: true,
+          });
         }
-      } catch (_error) {
-        e = _error;
-      }
+      } catch {}
     }
-    return _results;
   };
 
-  ignoreStack = [];
+  const ignoreStack = [];
 
-  Pace.ignore = function() {
-    var args, fn, ret;
-    fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+  Pace.ignore = (fn, ...args) => {
     ignoreStack.unshift('ignore');
-    ret = fn.apply(null, args);
+    const ret = fn.apply(null, args);
     ignoreStack.shift();
     return ret;
   };
 
-  Pace.track = function() {
-    var args, fn, ret;
-    fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+  Pace.track = (fn, ...args) => {
     ignoreStack.unshift('track');
-    ret = fn.apply(null, args);
+    const ret = fn.apply(null, args);
     ignoreStack.shift();
     return ret;
   };
 
-  shouldTrack = function(method) {
-    var _ref2;
-    if (method == null) {
-      method = 'GET';
-    }
+  const shouldTrack = (method) => {
+    method ??= 'GET';
     if (ignoreStack[0] === 'track') {
       return 'force';
     }
     if (!ignoreStack.length && options.ajax) {
       if (method === 'socket' && options.ajax.trackWebSockets) {
         return true;
-      } else if (_ref2 = method.toUpperCase(), __indexOf.call(options.ajax.trackMethods, _ref2) >= 0) {
+      } else if (options.ajax.trackMethods.includes(method.toUpperCase())) {
         return true;
       }
     }
     return false;
   };
 
-  RequestIntercept = (function(_super) {
-    __extends(RequestIntercept, _super);
-
-    function RequestIntercept() {
-      var monitorXHR,
-        _this = this;
-      RequestIntercept.__super__.constructor.apply(this, arguments);
-      monitorXHR = function(req) {
-        var _open;
-        _open = req.open;
-        return req.open = function(type, url, async) {
-          if (shouldTrack(type)) {
-            _this.trigger('request', {
-              type: type,
-              url: url,
-              request: req
-            });
-          }
-          return _open.apply(req, arguments);
-        };
+  // Outside the class on purpose: class bodies are strict mode, where assigning
+  // to a read-only property (a page may lock window.XMLHttpRequest) throws.
+  const installIntercepts = (intercept) => {
+    const monitorXHR = (req) => {
+      const _open = req.open;
+      req.open = (...args) => {
+        const [type, url] = args;
+        if (shouldTrack(type)) {
+          intercept.trigger('request', { type, url, request: req });
+        }
+        return _open.apply(req, args);
       };
-      window.XMLHttpRequest = function(flags) {
-        var req;
-        req = new _XMLHttpRequest(flags);
-        monitorXHR(req);
+    };
+    // Plain functions, not arrow functions: pages call these with `new`.
+    window.XMLHttpRequest = function (flags) {
+      const req = new _XMLHttpRequest(flags);
+      monitorXHR(req);
+      return req;
+    };
+    try {
+      extendNative(window.XMLHttpRequest, _XMLHttpRequest);
+    } catch {}
+    if (options.ajax.trackWebSockets) {
+      window.WebSocket = function (url, protocols) {
+        let req;
+        if (protocols != null) {
+          req = new _WebSocket(url, protocols);
+        } else {
+          req = new _WebSocket(url);
+        }
+        if (shouldTrack('socket')) {
+          intercept.trigger('request', { type: 'socket', url, protocols, request: req });
+        }
         return req;
       };
       try {
-        extendNative(window.XMLHttpRequest, _XMLHttpRequest);
-      } catch (_error) {}
-      if (_XDomainRequest != null) {
-        window.XDomainRequest = function() {
-          var req;
-          req = new _XDomainRequest;
-          monitorXHR(req);
-          return req;
-        };
-        try {
-          extendNative(window.XDomainRequest, _XDomainRequest);
-        } catch (_error) {}
-      }
-      if ((_WebSocket != null) && options.ajax.trackWebSockets) {
-        window.WebSocket = function(url, protocols) {
-          var req;
-          if (protocols != null) {
-            req = new _WebSocket(url, protocols);
-          } else {
-            req = new _WebSocket(url);
-          }
-          if (shouldTrack('socket')) {
-            _this.trigger('request', {
-              type: 'socket',
-              url: url,
-              protocols: protocols,
-              request: req
-            });
-          }
-          return req;
-        };
-        try {
-          extendNative(window.WebSocket, _WebSocket);
-        } catch (_error) {}
-      }
+        extendNative(window.WebSocket, _WebSocket);
+      } catch {}
     }
+  };
 
-    return RequestIntercept;
-
-  })(Events);
-
-  _intercept = null;
-
-  getIntercept = function() {
-    if (_intercept == null) {
-      _intercept = new RequestIntercept;
+  class RequestIntercept extends Events {
+    constructor() {
+      super();
+      installIntercepts(this);
     }
+  }
+
+  let _intercept = null;
+
+  const getIntercept = () => {
+    _intercept ??= new RequestIntercept();
     return _intercept;
   };
 
-  shouldIgnoreURL = function(url) {
-    var pattern, _j, _len1, _ref2;
-    _ref2 = options.ajax.ignoreURLs;
-    for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-      pattern = _ref2[_j];
+  const shouldIgnoreURL = (url) => {
+    const patterns = options.ajax.ignoreURLs;
+    for (let i = 0, n = patterns.length; i < n; i++) {
+      const pattern = patterns[i];
       if (typeof pattern === 'string') {
         if (url.indexOf(pattern) !== -1) {
           return true;
         }
-      } else {
-        if (pattern.test(url)) {
-          return true;
-        }
+      } else if (pattern.test(url)) {
+        return true;
       }
     }
     return false;
   };
 
-  getIntercept().on('request', function(_arg) {
-    var after, args, request, type, url;
-    type = _arg.type, request = _arg.request, url = _arg.url;
+  getIntercept().on('request', (event) => {
+    const { type, request, url } = event;
     if (shouldIgnoreURL(url)) {
       return;
     }
     if (!Pace.running && (options.restartOnRequestAfter !== false || shouldTrack(type) === 'force')) {
-      args = arguments;
-      after = options.restartOnRequestAfter || 0;
+      let after = options.restartOnRequestAfter || 0;
       if (typeof after === 'boolean') {
         after = 0;
       }
-      return setTimeout(function() {
-        var stillActive, _j, _len1, _ref2, _ref3, _results;
+      setTimeout(() => {
+        let stillActive;
         if (type === 'socket') {
           stillActive = request.readyState < 1;
         } else {
-          stillActive = (0 < (_ref2 = request.readyState) && _ref2 < 4);
+          stillActive = 0 < request.readyState && request.readyState < 4;
         }
         if (stillActive) {
           Pace.restart();
-          _ref3 = Pace.sources;
-          _results = [];
-          for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-            source = _ref3[_j];
+          for (let i = 0, n = Pace.sources.length; i < n; i++) {
+            const source = Pace.sources[i];
             if (source instanceof AjaxMonitor) {
-              source.watch.apply(source, args);
+              source.watch(event);
               break;
-            } else {
-              _results.push(void 0);
             }
           }
-          return _results;
         }
       }, after);
     }
   });
 
-  AjaxMonitor = (function() {
-    function AjaxMonitor() {
-      this.complete = __bind(this.complete, this);
-      var _this = this;
+  class AjaxMonitor {
+    constructor() {
+      this.complete = this.complete.bind(this);
       this.elements = [];
-      getIntercept().on('request', function() {
-        return _this.watch.apply(_this, arguments);
-      });
+      getIntercept().on('request', (event) => this.watch(event));
     }
 
-    AjaxMonitor.prototype.watch = function(_arg) {
-      var request, tracker, type, url;
-      type = _arg.type, request = _arg.request, url = _arg.url;
+    watch({ type, request, url }) {
       if (shouldIgnoreURL(url)) {
         return;
       }
+      let tracker;
       if (type === 'socket') {
         tracker = new SocketRequestTracker(request, this.complete);
       } else {
         tracker = new XHRRequestTracker(request, this.complete);
       }
-      return this.elements.push(tracker);
-    };
+      this.elements.push(tracker);
+    }
 
-    AjaxMonitor.prototype.complete = function(tracker) {
-      return this.elements = this.elements.filter(function(e) {
-        return e !== tracker;
-      });
-    };
+    complete(tracker) {
+      this.elements = this.elements.filter((e) => e !== tracker);
+    }
+  }
 
-    return AjaxMonitor;
-
-  })();
-
-  XHRRequestTracker = (function() {
-    function XHRRequestTracker(request, completeCallback) {
-      var event, size, _j, _len1, _onreadystatechange, _ref2,
-        _this = this;
+  class XHRRequestTracker {
+    constructor(request, completeCallback) {
       this.progress = 0;
-      if (window.ProgressEvent != null) {
-        size = null;
-        addEventListener(request, 'progress', function(evt) {
-          if (evt.lengthComputable) {
-            return _this.progress = 100 * evt.loaded / evt.total;
-          } else {
-            return _this.progress = _this.progress + (100 - _this.progress) / 2;
-          }
-        }, false);
-        _ref2 = ['load', 'abort', 'timeout', 'error'];
-        for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-          event = _ref2[_j];
-          addEventListener(request, event, function() {
-            completeCallback(_this);
-            return _this.progress = 100;
-          }, false);
+      request.addEventListener('progress', (evt) => {
+        if (evt.lengthComputable) {
+          this.progress = (100 * evt.loaded) / evt.total;
+        } else {
+          this.progress = this.progress + (100 - this.progress) / 2;
         }
-      } else {
-        _onreadystatechange = request.onreadystatechange;
-        request.onreadystatechange = function() {
-          var _ref3;
-          if ((_ref3 = request.readyState) === 0 || _ref3 === 4) {
-            completeCallback(_this);
-            _this.progress = 100;
-          } else if (request.readyState === 3) {
-            _this.progress = 50;
-          }
-          return typeof _onreadystatechange === "function" ? _onreadystatechange.apply(null, arguments) : void 0;
-        };
-      }
-    }
-
-    return XHRRequestTracker;
-
-  })();
-
-  SocketRequestTracker = (function() {
-    function SocketRequestTracker(request, completeCallback) {
-      var event, _j, _len1, _ref2,
-        _this = this;
-      this.progress = 0;
-      _ref2 = ['error', 'open'];
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        event = _ref2[_j];
-        addEventListener(request, event, function() {
-          completeCallback(_this);
-          return _this.progress = 100;
+      }, false);
+      for (const event of ['load', 'abort', 'timeout', 'error']) {
+        request.addEventListener(event, () => {
+          completeCallback(this);
+          this.progress = 100;
         }, false);
       }
     }
+  }
 
-    return SocketRequestTracker;
-
-  })();
-
-  ElementMonitor = (function() {
-    function ElementMonitor(options) {
-      var selector, _j, _len1, _ref2;
-      if (options == null) {
-        options = {};
+  class SocketRequestTracker {
+    constructor(request, completeCallback) {
+      this.progress = 0;
+      for (const event of ['error', 'open']) {
+        request.addEventListener(event, () => {
+          completeCallback(this);
+          this.progress = 100;
+        }, false);
       }
-      this.complete = __bind(this.complete, this);
+    }
+  }
+
+  class ElementMonitor {
+    constructor(settings) {
+      settings ??= {};
+      this.complete = this.complete.bind(this);
       this.elements = [];
-      if (options.selectors == null) {
-        options.selectors = [];
-      }
-      _ref2 = options.selectors;
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        selector = _ref2[_j];
-        this.elements.push(new ElementTracker(selector, this.complete));
+      settings.selectors ??= [];
+      const selectors = settings.selectors;
+      for (let i = 0, n = selectors.length; i < n; i++) {
+        this.elements.push(new ElementTracker(selectors[i], this.complete));
       }
     }
 
-    ElementMonitor.prototype.complete = function(tracker) {
-      return this.elements = this.elements.filter(function(e) {
-        return e !== tracker;
-      });
-    };
+    complete(tracker) {
+      this.elements = this.elements.filter((e) => e !== tracker);
+    }
+  }
 
-    return ElementMonitor;
-
-  })();
-
-  ElementTracker = (function() {
-    function ElementTracker(selector, completeCallback) {
+  class ElementTracker {
+    constructor(selector, completeCallback) {
       this.selector = selector;
       this.completeCallback = completeCallback;
       this.progress = 0;
       this.check();
     }
 
-    ElementTracker.prototype.check = function() {
-      var _this = this;
+    check() {
       if (document.querySelector(this.selector)) {
-        return this.done();
+        this.done();
       } else {
-        return setTimeout((function() {
-          return _this.check();
-        }), options.elements.checkInterval);
+        setTimeout(() => this.check(), options.elements.checkInterval);
       }
-    };
-
-    ElementTracker.prototype.done = function() {
-      this.completeCallback(this);
-      this.completeCallback = null;
-      return this.progress = 100;
-    };
-
-    return ElementTracker;
-
-  })();
-
-  DocumentMonitor = (function() {
-    DocumentMonitor.prototype.states = {
-      loading: 0,
-      interactive: 50,
-      complete: 100
-    };
-
-    function DocumentMonitor() {
-      var _onreadystatechange, _ref2,
-        _this = this;
-      this.progress = (_ref2 = this.states[document.readyState]) != null ? _ref2 : 100;
-      _onreadystatechange = document.onreadystatechange;
-      document.onreadystatechange = function() {
-        if (_this.states[document.readyState] != null) {
-          _this.progress = _this.states[document.readyState];
-        }
-        return typeof _onreadystatechange === "function" ? _onreadystatechange.apply(null, arguments) : void 0;
-      };
     }
 
-    return DocumentMonitor;
+    done() {
+      this.completeCallback(this);
+      this.completeCallback = null;
+      this.progress = 100;
+    }
+  }
 
-  })();
+  class DocumentMonitor {
+    constructor() {
+      this.progress = this.states[document.readyState] ?? 100;
+      const _onreadystatechange = document.onreadystatechange;
+      document.onreadystatechange = (...args) => {
+        if (this.states[document.readyState] != null) {
+          this.progress = this.states[document.readyState];
+        }
+        return typeof _onreadystatechange === 'function' ? _onreadystatechange.apply(null, args) : undefined;
+      };
+    }
+  }
 
-  EventLagMonitor = (function() {
-    function EventLagMonitor(settings) {
-      var avg, interval, last, points, samples,
-        _this = this;
+  DocumentMonitor.prototype.states = {
+    loading: 0,
+    interactive: 50,
+    complete: 100,
+  };
+
+  class EventLagMonitor {
+    constructor(settings) {
       this.progress = 0;
-      avg = 0;
-      samples = [];
-      points = 0;
-      last = now();
-      interval = setInterval(function() {
-        var diff;
-        diff = now() - last - 50;
+      let avg = 0;
+      const samples = [];
+      let points = 0;
+      let last = now();
+      const interval = setInterval(() => {
+        const diff = now() - last - 50;
         last = now();
         samples.push(diff);
         if (samples.length > settings.sampleCount) {
@@ -780,20 +543,17 @@
         }
         avg = avgAmplitude(samples);
         if (++points >= settings.minSamples && avg < settings.lagThreshold) {
-          _this.progress = 100;
-          return clearInterval(interval);
+          this.progress = 100;
+          clearInterval(interval);
         } else {
-          return _this.progress = 100 * (3 / (avg + 3));
+          this.progress = 100 * (3 / (avg + 3));
         }
       }, 50);
     }
+  }
 
-    return EventLagMonitor;
-
-  })();
-
-  Scaler = (function() {
-    function Scaler(source) {
+  class Scaler {
+    constructor(source) {
       this.source = source;
       this.last = this.sinceLastUpdate = 0;
       this.rate = options.initialRate;
@@ -804,11 +564,8 @@
       }
     }
 
-    Scaler.prototype.tick = function(frameTime, val) {
-      var scaling;
-      if (val == null) {
-        val = result(this.source, 'progress');
-      }
+    tick(frameTime, val) {
+      val ??= result(this.source, 'progress');
       if (val >= 100) {
         this.done = true;
       }
@@ -825,120 +582,101 @@
       if (val > this.progress) {
         this.progress += this.catchup * frameTime;
       }
-      scaling = 1 - Math.pow(this.progress / 100, options.easeFactor);
+      const scaling = 1 - Math.pow(this.progress / 100, options.easeFactor);
       this.progress += scaling * this.rate * frameTime;
       this.progress = Math.min(this.lastProgress + options.maxProgressPerFrame, this.progress);
       this.progress = Math.max(0, this.progress);
       this.progress = Math.min(100, this.progress);
       this.lastProgress = this.progress;
       return this.progress;
-    };
+    }
+  }
 
-    return Scaler;
-
-  })();
-
-  sources = null;
-
-  scalers = null;
-
-  bar = null;
-
-  uniScaler = null;
-
-  animation = null;
-
-  cancelAnimation = null;
+  let sources = null;
+  let scalers = null;
+  let bar = null;
+  let uniScaler = null;
+  let animation = null;
+  let cancelAnimation = null;
 
   Pace.running = false;
 
-  handlePushState = function() {
+  const handlePushState = () => {
     if (options.restartOnPushState) {
-      return Pace.restart();
+      Pace.restart();
     }
   };
 
-  if (window.history.pushState != null) {
-    _pushState = window.history.pushState;
-    window.history.pushState = function() {
-      handlePushState();
-      return _pushState.apply(window.history, arguments);
-    };
-  }
+  const _pushState = window.history.pushState;
+  window.history.pushState = (...args) => {
+    handlePushState();
+    return _pushState.apply(window.history, args);
+  };
 
-  if (window.history.replaceState != null) {
-    _replaceState = window.history.replaceState;
-    window.history.replaceState = function() {
-      handlePushState();
-      return _replaceState.apply(window.history, arguments);
-    };
-  }
+  const _replaceState = window.history.replaceState;
+  window.history.replaceState = (...args) => {
+    handlePushState();
+    return _replaceState.apply(window.history, args);
+  };
 
-  SOURCE_KEYS = {
+  const SOURCE_KEYS = {
     ajax: AjaxMonitor,
     elements: ElementMonitor,
     document: DocumentMonitor,
-    eventLag: EventLagMonitor
+    eventLag: EventLagMonitor,
   };
 
-  (init = function() {
-    var type, _j, _k, _len1, _len2, _ref2, _ref3, _ref4;
+  const init = () => {
     Pace.sources = sources = [];
-    _ref2 = ['ajax', 'elements', 'document', 'eventLag'];
-    for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-      type = _ref2[_j];
+    for (const type of ['ajax', 'elements', 'document', 'eventLag']) {
       if (options[type] !== false) {
         sources.push(new SOURCE_KEYS[type](options[type]));
       }
     }
-    _ref4 = (_ref3 = options.extraSources) != null ? _ref3 : [];
-    for (_k = 0, _len2 = _ref4.length; _k < _len2; _k++) {
-      source = _ref4[_k];
-      sources.push(new source(options));
+    const extraSources = options.extraSources ?? [];
+    for (let i = 0, n = extraSources.length; i < n; i++) {
+      sources.push(new extraSources[i](options));
     }
-    Pace.bar = bar = new Bar;
+    Pace.bar = bar = new Bar();
     scalers = [];
-    return uniScaler = new Scaler;
-  })();
+    uniScaler = new Scaler();
+  };
 
-  Pace.stop = function() {
+  init();
+
+  Pace.stop = () => {
     Pace.trigger('stop');
     Pace.running = false;
     bar.destroy();
     cancelAnimation = true;
     if (animation != null) {
-      if (typeof cancelAnimationFrame === "function") {
-        cancelAnimationFrame(animation);
-      }
+      cancelAnimationFrame(animation);
       animation = null;
     }
-    return init();
+    init();
   };
 
-  Pace.restart = function() {
+  Pace.restart = () => {
     Pace.trigger('restart');
     Pace.stop();
-    return Pace.start();
+    Pace.start();
   };
 
-  Pace.go = function() {
-    var start;
+  Pace.go = () => {
     Pace.running = true;
     bar.render();
-    start = now();
+    const start = now();
     cancelAnimation = false;
-    return animation = runAnimation(function(frameTime, enqueueNextFrame) {
-      var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, sum, _j, _k, _len1, _len2, _ref2;
-      remaining = 100 - bar.progress;
-      count = sum = 0;
-      done = true;
-      for (i = _j = 0, _len1 = sources.length; _j < _len1; i = ++_j) {
-        source = sources[i];
-        scalerList = scalers[i] != null ? scalers[i] : scalers[i] = [];
-        elements = (_ref2 = source.elements) != null ? _ref2 : [source];
-        for (j = _k = 0, _len2 = elements.length; _k < _len2; j = ++_k) {
-          element = elements[j];
-          scaler = scalerList[j] != null ? scalerList[j] : scalerList[j] = new Scaler(element);
+    animation = runAnimation((frameTime, enqueueNextFrame) => {
+      let count = 0;
+      let sum = 0;
+      let done = true;
+      for (let i = 0, n = sources.length; i < n; i++) {
+        const source = sources[i];
+        const scalerList = (scalers[i] ??= []);
+        const elements = source.elements ?? [source];
+        for (let j = 0, m = elements.length; j < m; j++) {
+          const scaler = (scalerList[j] ??= new Scaler(elements[j]));
           done &= scaler.done;
           if (scaler.done) {
             continue;
@@ -947,48 +685,42 @@
           sum += scaler.tick(frameTime);
         }
       }
-      avg = sum / count;
+      const avg = sum / count;
       bar.update(uniScaler.tick(frameTime, avg));
       if (bar.done() || done || cancelAnimation) {
         bar.update(100);
         Pace.trigger('done');
-        return setTimeout(function() {
+        return setTimeout(() => {
           bar.finish();
           Pace.running = false;
-          return Pace.trigger('hide');
+          Pace.trigger('hide');
         }, Math.max(options.ghostTime, Math.max(options.minTime - (now() - start), 0)));
-      } else {
-        return enqueueNextFrame();
       }
+      return enqueueNextFrame();
     });
   };
 
-  Pace.start = function(_options) {
+  Pace.start = (_options) => {
     extend(options, _options);
     Pace.running = true;
     try {
       bar.render();
-    } catch (_error) {
-      NoTargetError = _error;
+    } catch (error) {
+      NoTargetError = error;
     }
     if (!document.querySelector('.pace')) {
-      return setTimeout(Pace.start, 50);
+      setTimeout(Pace.start, 50);
     } else {
       Pace.trigger('start');
-      return Pace.go();
+      Pace.go();
     }
   };
 
   if (typeof define === 'function' && define.amd) {
-    define(function() {
-      return Pace;
-    });
+    define(() => Pace);
   } else if (typeof exports === 'object') {
     module.exports = Pace;
-  } else {
-    if (options.startOnPageLoad) {
-      Pace.start();
-    }
+  } else if (options.startOnPageLoad) {
+    Pace.start();
   }
-
-}).call(this);
+})();

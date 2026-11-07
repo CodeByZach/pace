@@ -297,14 +297,15 @@ None!
 Support
 -------
 
-Pace is designed to support IE8+ (standards mode), FF 3.5+, Chrome, Safari 4+, Opera 10.5+, and all modern
-mobile browsers. If you run into a compatibility issue, or can make a case for supporting something else,
-please create an issue.
+Pace supports Chrome and Edge 96+, Firefox 95+, and Safari 15.2+ on macOS and iOS, plus browsers built
+on the same engines, such as Opera and Samsung Internet. For older browsers, use pace-js 1.x.
+
+If you run into a compatibility issue, please create an issue.
 
 Size
 ----
 
-pace.js is 4kb minified and gzipped. The themes vary between 0.5 and 4kb.
+pace.min.js is under 4 kB gzipped. The themes are between 0.2 and 3.2 kB gzipped.
 
 Issues
 ------

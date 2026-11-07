@@ -15,7 +15,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "npm run test:syntax && npm run test:browsers",
-    "test:syntax": "acorn --ecma5 --silent pace.js pace.min.js",
+    "test:syntax": "acorn --ecma2021 --silent pace.js pace.min.js && es-check checkBrowser --checkFeatures --quiet pace.js pace.min.js",
     "test:browsers": "playwright test"
   },
   "repository": {
@@ -47,6 +47,7 @@
   "devDependencies": {
     "@playwright/test": "1.64.1",
     "acorn": "8.19.0",
+    "es-check": "9.8.1",
     "esbuild": "0.28.2"
   }
 }
