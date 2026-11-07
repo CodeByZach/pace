@@ -5,11 +5,8 @@
  */
 (function() {
   var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Evented, Events, NoTargetError, Pace, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, addEventListener, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, ignoreStack, init, now, options, requestAnimationFrame, result, runAnimation, scalers, shouldIgnoreURL, shouldTrack, source, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _i, _intercept, _len, _pushState, _ref, _ref1, _replaceState,
-    __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   defaultOptions = {
     className: '',
@@ -97,9 +94,7 @@
     return tick();
   };
 
-  result = function() {
-    var args, key, obj;
-    obj = arguments[0], key = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
+  result = function(obj, key, ...args) {
     if (typeof obj[key] === 'function') {
       return obj[key].apply(obj, args);
     } else {
@@ -107,14 +102,13 @@
     }
   };
 
-  extend = function() {
-    var key, out, source, sources, val, _i, _len;
-    out = arguments[0], sources = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+  extend = function(out, ...sources) {
+    var key, source, val, _i, _len;
     for (_i = 0, _len = sources.length; _i < _len; _i++) {
       source = sources[_i];
       if (source) {
         for (key in source) {
-          if (!__hasProp.call(source, key)) continue;
+          if (!Object.prototype.hasOwnProperty.call(source, key)) continue;
           if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
           val = source[key];
           if ((out[key] != null) && typeof out[key] === 'object' && (val != null) && typeof val === 'object') {
@@ -209,9 +203,8 @@
       }
     };
 
-    Evented.prototype.trigger = function() {
-      var args, ctx, event, handler, i, once, _ref, _ref1, _results;
-      event = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    Evented.prototype.trigger = function(event, ...args) {
+      var ctx, handler, i, once, _ref, _ref1, _results;
       if ((_ref = this.bindings) != null ? _ref[event] : void 0) {
         i = 0;
         _results = [];
@@ -416,18 +409,16 @@
 
   ignoreStack = [];
 
-  Pace.ignore = function() {
-    var args, fn, ret;
-    fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+  Pace.ignore = function(fn, ...args) {
+    var ret;
     ignoreStack.unshift('ignore');
     ret = fn.apply(null, args);
     ignoreStack.shift();
     return ret;
   };
 
-  Pace.track = function() {
-    var args, fn, ret;
-    fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+  Pace.track = function(fn, ...args) {
+    var ret;
     ignoreStack.unshift('track');
     ret = fn.apply(null, args);
     ignoreStack.shift();
@@ -435,7 +426,6 @@
   };
 
   shouldTrack = function(method) {
-    var _ref2;
     if (method == null) {
       method = 'GET';
     }
@@ -445,7 +435,7 @@
     if (!ignoreStack.length && options.ajax) {
       if (method === 'socket' && options.ajax.trackWebSockets) {
         return true;
-      } else if (_ref2 = method.toUpperCase(), __indexOf.call(options.ajax.trackMethods, _ref2) >= 0) {
+      } else if (options.ajax.trackMethods.includes(method.toUpperCase())) {
         return true;
       }
     }
@@ -588,7 +578,7 @@
 
   AjaxMonitor = (function() {
     function AjaxMonitor() {
-      this.complete = __bind(this.complete, this);
+      this.complete = this.complete.bind(this);
       var _this = this;
       this.elements = [];
       getIntercept().on('request', function() {
@@ -686,7 +676,7 @@
       if (options == null) {
         options = {};
       }
-      this.complete = __bind(this.complete, this);
+      this.complete = this.complete.bind(this);
       this.elements = [];
       if (options.selectors == null) {
         options.selectors = [];
