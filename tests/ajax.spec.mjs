@@ -58,3 +58,20 @@ test.describe('with ajax options', () => {
     expect(await page.evaluate(() => events)).toEqual([]);
   });
 });
+
+test.describe('with ajax.trackMethods that is not an array', () => {
+  test('a string matches nothing, not substrings', async ({ page, open }) => {
+    await open({ head: "<script>window.paceOptions = { eventLag: false, ajax: { trackMethods: 'GET' } };</script>" });
+    await idle(page);
+    await clearEvents(page);
+    await request(page, { ms: 900 });
+    expect(await page.evaluate(() => events)).toEqual([]);
+  });
+
+  test('a number does not break the page\'s requests', async ({ page, open }) => {
+    await open({ head: '<script>window.paceOptions = { eventLag: false, ajax: { trackMethods: 5 } };</script>' });
+    await idle(page);
+    // Resolves only if the page's xhr.open() didn't throw.
+    await request(page, { ms: 100 });
+  });
+});
