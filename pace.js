@@ -4,7 +4,7 @@
  * Licensed MIT © HubSpot, Inc.
  */
 (function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Evented, Events, NoTargetError, Pace, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, addEventListener, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, ignoreStack, init, now, options, requestAnimationFrame, result, runAnimation, scalers, shouldIgnoreURL, shouldTrack, source, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _i, _intercept, _len, _pushState, _ref, _ref1, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Evented, Events, NoTargetError, Pace, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, ignoreStack, init, now, options, requestAnimationFrame, result, runAnimation, scalers, shouldIgnoreURL, shouldTrack, source, sources, uniScaler, _WebSocket, _XMLHttpRequest, _i, _intercept, _len, _pushState, _ref, _ref1, _replaceState,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -37,44 +37,12 @@
   };
 
   now = function() {
-    var _ref;
-    return (_ref = typeof performance !== "undefined" && performance !== null ? typeof performance.now === "function" ? performance.now() : void 0 : void 0) != null ? _ref : +(new Date);
+    return performance.now();
   };
 
-  requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+  requestAnimationFrame = window.requestAnimationFrame;
 
-  cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
-
-  addEventListener = function(obj, event, callback) {
-    if (typeof obj.addEventListener === "function") {
-      return obj.addEventListener(event, callback, false);
-    } else {
-      return function() {
-        if (typeof obj["on" + event] !== "function" || typeof obj["on" + event].eventListeners !== "object") {
-          var eventListeners = new Events();
-          if (typeof obj["on" + event] === "function") {
-            eventListeners.on(event, obj["on" + event]);
-          }
-          obj["on" + event] = function(evt) {
-            return eventListeners.trigger(event, evt);
-          };
-          obj["on" + event].eventListeners = eventListeners;
-        } else {
-          var eventListeners = obj["on" + event].eventListeners;
-        }
-        eventListeners.on(event, callback);
-      }();
-    }
-  };
-
-  if (requestAnimationFrame == null) {
-    requestAnimationFrame = function(fn) {
-      return setTimeout(fn, 50);
-    };
-    cancelAnimationFrame = function(id) {
-      return clearTimeout(id);
-    };
-  }
+  cancelAnimationFrame = window.cancelAnimationFrame;
 
   runAnimation = function(fn) {
     var last, tick;
@@ -153,7 +121,7 @@
       return JSON.parse(data);
     } catch (_error) {
       e = _error;
-      return typeof console !== "undefined" && console !== null ? console.error("Error parsing inline pace options", e) : void 0;
+      return console.error("Error parsing inline pace options", e);
     }
   };
 
@@ -309,17 +277,12 @@
     };
 
     Bar.prototype.render = function() {
-      var el, key, progressStr, transform, _j, _len1, _ref2;
+      var el, progressStr;
       if (document.querySelector(options.target) == null) {
         return false;
       }
       el = this.getElement();
-      transform = "translate3d(" + this.progress + "%, 0, 0)";
-      _ref2 = ['webkitTransform', 'msTransform', 'transform'];
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        key = _ref2[_j];
-        el.children[0].style[key] = transform;
-      }
+      el.children[0].style.transform = "translate3d(" + this.progress + "%, 0, 0)";
       if (!this.lastRenderedProgress || this.lastRenderedProgress | 0 !== this.progress | 0) {
         el.children[0].setAttribute('data-progress-text', "" + (this.progress | 0) + "%");
         if (this.progress >= 100) {
@@ -374,8 +337,6 @@
 
   _XMLHttpRequest = window.XMLHttpRequest;
 
-  _XDomainRequest = window.XDomainRequest;
-
   _WebSocket = window.WebSocket;
 
   extendNative = function(to, from) {
@@ -384,19 +345,15 @@
     for (key in from.prototype) {
       try {
         if ((to[key] == null) && typeof from[key] !== 'function') {
-          if (typeof Object.defineProperty === 'function') {
-            _results.push(Object.defineProperty(to, key, {
-              get: (function(key) {
-                return function() {
-                  return from.prototype[key];
-                };
-              })(key),
-              configurable: true,
-              enumerable: true
-            }));
-          } else {
-            _results.push(to[key] = from.prototype[key]);
-          }
+          _results.push(Object.defineProperty(to, key, {
+            get: (function(key) {
+              return function() {
+                return from.prototype[key];
+              };
+            })(key),
+            configurable: true,
+            enumerable: true
+          }));
         } else {
           _results.push(void 0);
         }
@@ -472,18 +429,7 @@
       try {
         extendNative(window.XMLHttpRequest, _XMLHttpRequest);
       } catch (_error) {}
-      if (_XDomainRequest != null) {
-        window.XDomainRequest = function() {
-          var req;
-          req = new _XDomainRequest;
-          monitorXHR(req);
-          return req;
-        };
-        try {
-          extendNative(window.XDomainRequest, _XDomainRequest);
-        } catch (_error) {}
-      }
-      if ((_WebSocket != null) && options.ajax.trackWebSockets) {
+      if (options.ajax.trackWebSockets) {
         window.WebSocket = function(url, protocols) {
           var req;
           if (protocols != null) {
@@ -612,38 +558,23 @@
 
   XHRRequestTracker = (function() {
     function XHRRequestTracker(request, completeCallback) {
-      var event, size, _j, _len1, _onreadystatechange, _ref2,
+      var event, _j, _len1, _ref2,
         _this = this;
       this.progress = 0;
-      if (window.ProgressEvent != null) {
-        size = null;
-        addEventListener(request, 'progress', function(evt) {
-          if (evt.lengthComputable) {
-            return _this.progress = 100 * evt.loaded / evt.total;
-          } else {
-            return _this.progress = _this.progress + (100 - _this.progress) / 2;
-          }
-        }, false);
-        _ref2 = ['load', 'abort', 'timeout', 'error'];
-        for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-          event = _ref2[_j];
-          addEventListener(request, event, function() {
-            completeCallback(_this);
-            return _this.progress = 100;
-          }, false);
+      request.addEventListener('progress', function(evt) {
+        if (evt.lengthComputable) {
+          return _this.progress = 100 * evt.loaded / evt.total;
+        } else {
+          return _this.progress = _this.progress + (100 - _this.progress) / 2;
         }
-      } else {
-        _onreadystatechange = request.onreadystatechange;
-        request.onreadystatechange = function() {
-          var _ref3;
-          if ((_ref3 = request.readyState) === 0 || _ref3 === 4) {
-            completeCallback(_this);
-            _this.progress = 100;
-          } else if (request.readyState === 3) {
-            _this.progress = 50;
-          }
-          return typeof _onreadystatechange === "function" ? _onreadystatechange.apply(null, arguments) : void 0;
-        };
+      }, false);
+      _ref2 = ['load', 'abort', 'timeout', 'error'];
+      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+        event = _ref2[_j];
+        request.addEventListener(event, function() {
+          completeCallback(_this);
+          return _this.progress = 100;
+        }, false);
       }
     }
 
@@ -659,7 +590,7 @@
       _ref2 = ['error', 'open'];
       for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
         event = _ref2[_j];
-        addEventListener(request, event, function() {
+        request.addEventListener(event, function() {
           completeCallback(_this);
           return _this.progress = 100;
         }, false);
@@ -848,21 +779,17 @@
     }
   };
 
-  if (window.history.pushState != null) {
-    _pushState = window.history.pushState;
-    window.history.pushState = function() {
-      handlePushState();
-      return _pushState.apply(window.history, arguments);
-    };
-  }
+  _pushState = window.history.pushState;
+  window.history.pushState = function() {
+    handlePushState();
+    return _pushState.apply(window.history, arguments);
+  };
 
-  if (window.history.replaceState != null) {
-    _replaceState = window.history.replaceState;
-    window.history.replaceState = function() {
-      handlePushState();
-      return _replaceState.apply(window.history, arguments);
-    };
-  }
+  _replaceState = window.history.replaceState;
+  window.history.replaceState = function() {
+    handlePushState();
+    return _replaceState.apply(window.history, arguments);
+  };
 
   SOURCE_KEYS = {
     ajax: AjaxMonitor,
@@ -897,9 +824,7 @@
     bar.destroy();
     cancelAnimation = true;
     if (animation != null) {
-      if (typeof cancelAnimationFrame === "function") {
-        cancelAnimationFrame(animation);
-      }
+      cancelAnimationFrame(animation);
       animation = null;
     }
     return init();
