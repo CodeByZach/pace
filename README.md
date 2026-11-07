@@ -297,8 +297,11 @@ None!
 Support
 -------
 
-Pace supports Chrome and Edge 96+, Firefox 95+, and Safari 15.2+ on macOS and iOS, plus browsers built
-on the same engines, such as Opera and Samsung Internet. For older browsers, use pace-js 1.x.
+Pace supports Chrome and Edge 96+, Firefox 95+, Safari 15.2+ on macOS and iOS, Opera 82+, Samsung
+Internet 17+, and other browsers built on Chromium 96 or later. For older browsers, use pace-js 1.x.
+
+In tests that run on jsdom, turn on its `pretendToBeVisual` option (Jest and Vitest already do): without
+it, jsdom has no `requestAnimationFrame`.
 
 If you run into a compatibility issue, please create an issue.
 

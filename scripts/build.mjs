@@ -19,8 +19,9 @@ const root = path.resolve(import.meta.dirname, '..');
 
 // The oldest browser versions in .browserslistrc ("baseline 2021 with
 // downstream"). esbuild doesn't read Browserslist, so they're listed here:
-// https://esbuild.github.io/api/#target. `npm test` checks the minified build
-// against .browserslistrc, so the two can't drift apart unnoticed.
+// https://esbuild.github.io/api/#target. `npm test` runs es-check with
+// .browserslistrc on pace.js and pace.min.js, so syntax and many built-ins
+// newer than these browsers fail the test.
 const TARGET = ['chrome96', 'edge96', 'firefox95', 'safari15.2', 'ios15.2'];
 
 // The 10 theme colors, from the original Gruntfile.coffee `themeColors`.
