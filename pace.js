@@ -106,10 +106,44 @@
 
   window.Pace = Pace;
 
+  // Removes the handlers of `event` that match `test`, and marks them so an
+  // event that is firing right now skips them too.
+  const removeBindings = (target, event, test) => {
+    const bindings = target.bindings?.[event];
+    if (!bindings) {
+      return;
+    }
+    target.bindings[event] = bindings.filter((binding) => {
+      if (!test(binding)) {
+        return true;
+      }
+      binding.removed = true;
+      return false;
+    });
+  };
+
+  // Reports an error like an uncaught one, without throwing. reportError keeps
+  // the details for window.onerror even when pace.js is served from another
+  // origin; Safari before 15.4 lacks it, so there the error is thrown from a
+  // microtask instead.
+  const reportHandlerError = (error) => {
+    if (typeof reportError === 'function') {
+      reportError(error);
+    } else {
+      queueMicrotask(() => {
+        throw error;
+      });
+    }
+  };
+
+  // Handlers run the way the DOM runs event listeners
+  // (https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke): the ones
+  // registered when the event fires, minus any removed meanwhile; a `once`
+  // handler is removed before it runs; an exception is reported, not thrown.
   Object.assign(Pace, {
     on(event, handler, ctx, once) {
       once ??= false;
-      this.bindings ??= {};
+      this.bindings ??= Object.create(null);
       this.bindings[event] ??= [];
       this.bindings[event].push({ handler, ctx, once });
     },
@@ -119,35 +153,25 @@
     },
 
     off(event, handler) {
-      if (this.bindings?.[event] == null) {
-        return;
-      }
-      if (handler == null) {
-        delete this.bindings[event];
-        return;
-      }
-      let i = 0;
-      while (i < this.bindings[event].length) {
-        if (this.bindings[event][i].handler === handler) {
-          this.bindings[event].splice(i, 1);
-        } else {
-          i++;
-        }
-      }
+      removeBindings(this, event, (binding) => handler == null || binding.handler === handler);
     },
 
     trigger(event, ...args) {
-      if (!this.bindings?.[event]) {
+      const bindings = this.bindings?.[event];
+      if (!bindings) {
         return;
       }
-      let i = 0;
-      while (i < this.bindings[event].length) {
-        const { handler, ctx, once } = this.bindings[event][i];
-        handler.apply(ctx ?? this, args);
-        if (once) {
-          this.bindings[event].splice(i, 1);
-        } else {
-          i++;
+      for (const binding of bindings.slice()) {
+        if (binding.removed) {
+          continue;
+        }
+        if (binding.once) {
+          removeBindings(this, event, (other) => other === binding);
+        }
+        try {
+          binding.handler.apply(binding.ctx ?? this, args);
+        } catch (error) {
+          reportHandlerError(error);
         }
       }
     },

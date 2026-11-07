@@ -212,8 +212,11 @@ Pace fires the following events:
 You can bind onto events using the `on`, `off` and `once` methods:
 
 - `Pace.on(event, handler, [context])`: Call `handler` (optionally with context) when `event` is triggered
-- `Pace.off(event, [handler])`: Unbind the provided `event` and `handler` combination.
+- `Pace.off(event, [handler])`: Unbind `handler` from `event`, or every handler of `event` if `handler` is left out.
 - `Pace.once(event, handler, [context])`: Bind `handler` to the next (and only the next) incidence of `event`
+
+If a handler throws, the error is reported like an uncaught error (in the console and to `window.onerror`), and Pace
+and the other handlers carry on.
 
 Tracking
 --------
