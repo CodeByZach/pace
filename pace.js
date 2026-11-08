@@ -1,7 +1,7 @@
 /*!
  * pace.js v1.3.1
  * https://github.com/CodeByZach/pace/
- * Licensed MIT © HubSpot, Inc.
+ * Licensed MIT © HubSpot, Inc. and Zachary Miller
  */
 (function () {
   const defaultOptions = {
@@ -282,24 +282,6 @@
     }
   }
 
-  const _XMLHttpRequest = window.XMLHttpRequest;
-
-  const _WebSocket = window.WebSocket;
-
-  const extendNative = (to, from) => {
-    for (const key in from.prototype) {
-      try {
-        if (to[key] == null && typeof from[key] !== 'function') {
-          Object.defineProperty(to, key, {
-            get: () => from.prototype[key],
-            configurable: true,
-            enumerable: true,
-          });
-        }
-      } catch {}
-    }
-  };
-
   const ignoreStack = [];
 
   Pace.ignore = (fn, ...args) => {
@@ -316,148 +298,231 @@
     return ret;
   };
 
+  // true, false, or 'force' (inside Pace.track). With `ajax: false`, nothing is
+  // tracked, not even inside Pace.track.
   const shouldTrack = (method) => {
+    if (!options.ajax) {
+      return false;
+    }
     method ??= 'GET';
     if (ignoreStack[0] === 'track') {
       return 'force';
     }
-    if (!ignoreStack.length && options.ajax) {
-      if (method === 'socket' && options.ajax.trackWebSockets) {
-        return true;
-      }
-      // Array.prototype.includes, so a string or number from a misconfiguration
-      // matches nothing instead of matching substrings or throwing.
-      if (Array.prototype.includes.call(options.ajax.trackMethods, method.toUpperCase())) {
-        return true;
+    if (ignoreStack.length) {
+      return false;
+    }
+    if (method === 'socket') {
+      return Boolean(options.ajax.trackWebSockets);
+    }
+    // Array.prototype.includes, so a string or number from a misconfiguration
+    // matches nothing instead of matching substrings or throwing.
+    return Array.prototype.includes.call(options.ajax.trackMethods, String(method).toUpperCase());
+  };
+
+  const shouldIgnoreURL = (url) => {
+    const patterns = options.ajax?.ignoreURLs ?? [];
+    for (let i = 0, n = patterns.length; i < n; i++) {
+      const pattern = patterns[i];
+      if (typeof pattern === 'string') {
+        if (url.includes(pattern)) {
+          return true;
+        }
+      } else if (pattern instanceof RegExp) {
+        // A pattern with the g or y flag keeps state between test() calls.
+        pattern.lastIndex = 0;
+        if (pattern.test(url)) {
+          return true;
+        }
       }
     }
     return false;
   };
 
-  // Outside the class on purpose: class bodies are strict mode, where assigning
-  // to a read-only property (a page may lock window.XMLHttpRequest) throws.
-  const installIntercepts = (intercept) => {
-    const monitorXHR = (req) => {
-      const _open = req.open;
-      req.open = (...args) => {
-        const [type, url] = args;
-        if (shouldTrack(type)) {
-          intercept.trigger('request', { type, url, request: req });
-        }
-        return _open.apply(req, args);
-      };
-    };
-    // Plain functions, not arrow functions: pages call these with `new`.
-    window.XMLHttpRequest = function (flags) {
-      const req = new _XMLHttpRequest(flags);
-      monitorXHR(req);
-      return req;
-    };
-    try {
-      extendNative(window.XMLHttpRequest, _XMLHttpRequest);
-    } catch {}
-    if (options.ajax.trackWebSockets) {
-      window.WebSocket = function (url, protocols) {
-        let req;
-        if (protocols != null) {
-          req = new _WebSocket(url, protocols);
-        } else {
-          req = new _WebSocket(url);
-        }
-        if (shouldTrack('socket')) {
-          intercept.trigger('request', { type: 'socket', url, protocols, request: req });
-        }
-        return req;
-      };
-      try {
-        extendNative(window.WebSocket, _WebSocket);
-      } catch {}
+  // Tracked requests that have started and not yet ended, each with its
+  // 'request' event.
+  const openRequests = new Map();
+
+  // The callbacks waiting for each open request (by its event) to end.
+  const endCallbacks = new WeakMap();
+
+  // Requests waiting for their restartOnRequestAfter check. A request sent just
+  // before a run starts (Turbolinks sends one, then calls pushState) belongs to
+  // that run, so a run that starts meanwhile picks them up.
+  const awaitingCheck = new Set();
+
+  const isOpen = (event) => openRequests.get(event.request) === event;
+
+  // Calls `callback` once the request of `event` ends (right away if it has).
+  const whenRequestEnds = (event, callback) => {
+    if (!isOpen(event)) {
+      callback();
+      return;
     }
+    endCallbacks.get(event).push(callback);
+  };
+
+  const endRequest = (request) => {
+    const event = openRequests.get(request);
+    if (!event) {
+      return;
+    }
+    openRequests.delete(request);
+    const callbacks = endCallbacks.get(event);
+    endCallbacks.delete(event);
+    for (const callback of callbacks) {
+      callback();
+    }
+  };
+
+  const beginRequest = (intercept, event) => {
+    endRequest(event.request);
+    openRequests.set(event.request, event);
+    endCallbacks.set(event, []);
+    intercept.trigger('request', event);
+  };
+
+  // What open() decided about each XMLHttpRequest, used when it is sent.
+  const opened = new WeakMap();
+
+  // Wraps XMLHttpRequest.prototype.open and send, and replaces WebSocket with a
+  // subclass, so the page keeps the native classes: instanceof, constants,
+  // subclasses and other libraries' prototype patches keep working. Outside the
+  // class on purpose: class bodies are strict mode, where assigning to a
+  // read-only property (a page may lock these) throws.
+  const installIntercepts = (intercept) => {
+    const proto = window.XMLHttpRequest.prototype;
+    const open = proto.open;
+    const send = proto.send;
+    // XMLHttpRequests that already have pace's readystatechange listener.
+    const listening = new WeakSet();
+    proto.open = function (...args) {
+      const [method, url] = args;
+      const decision = shouldTrack(method);
+      const result = open.apply(this, args);
+      // Opening a request again cancels the one it was making (only once open()
+      // has succeeded: when it throws, the earlier request keeps going).
+      endRequest(this);
+      opened.delete(this);
+      if (decision) {
+        opened.set(this, { type: method, url: String(url), force: decision === 'force' });
+      }
+      return result;
+    };
+    proto.send = function (...args) {
+      const info = opened.get(this);
+      opened.delete(this);
+      if (!info || shouldIgnoreURL(info.url)) {
+        return send.apply(this, args);
+      }
+      // One listener per XMLHttpRequest, added before send() because a
+      // synchronous request ends inside it. Every way a request ends passes
+      // readyState 4 (done) or, when the page aborts it from that handler, 0;
+      // a request in flight is always at 1 to 3.
+      if (!listening.has(this)) {
+        listening.add(this);
+        this.addEventListener('readystatechange', () => {
+          if (this.readyState === 4 || this.readyState === 0) {
+            endRequest(this);
+          }
+        });
+      }
+      beginRequest(intercept, { ...info, request: this });
+      try {
+        return send.apply(this, args);
+      } catch (error) {
+        endRequest(this);
+        throw error;
+      }
+    };
+    if (options.ajax.trackWebSockets) {
+      const NativeWebSocket = window.WebSocket;
+      window.WebSocket = class WebSocket extends NativeWebSocket {
+        constructor(url, protocols) {
+          if (protocols != null) {
+            super(url, protocols);
+          } else {
+            super(url);
+          }
+          const decision = shouldTrack('socket');
+          if (decision && !shouldIgnoreURL(String(url))) {
+            for (const name of ['open', 'error', 'close']) {
+              this.addEventListener(name, () => endRequest(this), { once: true });
+            }
+            beginRequest(intercept, { type: 'socket', url: String(url), protocols, force: decision === 'force', request: this });
+          }
+        }
+      };
+    }
+  };
+
+  // A request that is still open after restartOnRequestAfter ms shows the bar:
+  // it joins a run in progress, or restarts pace.
+  const onRequest = (event) => {
+    if (isActive() || (options.restartOnRequestAfter === false && !event.force)) {
+      return;
+    }
+    let after = options.restartOnRequestAfter || 0;
+    if (typeof after === 'boolean') {
+      after = 0;
+    }
+    awaitingCheck.add(event);
+    setTimeout(() => {
+      awaitingCheck.delete(event);
+      if (!isOpen(event)) {
+        return;
+      }
+      if (!isActive()) {
+        Pace.restart();
+      }
+      ajaxMonitor()?.watch(event);
+    }, after);
   };
 
   class RequestIntercept extends Events {
     constructor() {
       super();
       installIntercepts(this);
+      this.on('request', onRequest);
     }
   }
 
   let _intercept = null;
 
+  // Hooks into XMLHttpRequest and WebSocket the first time a run tracks ajax.
   const getIntercept = () => {
     _intercept ??= new RequestIntercept();
     return _intercept;
   };
 
-  const shouldIgnoreURL = (url) => {
-    const patterns = options.ajax.ignoreURLs;
-    for (let i = 0, n = patterns.length; i < n; i++) {
-      const pattern = patterns[i];
-      if (typeof pattern === 'string') {
-        if (url.indexOf(pattern) !== -1) {
-          return true;
-        }
-      } else if (pattern.test(url)) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  getIntercept().on('request', (event) => {
-    const { type, request, url } = event;
-    if (shouldIgnoreURL(url)) {
-      return;
-    }
-    if (!isActive() && (options.restartOnRequestAfter !== false || shouldTrack(type) === 'force')) {
-      let after = options.restartOnRequestAfter || 0;
-      if (typeof after === 'boolean') {
-        after = 0;
-      }
-      setTimeout(() => {
-        let stillActive;
-        if (type === 'socket') {
-          stillActive = request.readyState < 1;
-        } else {
-          stillActive = 0 < request.readyState && request.readyState < 4;
-        }
-        if (!stillActive) {
-          return;
-        }
-        // Join a run that started meanwhile, rather than restarting it.
-        if (!isActive()) {
-          Pace.restart();
-        }
-        run?.collectors.find((collector) => collector instanceof AjaxMonitor)?.watch(event);
-      }, after);
-    }
-  });
-
   class AjaxMonitor {
     constructor() {
       this.complete = this.complete.bind(this);
+      // The trackers of the watched requests that are still loading.
       this.elements = [];
-      this.watched = new WeakSet();
       this.onRequest = (event) => this.watch(event);
       getIntercept().on('request', this.onRequest);
+      for (const event of awaitingCheck) {
+        this.watch(event);
+      }
     }
 
-    watch({ type, request, url }) {
-      if (shouldIgnoreURL(url) || this.watched.has(request)) {
+    // Tracks the request of `event`, unless it has ended or is already tracked
+    // (a reused XMLHttpRequest sends a new event per request).
+    watch(event) {
+      if (!isOpen(event) || this.elements.some((tracker) => tracker.event === event)) {
         return;
       }
-      this.watched.add(request);
-      let tracker;
-      if (type === 'socket') {
-        tracker = new SocketRequestTracker(request, this.complete);
-      } else {
-        tracker = new XHRRequestTracker(request, this.complete);
-      }
-      this.elements.push(tracker);
+      const Tracker = event.type === 'socket' ? SocketRequestTracker : XHRRequestTracker;
+      this.elements.push(new Tracker(event, this.complete));
     }
 
     complete(tracker) {
       this.elements = this.elements.filter((e) => e !== tracker);
+    }
+
+    // The requests this monitor is tracking that are still loading.
+    openEvents() {
+      return this.elements.map((tracker) => tracker.event);
     }
 
     destroy() {
@@ -466,33 +531,31 @@
   }
 
   class XHRRequestTracker {
-    constructor(request, completeCallback) {
+    constructor(event, completeCallback) {
+      this.event = event;
       this.progress = 0;
-      request.addEventListener('progress', (evt) => {
+      event.request.addEventListener('progress', (evt) => {
         if (evt.lengthComputable) {
           this.progress = (100 * evt.loaded) / evt.total;
         } else {
           this.progress = this.progress + (100 - this.progress) / 2;
         }
       }, false);
-      for (const event of ['load', 'abort', 'timeout', 'error']) {
-        request.addEventListener(event, () => {
-          completeCallback(this);
-          this.progress = 100;
-        }, false);
-      }
+      whenRequestEnds(event, () => {
+        completeCallback(this);
+        this.progress = 100;
+      });
     }
   }
 
   class SocketRequestTracker {
-    constructor(request, completeCallback) {
+    constructor(event, completeCallback) {
+      this.event = event;
       this.progress = 0;
-      for (const event of ['error', 'open']) {
-        request.addEventListener(event, () => {
-          completeCallback(this);
-          this.progress = 100;
-        }, false);
-      }
+      whenRequestEnds(event, () => {
+        completeCallback(this);
+        this.progress = 100;
+      });
     }
   }
 
@@ -646,6 +709,8 @@
   // A run goes from waiting (for the target element) to running to finishing
   // (done, about to hide). `run` holds the current one; null when idle.
   let run = null;
+
+  const ajaxMonitor = () => run?.collectors.find((collector) => collector instanceof AjaxMonitor);
   let bar = (Pace.bar = new Bar());
 
   Pace.sources = [];
@@ -850,8 +915,14 @@
 
   Pace.restart = () => {
     Pace.trigger('restart');
+    const carried = ajaxMonitor()?.openEvents() ?? [];
     Pace.stop();
     Pace.start();
+    // Whichever run is going now (stop and start handlers may have replaced
+    // it) keeps tracking the requests the replaced run was tracking.
+    for (const event of carried) {
+      ajaxMonitor()?.watch(event);
+    }
   };
 
   if (typeof define === 'function' && define.amd) {
