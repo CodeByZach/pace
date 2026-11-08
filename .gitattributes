@@ -1,5 +1,5 @@
 # Built by `npm run build` (scripts/build.mjs): collapsed in pull request diffs
 # and left out of the language stats.
-pace.min.js linguist-generated
-pace-theme-default.min.css linguist-generated
+/pace.min.js linguist-generated
+/pace-theme-default.min.css linguist-generated
 themes/** linguist-generated
