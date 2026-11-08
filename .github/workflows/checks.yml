@@ -31,9 +31,15 @@ jobs:
       - name: List package contents
         run: npm pack --dry-run
 
-  browser-tests:
+  # One job per engine, in parallel.
+  browser-engines:
+    name: browser-tests (${{ matrix.browser }})
     runs-on: ubuntu-26.04
     timeout-minutes: 10
+    strategy:
+      fail-fast: false # report every engine
+      matrix:
+        browser: [chromium, firefox, webkit]
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -46,7 +52,20 @@ jobs:
       - run: npm ci
 
       # Not cached: Playwright's docs say restoring takes about as long as downloading.
-      - name: Install browsers
-        run: npx playwright install --with-deps --only-shell chromium firefox webkit
+      - name: Install the browser
+        run: npx playwright install --with-deps --only-shell ${{ matrix.browser }}
 
-      - run: npm run test:browsers
+      - run: npm run test:browsers -- --project="${{ matrix.browser }} *"
+
+  # The required check: passes only if every engine passed, so the required
+  # checks stay the same when engines change.
+  browser-tests:
+    needs: browser-engines
+    if: always()
+    runs-on: ubuntu-26.04
+    timeout-minutes: 1
+    steps:
+      - name: Check that every engine passed
+        env:
+          RESULT: ${{ needs.browser-engines.result }}
+        run: test "$RESULT" = success
