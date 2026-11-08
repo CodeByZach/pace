@@ -325,7 +325,7 @@ Credits
 
 [HubSpot](http://dev.hubspot.com)
 
-[CodeByZach](https://github.com/CodeByZach)
+[Zachary Miller](https://github.com/CodeByZach)
 
 Javascript by [Zack Bloom](http://twitter.com/zackbloom)
 CSS by [Adam Schwartz](http://twitter.com/adamfschwartz)

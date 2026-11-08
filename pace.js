@@ -1,7 +1,7 @@
 /*!
  * pace.js v1.3.1
  * https://github.com/CodeByZach/pace/
- * Licensed MIT © HubSpot, Inc.
+ * Licensed MIT © HubSpot, Inc. and Zachary Miller
  */
 (function () {
   const defaultOptions = {
