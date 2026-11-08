@@ -187,11 +187,12 @@ API
 Pace exposes the following methods:
 
 - `Pace.start`: Show the progress bar and start updating. Called automatically if you don't use AMD or CommonJS.
+While a run is in progress (not yet `done`), it only stores the options for the next run.
 
 - `Pace.restart`: Show the progress bar if it's hidden and start reporting the progress from scratch. Called automatically
 whenever `pushState` or `replaceState` is called by default.
 
-- `Pace.stop`: Hide the progress bar and stop updating it.
+- `Pace.stop`: Remove the progress bar and stop updating it, without firing `done` or `hide`. `<body>` gets `pace-done`.
 
 - `Pace.track`: Explicitly track one or more requests, see Tracking below
 
