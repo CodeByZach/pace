@@ -288,6 +288,10 @@ A few things Pace can't track:
 
 - Requests sent with `async: false` block the page until they finish, so the bar can't animate during them.
 - Downloads started by a plain link aren't ajax requests.
+- Requests sent before Pace first starts. When it doesn't start on page load (`startOnPageLoad: false`, or with a
+  bundler), call `Pace.start()` early.
+- Requests made through a library that replaces `window.XMLHttpRequest` with its own version (such as xhook), if that
+  library loads before Pace. Load Pace first.
 
 Avoid calling `Pace.restart()` for every request, for example from jQuery's `ajaxStart`. It restarts the bar even for
 ignored requests, and parallel requests restart it several times. To show the bar for `POST` requests, add `POST` to
@@ -312,7 +316,7 @@ If you run into a compatibility issue, please create an issue.
 Size
 ----
 
-pace.min.js is under 4 kB gzipped. The themes are between 0.2 and 3.2 kB gzipped.
+pace.min.js is about 4 kB gzipped. The themes are between 0.2 and 3.2 kB gzipped.
 
 Issues
 ------
