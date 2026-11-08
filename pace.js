@@ -342,26 +342,33 @@
   // 'request' event.
   const openRequests = new Map();
 
-  // Requests a run was tracking when it was stopped or restarted, for the next
-  // run to keep tracking if they're still loading.
-  let handedOver = [];
+  // The callbacks waiting for each open request (by its event) to end.
   const endCallbacks = new WeakMap();
 
-  // Calls `callback` once `request` ends (right away if it already has).
-  const whenRequestEnds = (request, callback) => {
-    if (!openRequests.has(request)) {
+  // Requests waiting for their restartOnRequestAfter check. A request sent just
+  // before a run starts (Turbolinks sends one, then calls pushState) belongs to
+  // that run, so a run that starts meanwhile picks them up.
+  const awaitingCheck = new Set();
+
+  const isOpen = (event) => openRequests.get(event.request) === event;
+
+  // Calls `callback` once the request of `event` ends (right away if it has).
+  const whenRequestEnds = (event, callback) => {
+    if (!isOpen(event)) {
       callback();
       return;
     }
-    endCallbacks.get(request).push(callback);
+    endCallbacks.get(event).push(callback);
   };
 
   const endRequest = (request) => {
-    if (!openRequests.delete(request)) {
+    const event = openRequests.get(request);
+    if (!event) {
       return;
     }
-    const callbacks = endCallbacks.get(request);
-    endCallbacks.delete(request);
+    openRequests.delete(request);
+    const callbacks = endCallbacks.get(event);
+    endCallbacks.delete(event);
     for (const callback of callbacks) {
       callback();
     }
@@ -370,7 +377,7 @@
   const beginRequest = (intercept, event) => {
     endRequest(event.request);
     openRequests.set(event.request, event);
-    endCallbacks.set(event.request, []);
+    endCallbacks.set(event, []);
     intercept.trigger('request', event);
   };
 
@@ -386,7 +393,7 @@
     const proto = window.XMLHttpRequest.prototype;
     const open = proto.open;
     const send = proto.send;
-    // XMLHttpRequests that already have pace's loadend listener.
+    // XMLHttpRequests that already have pace's readystatechange listener.
     const listening = new WeakSet();
     proto.open = function (...args) {
       const [method, url] = args;
@@ -408,19 +415,19 @@
         return send.apply(this, args);
       }
       // One listener per XMLHttpRequest, added before send() because a
-      // synchronous request ends inside it. A request ends with readyState 4;
-      // a page that reuses the object from its load handler gets the first
-      // request's loadend after already opening the next one.
+      // synchronous request ends inside it. Every way a request ends passes
+      // readyState 4 (done) or, when the page aborts it from that handler, 0;
+      // a request in flight is always at 1 to 3.
       if (!listening.has(this)) {
         listening.add(this);
-        this.addEventListener('loadend', () => {
-          if (this.readyState === 4) {
+        this.addEventListener('readystatechange', () => {
+          if (this.readyState === 4 || this.readyState === 0) {
             endRequest(this);
           }
         });
       }
+      beginRequest(intercept, { ...info, request: this });
       try {
-        beginRequest(intercept, { ...info, request: this });
         return send.apply(this, args);
       } catch (error) {
         endRequest(this);
@@ -451,28 +458,23 @@
   // A request that is still open after restartOnRequestAfter ms shows the bar:
   // it joins a run in progress, or restarts pace.
   const onRequest = (event) => {
-    const { type, request, force } = event;
-    if (isActive() || (options.restartOnRequestAfter === false && !force)) {
+    if (isActive() || (options.restartOnRequestAfter === false && !event.force)) {
       return;
     }
     let after = options.restartOnRequestAfter || 0;
     if (typeof after === 'boolean') {
       after = 0;
     }
+    awaitingCheck.add(event);
     setTimeout(() => {
-      let stillActive;
-      if (type === 'socket') {
-        stillActive = request.readyState < 1;
-      } else {
-        stillActive = 0 < request.readyState && request.readyState < 4;
-      }
-      if (!stillActive) {
+      awaitingCheck.delete(event);
+      if (!isOpen(event)) {
         return;
       }
       if (!isActive()) {
         Pace.restart();
       }
-      run?.collectors.find((collector) => collector instanceof AjaxMonitor)?.watch(event);
+      ajaxMonitor()?.watch(event);
     }, after);
   };
 
@@ -495,44 +497,32 @@
   class AjaxMonitor {
     constructor() {
       this.complete = this.complete.bind(this);
+      // The trackers of the watched requests that are still loading.
       this.elements = [];
-      this.watched = new Set();
       this.onRequest = (event) => this.watch(event);
       getIntercept().on('request', this.onRequest);
-      // Requests the previous run was tracking, if they're still loading.
-      const previous = handedOver;
-      handedOver = [];
-      for (const event of previous) {
-        if (openRequests.get(event.request) === event) {
-          this.watch(event);
-        }
+      for (const event of awaitingCheck) {
+        this.watch(event);
       }
     }
 
-    // Each request event once (a reused XMLHttpRequest sends a new one per
-    // request).
+    // Tracks the request of `event`, unless it has ended or is already tracked
+    // (a reused XMLHttpRequest sends a new event per request).
     watch(event) {
-      if (this.watched.has(event)) {
+      if (!isOpen(event) || this.elements.some((tracker) => tracker.event === event)) {
         return;
       }
-      this.watched.add(event);
-      const { type, request } = event;
-      let tracker;
-      if (type === 'socket') {
-        tracker = new SocketRequestTracker(request, this.complete);
-      } else {
-        tracker = new XHRRequestTracker(request, this.complete);
-      }
-      this.elements.push(tracker);
+      const Tracker = event.type === 'socket' ? SocketRequestTracker : XHRRequestTracker;
+      this.elements.push(new Tracker(event, this.complete));
     }
 
     complete(tracker) {
       this.elements = this.elements.filter((e) => e !== tracker);
     }
 
-    // The requests this monitor watched that are still loading.
+    // The requests this monitor is tracking that are still loading.
     openEvents() {
-      return [...this.watched].filter((event) => openRequests.get(event.request) === event);
+      return this.elements.map((tracker) => tracker.event);
     }
 
     destroy() {
@@ -541,16 +531,17 @@
   }
 
   class XHRRequestTracker {
-    constructor(request, completeCallback) {
+    constructor(event, completeCallback) {
+      this.event = event;
       this.progress = 0;
-      request.addEventListener('progress', (evt) => {
+      event.request.addEventListener('progress', (evt) => {
         if (evt.lengthComputable) {
           this.progress = (100 * evt.loaded) / evt.total;
         } else {
           this.progress = this.progress + (100 - this.progress) / 2;
         }
       }, false);
-      whenRequestEnds(request, () => {
+      whenRequestEnds(event, () => {
         completeCallback(this);
         this.progress = 100;
       });
@@ -558,9 +549,10 @@
   }
 
   class SocketRequestTracker {
-    constructor(request, completeCallback) {
+    constructor(event, completeCallback) {
+      this.event = event;
       this.progress = 0;
-      whenRequestEnds(request, () => {
+      whenRequestEnds(event, () => {
         completeCallback(this);
         this.progress = 100;
       });
@@ -717,6 +709,8 @@
   // A run goes from waiting (for the target element) to running to finishing
   // (done, about to hide). `run` holds the current one; null when idle.
   let run = null;
+
+  const ajaxMonitor = () => run?.collectors.find((collector) => collector instanceof AjaxMonitor);
   let bar = (Pace.bar = new Bar());
 
   Pace.sources = [];
@@ -776,7 +770,6 @@
       cancelAnimationFrame(current.frame);
       clearTimeout(current.waitTimer);
       clearTimeout(current.hideTimer);
-      handedOver = current.collectors.find((collector) => collector instanceof AjaxMonitor)?.openEvents() ?? [];
       stopCollectors(current);
     }
     bar.destroy();
@@ -922,8 +915,14 @@
 
   Pace.restart = () => {
     Pace.trigger('restart');
+    const carried = ajaxMonitor()?.openEvents() ?? [];
     Pace.stop();
     Pace.start();
+    // Whichever run is going now (stop and start handlers may have replaced
+    // it) keeps tracking the requests the replaced run was tracking.
+    for (const event of carried) {
+      ajaxMonitor()?.watch(event);
+    }
   };
 
   if (typeof define === 'function' && define.amd) {

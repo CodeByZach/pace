@@ -152,13 +152,28 @@ test('a request sent again from its own load handler is tracked until the second
         resolve(performance.now());
       }
     };
-    xhr.open('GET', '/delay?ms=100');
+    // Long enough to restart the bar, so the same run sees both requests.
+    xhr.open('GET', '/delay?ms=900');
     xhr.send();
   }));
   await idle(page);
   const [events, doneAt] = await page.evaluate(() => [window.events, eventTimes.done]);
   expect(events).toEqual(RESTARTED);
   expect(doneAt).toBeGreaterThanOrEqual(secondLoadedAt - 50);
+});
+
+test('a request opened again from its own load handler, without being sent, does not restart the bar', async ({ page, open }) => {
+  await open({ head: NO_EVENT_LAG });
+  await idle(page);
+  await clearEvents(page);
+  await page.evaluate(() => new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = () => { xhr.open('GET', '/delay?ms=10'); resolve(); };
+    xhr.open('GET', '/delay?ms=10');
+    xhr.send();
+  }));
+  await page.waitForTimeout(800);
+  expect(await page.evaluate(() => events)).toEqual([]);
 });
 
 test('opening a request again stops tracking the request it replaces', async ({ page, open }) => {
@@ -173,6 +188,20 @@ test('opening a request again stops tracking the request it replaces', async ({ 
   });
   await idle(page);
   // Well before the replaced 3 s request would have finished.
+  expect(await page.evaluate(() => eventTimes.done)).toBeLessThan(2500);
+});
+
+test('opening a loading request again without sending it stops tracking it', async ({ page, open }) => {
+  await open({
+    head: NO_EVENT_LAG,
+    body: `<script>
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/delay?ms=3000');
+      xhr.send();
+      setTimeout(function () { xhr.open('GET', '/delay?ms=10'); }, 50);
+    </script>`,
+  });
+  await idle(page);
   expect(await page.evaluate(() => eventTimes.done)).toBeLessThan(2500);
 });
 
@@ -207,6 +236,52 @@ test('a background request that no run was tracking does not hold a navigation',
   expect(doneAt).toBeLessThan(loadedAt - 1000); // finished well before the request did
 });
 
+test('a navigation right after a request, in the same task, shows one bar that waits for it', async ({ page, open }) => {
+  await open({ head: NO_EVENT_LAG });
+  await idle(page);
+  await clearEvents(page);
+  const loadedAt = await page.evaluate(() => new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', '/delay?ms=1500');
+    xhr.onload = () => resolve(performance.now());
+    xhr.send();
+    history.pushState({}, '', '?next');
+  }));
+  await idle(page);
+  const [events, doneAt] = await page.evaluate(() => [window.events, eventTimes.done]);
+  expect(events).toEqual(RESTARTED);
+  expect(doneAt).toBeGreaterThanOrEqual(loadedAt - 50);
+});
+
+test('a stop handler that starts pace again keeps the requests of the run being replaced', async ({ page, open }) => {
+  await open({ head: NO_EVENT_LAG });
+  await idle(page);
+  await clearEvents(page);
+  const loaded = request(page, { ms: 2500 });
+  await expect.poll(() => page.evaluate(() => events.includes('start'))).toBe(true); // it restarted the bar
+  await page.evaluate(() => {
+    Pace.once('stop', () => Pace.start());
+    history.pushState({}, '', '?next');
+  });
+  const loadedAt = await loaded;
+  await idle(page);
+  expect(await page.evaluate(() => eventTimes.done)).toBeGreaterThanOrEqual(loadedAt - 50);
+});
+
+test('after Pace.stop(), a later unrelated run does not wait for the requests that were stopped', async ({ page, open }) => {
+  await open({ head: NO_EVENT_LAG });
+  await idle(page);
+  await clearEvents(page);
+  const stoppedLoaded = request(page, { ms: 3500 });
+  await expect.poll(() => page.evaluate(() => events.includes('start'))).toBe(true); // it restarted the bar
+  await page.evaluate(() => Pace.stop());
+  await clearEvents(page);
+  await request(page, { ms: 900 });
+  await idle(page);
+  const doneAt = await page.evaluate(() => eventTimes.done);
+  expect(doneAt).toBeLessThan((await stoppedLoaded) - 1000);
+});
+
 test('a navigation keeps tracking the requests of the run it replaces', async ({ page, open }) => {
   await open({ head: HOLD });
   const loadedAt = await page.evaluate(() => new Promise((resolve) => {
@@ -230,10 +305,10 @@ test('with trackWebSockets: false, WebSocket stays native', async ({ page, open 
   expect(await page.evaluate(() => WebSocket === NativeWebSocket)).toBe(true);
 });
 
-// A real server on 127.0.0.1 (Chrome doesn't let the fake public origin of the other tests
-// connect to it). It answers the WebSocket handshake after 1.5 s, so the socket stays
-// connecting until then.
-test.describe('a WebSocket that is still connecting', () => {
+// A real server on 127.0.0.1, for cases Playwright's routed responses don't reproduce. (Chrome
+// doesn't let the fake public origin of the other tests connect to 127.0.0.1.) It serves a page,
+// pace, /delay?ms=N, and a WebSocket whose handshake is answered after 1.5 s.
+test.describe('with a real server', () => {
   let server;
   let origin;
   const sockets = new Set();
@@ -241,19 +316,37 @@ test.describe('a WebSocket that is still connecting', () => {
   test.beforeAll(async ({ paceFile }) => {
     const pace = fs.readFileSync(new URL(paceFile, new URL('..', import.meta.url)), 'utf8');
     server = http.createServer((req, res) => {
-      if (req.url === '/pace.js') {
+      const url = new URL(req.url, 'http://localhost');
+      if (url.pathname === '/pace.js') {
         res.writeHead(200, { 'content-type': 'text/javascript' });
         return res.end(pace);
+      }
+      if (url.pathname === '/drop') {
+        req.socket.destroy(); // a network error
+        return;
+      }
+      if (url.pathname === '/delay') {
+        // No Content-Length (chunked), so the request's progress never reports 100% on its own
+        // and only its end can finish the bar.
+        setTimeout(() => {
+          res.write('ok');
+          res.end();
+        }, Number(url.searchParams.get('ms')));
+        return;
       }
       res.writeHead(200, { 'content-type': 'text/html' });
       res.end(`<!doctype html>
 <script>window.paceOptions = { eventLag: false };</script>
 <script src="/pace.js"></script>
 <script>
-  window.openedAt = null;
-  Pace.on('done', function () { window.doneAt = performance.now(); });
+  window.events = [];
+  window.eventTimes = {};
+  ['start', 'stop', 'restart', 'done', 'hide'].forEach(function (name) {
+    Pace.on(name, function () { events.push(name); eventTimes[name] = performance.now(); });
+  });
+  ${url.searchParams.has('socket') ? `window.openedAt = null;
   var socket = new WebSocket('ws://' + location.host + '/socket');
-  socket.onopen = function () { openedAt = performance.now(); };
+  socket.onopen = function () { openedAt = performance.now(); };` : ''}
 </script>`);
     });
     server.on('upgrade', (req, socket) => {
@@ -274,11 +367,69 @@ test.describe('a WebSocket that is still connecting', () => {
     server.close(resolve);
   }));
 
-  test('holds the bar until it opens', async ({ page }) => {
-    await page.goto(origin);
-    await page.waitForFunction(() => window.doneAt != null, null, { timeout: 10000 });
-    const [openedAt, doneAt] = await page.evaluate(() => [window.openedAt, window.doneAt]);
+  test('a WebSocket that is still connecting holds the bar until it opens', async ({ page }) => {
+    await page.goto(`${origin}/?socket`);
+    await idle(page);
+    const [openedAt, doneAt] = await page.evaluate(() => [window.openedAt, eventTimes.done]);
     expect(openedAt).not.toBeNull();
     expect(doneAt).toBeGreaterThanOrEqual(openedAt);
+  });
+
+  test('a request aborted in its own load handler ends', async ({ page }) => {
+    await page.goto(origin);
+    await idle(page);
+    await clearEvents(page);
+    await page.evaluate(() => new Promise((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = () => { xhr.abort(); resolve(); };
+      xhr.open('GET', '/delay?ms=900');
+      xhr.send();
+    }));
+    await idle(page);
+    expect(await page.evaluate(() => events)).toEqual(RESTARTED);
+    // Nothing is left open for the next run to wait on.
+    await clearEvents(page);
+    await page.evaluate(() => history.pushState({}, '', '?next'));
+    await idle(page);
+    expect(await page.evaluate(() => events)).toEqual(RESTARTED);
+  });
+
+  test('a request aborted from its readystatechange handler when done ends', async ({ page }) => {
+    await page.goto(origin);
+    await idle(page);
+    await clearEvents(page);
+    await page.evaluate(() => new Promise((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4) {
+          xhr.abort();
+          resolve();
+        }
+      };
+      xhr.open('GET', '/delay?ms=900');
+      xhr.send();
+    }));
+    await idle(page);
+    expect(await page.evaluate(() => events)).toEqual(RESTARTED);
+    await clearEvents(page);
+    await page.evaluate(() => history.pushState({}, '', '?next'));
+    await idle(page);
+    expect(await page.evaluate(() => events)).toEqual(RESTARTED);
+  });
+
+  test('a synchronous request that fails leaves nothing open', async ({ page }) => {
+    await page.goto(origin);
+    await idle(page);
+    await page.evaluate(() => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', '/drop', false);
+      try {
+        xhr.send();
+      } catch {}
+    });
+    await clearEvents(page);
+    await page.evaluate(() => history.pushState({}, '', '?next'));
+    await idle(page);
+    expect(await page.evaluate(() => events)).toEqual(RESTARTED);
   });
 });
