@@ -123,21 +123,12 @@ test('a URL object works with ajax.ignoreURLs', async ({ page, open }) => {
 });
 
 test('an ajax.ignoreURLs pattern with the g flag ignores every matching request', async ({ page, open }) => {
-  await open({
-    head: '<script>window.paceOptions = { eventLag: false, ajax: { ignoreURLs: [/delay/g] } };</script>',
-    body: `<script>
-      window.loaded = 0;
-      [1, 2].forEach(function () {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', '/delay?ms=2000');
-        xhr.onload = function () { loaded++; };
-        xhr.send();
-      });
-    </script>`,
-  });
+  await open({ head: '<script>window.paceOptions = { eventLag: false, ajax: { ignoreURLs: [/delay/g] } };</script>' });
   await idle(page);
-  // Neither ignored request held the page-load run.
-  expect(await page.evaluate(() => loaded)).toBe(0);
+  await clearEvents(page);
+  // Two requests, so a pattern that kept its lastIndex from the first would miss the second.
+  await Promise.all([request(page, { ms: 900 }), request(page, { ms: 900 })]);
+  expect(await page.evaluate(() => events)).toEqual([]);
 });
 
 test('an ajax.ignoreURLs entry that is neither a string nor a RegExp is skipped', async ({ page, open }) => {
