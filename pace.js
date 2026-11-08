@@ -328,7 +328,10 @@
     if (!ignoreStack.length && options.ajax) {
       if (method === 'socket' && options.ajax.trackWebSockets) {
         return true;
-      } else if (options.ajax.trackMethods.includes(method.toUpperCase())) {
+      }
+      // Array.prototype.includes, so a string or number from a misconfiguration
+      // matches nothing instead of matching substrings or throwing.
+      if (Array.prototype.includes.call(options.ajax.trackMethods, method.toUpperCase())) {
         return true;
       }
     }
