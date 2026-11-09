@@ -2,9 +2,6 @@
 // XMLHttpRequest.prototype.open/send and subclasses WebSocket, so pages and other
 // libraries keep the native objects, and it tracks a request from send() until it
 // ends.
-import crypto from 'node:crypto';
-import fs from 'node:fs';
-import http from 'node:http';
 import { test, expect, idle, request, clearEvents, RESTARTED, HOLD, NO_EVENT_LAG } from './fixtures.mjs';
 
 // Saved before pace loads, to compare with afterwards.
@@ -115,6 +112,22 @@ test('a URL object works with ajax.ignoreURLs', async ({ page, open }) => {
   await page.evaluate(() => new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', new URL('/delay?ms=900&ignored', location.href));
+    xhr.onload = resolve;
+    xhr.onerror = reject;
+    xhr.send();
+  }));
+  expect(await page.evaluate(() => events)).toEqual([]);
+});
+
+test('a URL object changed after open() is matched as open() used it', async ({ page, open }) => {
+  await open({ head: "<script>window.paceOptions = { eventLag: false, ajax: { ignoreURLs: ['ignored'] } };</script>" });
+  await idle(page);
+  await clearEvents(page);
+  await page.evaluate(() => new Promise((resolve, reject) => {
+    const url = new URL('/delay?ms=900&ignored', location.href);
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url);
+    url.search = '?ms=900';
     xhr.onload = resolve;
     xhr.onerror = reject;
     xhr.send();
@@ -305,78 +318,27 @@ test('with trackWebSockets: false, WebSocket stays native', async ({ page, open 
   expect(await page.evaluate(() => WebSocket === NativeWebSocket)).toBe(true);
 });
 
-// A real server on 127.0.0.1, for cases Playwright's routed responses don't reproduce. (Chrome
-// doesn't let the fake public origin of the other tests connect to 127.0.0.1.) It serves a page,
-// pace, /delay?ms=N, and a WebSocket whose handshake is answered after 1.5 s.
+// Cases that need a real server (see `server` in fixtures.mjs).
 test.describe('with a real server', () => {
-  let server;
-  let origin;
-  const sockets = new Set();
-
-  test.beforeAll(async ({ paceFile }) => {
-    const pace = fs.readFileSync(new URL(paceFile, new URL('..', import.meta.url)), 'utf8');
-    server = http.createServer((req, res) => {
-      const url = new URL(req.url, 'http://localhost');
-      if (url.pathname === '/pace.js') {
-        res.writeHead(200, { 'content-type': 'text/javascript' });
-        return res.end(pace);
-      }
-      if (url.pathname === '/drop') {
-        req.socket.destroy(); // a network error
-        return;
-      }
-      if (url.pathname === '/delay') {
-        // No Content-Length (chunked), so the request's progress never reports 100% on its own
-        // and only its end can finish the bar.
-        setTimeout(() => {
-          res.write('ok');
-          res.end();
-        }, Number(url.searchParams.get('ms')));
-        return;
-      }
-      res.writeHead(200, { 'content-type': 'text/html' });
-      res.end(`<!doctype html>
-<script>window.paceOptions = { eventLag: false };</script>
-<script src="/pace.js"></script>
-<script>
-  window.events = [];
-  window.eventTimes = {};
-  ['start', 'stop', 'restart', 'done', 'hide'].forEach(function (name) {
-    Pace.on(name, function () { events.push(name); eventTimes[name] = performance.now(); });
-  });
-  ${url.searchParams.has('socket') ? `window.openedAt = null;
-  var socket = new WebSocket('ws://' + location.host + '/socket');
-  socket.onopen = function () { openedAt = performance.now(); };` : ''}
-</script>`);
-    });
-    server.on('upgrade', (req, socket) => {
-      sockets.add(socket);
-      socket.on('error', () => {});
-      const accept = crypto.createHash('sha1').update(req.headers['sec-websocket-key'] + '258EAFA5-E914-47DA-95CA-C5AB0DC85B11').digest('base64');
-      setTimeout(() => {
-        socket.write(`HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ${accept}\r\n\r\n`);
-      }, 1500);
-    });
-    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-    origin = `http://127.0.0.1:${server.address().port}`;
-  });
-
-  test.afterAll(() => new Promise((resolve) => {
-    for (const socket of sockets) socket.destroy();
-    server.closeAllConnections();
-    server.close(resolve);
-  }));
-
-  test('a WebSocket that is still connecting holds the bar until it opens', async ({ page }) => {
-    await page.goto(`${origin}/?socket`);
+  test('a WebSocket that is still connecting holds the bar until it opens', async ({ page, server }) => {
+    await page.goto(`${server}/?socket`);
     await idle(page);
     const [openedAt, doneAt] = await page.evaluate(() => [window.openedAt, eventTimes.done]);
     expect(openedAt).not.toBeNull();
     expect(doneAt).toBeGreaterThanOrEqual(openedAt);
   });
 
-  test('a request aborted in its own load handler ends', async ({ page }) => {
-    await page.goto(origin);
+  test('ajax.ignoreURLs patterns see the full URL of a WebSocket', async ({ page, server }) => {
+    await page.goto(`${server}/?options=${encodeURIComponent('{ eventLag: false, ajax: { ignoreURLs: [/^ws:\\/\\/127\\.0\\.0\\.1:\\d+\\/socket/] } }')}`);
+    await idle(page);
+    await clearEvents(page);
+    await page.evaluate(() => { window.socket = new WebSocket('/socket?never'); }); // a relative URL
+    await page.waitForTimeout(800);
+    expect(await page.evaluate(() => events)).toEqual([]);
+  });
+
+  test('a request aborted in its own load handler ends', async ({ page, server }) => {
+    await page.goto(server);
     await idle(page);
     await clearEvents(page);
     await page.evaluate(() => new Promise((resolve) => {
@@ -394,8 +356,8 @@ test.describe('with a real server', () => {
     expect(await page.evaluate(() => events)).toEqual(RESTARTED);
   });
 
-  test('a request aborted from its readystatechange handler when done ends', async ({ page }) => {
-    await page.goto(origin);
+  test('a request aborted from its readystatechange handler when done ends', async ({ page, server }) => {
+    await page.goto(server);
     await idle(page);
     await clearEvents(page);
     await page.evaluate(() => new Promise((resolve) => {
@@ -417,8 +379,8 @@ test.describe('with a real server', () => {
     expect(await page.evaluate(() => events)).toEqual(RESTARTED);
   });
 
-  test('a synchronous request that fails leaves nothing open', async ({ page }) => {
-    await page.goto(origin);
+  test('a synchronous request that fails leaves nothing open', async ({ page, server }) => {
+    await page.goto(server);
     await idle(page);
     await page.evaluate(() => {
       const xhr = new XMLHttpRequest();

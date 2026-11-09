@@ -99,7 +99,7 @@ Collectors are the bits of code which gather progress information. Pace includes
 
 - Ajax
 
-  Monitors ajax requests (XMLHttpRequest and WebSocket) on the page. Only `GET` requests are tracked by default, see Tracking below
+  Monitors ajax requests (XMLHttpRequest, fetch and WebSocket) on the page. Only `GET` requests are tracked by default, see Tracking below
 
 - Elements
 
@@ -235,6 +235,21 @@ paceOptions = {
 }
 ```
 
+`fetch()` requests are tracked the same way, until their response arrives: Pace can't see a response's body load
+without reading it. To stop tracking them, set `trackFetch: false` inside `ajax`.
+
+Pace waits for each request at most `maxWait` milliseconds after it's sent (15000 by default), so a request that never
+finishes can't hold the bar forever. The request itself keeps going. Set a different number, or `false` to wait for
+every request until it ends (anything other than a number from 0 to 2147483647, about 24 days, means the same):
+
+```javascript
+paceOptions = {
+  ajax: {
+    maxWait: 30000
+  }
+}
+```
+
 You can disable all ajax tracking by setting `ajax` to false:
 
 ```javascript
@@ -280,9 +295,18 @@ paceOptions = {
 ```
 
 A string matches any ajax request URL that contains it (case-sensitive); a regular expression is tested against
-the URL. These patterns only apply to ajax requests, not to links, images or other resources on the page.
+the URL. Patterns see the URL as the page wrote it, the full URL (such as `https://example.com/api/items?page=2`), and for
+requests to the page's own origin (same protocol, domain and port) the part after it (`/api/items?page=2`), so a
+pattern matches however the request's URL was written. They only apply to ajax requests, not to links, images or other
+resources on the page.
 
-WebSocket connections are tracked too. To stop that, set `trackWebSockets: false` inside `ajax`.
+Requests a page keeps open on purpose, such as long polling for chat or live updates, show the bar each time one
+starts, and so do slow requests a page makes in the background, such as prefetching links. Add their URLs to
+`ignoreURLs`.
+
+WebSocket connections are tracked too. To stop that, set `trackWebSockets: false` inside `ajax`. When `trackFetch` or
+`trackWebSockets` is false the first time Pace starts, Pace leaves `fetch` or `WebSocket` alone, so `Pace.track` can't
+track them either.
 
 A few things Pace can't track:
 
@@ -292,6 +316,7 @@ A few things Pace can't track:
   bundler), call `Pace.start()` early.
 - Requests made through a library that replaces `window.XMLHttpRequest` with its own version (such as xhook), if that
   library loads before Pace. Load Pace first.
+- `fetch()` calls made through a copy of `fetch` that a library saved before Pace started.
 
 Avoid calling `Pace.restart()` for every request, for example from jQuery's `ajaxStart`. It restarts the bar even for
 ignored requests, and parallel requests restart it several times. To show the bar for `POST` requests, add `POST` to

@@ -28,7 +28,9 @@
     ajax: {
       trackMethods: ['GET'],
       trackWebSockets: true,
+      trackFetch: true,
       ignoreURLs: [],
+      maxWait: 15000,
     },
   };
 
@@ -298,9 +300,10 @@
     return ret;
   };
 
-  // true, false, or 'force' (inside Pace.track). With `ajax: false`, nothing is
+  // Whether to track a request of `kind` ('xhr', 'fetch' or 'socket'): true,
+  // false, or 'force' (inside Pace.track). With `ajax: false`, nothing is
   // tracked, not even inside Pace.track.
-  const shouldTrack = (method) => {
+  const shouldTrack = (kind, method) => {
     if (!options.ajax) {
       return false;
     }
@@ -311,28 +314,53 @@
     if (ignoreStack.length) {
       return false;
     }
-    if (method === 'socket') {
+    if (kind === 'socket') {
       return Boolean(options.ajax.trackWebSockets);
+    }
+    if (kind === 'fetch' && !options.ajax.trackFetch) {
+      return false;
     }
     // Array.prototype.includes, so a string or number from a misconfiguration
     // matches nothing instead of matching substrings or throwing.
     return Array.prototype.includes.call(options.ajax.trackMethods, String(method).toUpperCase());
   };
 
-  const shouldIgnoreURL = (url) => {
+  // What ajax.ignoreURLs patterns are matched against: a request's URL as the page
+  // wrote it, its full URL, and for a request to the page's own origin the part
+  // after the origin (/api/items?page=2), so a pattern matches however the URL was
+  // written. `resolved` is the full URL when the browser already resolved it.
+  const urlsToMatch = (url, resolved) => {
+    const urls = [String(url)];
+    try {
+      const full = new URL(resolved ?? urls[0], document.baseURI);
+      urls.push(full.href);
+      if (full.origin === location.origin) {
+        urls.push(full.pathname + full.search + full.hash);
+      }
+    } catch {
+      // A URL the browser can't parse is matched only as written.
+    }
+    return urls;
+  };
+
+  const matches = (pattern, url) => {
+    if (typeof pattern === 'string') {
+      return url.includes(pattern);
+    }
+    if (pattern instanceof RegExp) {
+      // A pattern with the g or y flag keeps state between test() calls.
+      pattern.lastIndex = 0;
+      return pattern.test(url);
+    }
+    return false;
+  };
+
+  // `urls` from urlsToMatch().
+  const shouldIgnoreURL = (urls) => {
     const patterns = options.ajax?.ignoreURLs ?? [];
     for (let i = 0, n = patterns.length; i < n; i++) {
-      const pattern = patterns[i];
-      if (typeof pattern === 'string') {
-        if (url.includes(pattern)) {
-          return true;
-        }
-      } else if (pattern instanceof RegExp) {
-        // A pattern with the g or y flag keeps state between test() calls.
-        pattern.lastIndex = 0;
-        if (pattern.test(url)) {
-          return true;
-        }
+      if (urls.some((candidate) => matches(patterns[i], candidate))) {
+        return true;
       }
     }
     return false;
@@ -361,6 +389,8 @@
     endCallbacks.get(event).push(callback);
   };
 
+  // Ends the request, either because it ended or because pace stopped waiting
+  // for it (ajax.maxWait).
   const endRequest = (request) => {
     const event = openRequests.get(request);
     if (!event) {
@@ -378,6 +408,15 @@
     endRequest(event.request);
     openRequests.set(event.request, event);
     endCallbacks.set(event, []);
+    // Pace waits for a request at most ajax.maxWait ms from when it was sent, so
+    // one that never ends can't hold the bar forever. The request keeps going.
+    // false, or a value a timer can't wait for (setTimeout would treat Infinity,
+    // null or more than 2^31 - 1 ms as 0), means no limit.
+    const maxWait = options.ajax?.maxWait;
+    if (typeof maxWait === 'number' && maxWait >= 0 && maxWait <= 2147483647) {
+      const timer = setTimeout(() => endRequest(event.request), maxWait);
+      endCallbacks.get(event).push(() => clearTimeout(timer));
+    }
     intercept.trigger('request', event);
   };
 
@@ -386,9 +425,10 @@
 
   // Wraps XMLHttpRequest.prototype.open and send, and replaces WebSocket with a
   // subclass, so the page keeps the native classes: instanceof, constants,
-  // subclasses and other libraries' prototype patches keep working. Outside the
-  // class on purpose: class bodies are strict mode, where assigning to a
-  // read-only property (a page may lock these) throws.
+  // subclasses and other libraries' prototype patches keep working. Replaces
+  // fetch with a function that behaves the same. Outside the class on purpose:
+  // class bodies are strict mode, where assigning to a read-only property (a
+  // page may lock these) throws.
   const installIntercepts = (intercept) => {
     const proto = window.XMLHttpRequest.prototype;
     const open = proto.open;
@@ -397,21 +437,22 @@
     const listening = new WeakSet();
     proto.open = function (...args) {
       const [method, url] = args;
-      const decision = shouldTrack(method);
+      const decision = shouldTrack('xhr', method);
       const result = open.apply(this, args);
       // Opening a request again cancels the one it was making (only once open()
       // has succeeded: when it throws, the earlier request keeps going).
       endRequest(this);
       opened.delete(this);
       if (decision) {
-        opened.set(this, { type: method, url: String(url), force: decision === 'force' });
+        // The URL as open() used it, before the page can change a URL object.
+        opened.set(this, { kind: 'xhr', urls: urlsToMatch(url), force: decision === 'force' });
       }
       return result;
     };
     proto.send = function (...args) {
       const info = opened.get(this);
       opened.delete(this);
-      if (!info || shouldIgnoreURL(info.url)) {
+      if (!info || shouldIgnoreURL(info.urls)) {
         return send.apply(this, args);
       }
       // One listener per XMLHttpRequest, added before send() because a
@@ -444,13 +485,51 @@
             super(url);
           }
           const decision = shouldTrack('socket');
-          if (decision && !shouldIgnoreURL(String(url))) {
+          if (decision && !shouldIgnoreURL(urlsToMatch(url, this.url))) {
             for (const name of ['open', 'error', 'close']) {
               this.addEventListener(name, () => endRequest(this), { once: true });
             }
-            beginRequest(intercept, { type: 'socket', url: String(url), protocols, force: decision === 'force', request: this });
+            beginRequest(intercept, { kind: 'socket', force: decision === 'force', request: this });
           }
         }
+      };
+    }
+    if (options.ajax.trackFetch && typeof window.fetch === 'function') {
+      const originalFetch = window.fetch;
+      // Calls the original with the same `this` and arguments, never reads or
+      // copies a Request's body, and returns a promise that settles like the
+      // original's. A request ends when that promise settles: on the response's
+      // headers, an error or an abort, not at the end of its body.
+      // Declares only `input`, so its length is 1 like the native fetch's.
+      window.fetch = function fetch(input) {
+        const init = arguments[1];
+        let event = null;
+        // Deciding whether to track never throws into the page: fetch itself
+        // rejects input it can't use (a URL whose toString() throws, say).
+        try {
+          // Also a Request made in another frame, which instanceof wouldn't see.
+          const isRequest = Object.prototype.toString.call(input) === '[object Request]';
+          const decision = shouldTrack('fetch', init?.method ?? (isRequest ? input.method : 'GET'));
+          if (decision && !shouldIgnoreURL(urlsToMatch(isRequest ? input.url : input))) {
+            event = { kind: 'fetch', force: decision === 'force' };
+          }
+        } catch {}
+        const promise = originalFetch.apply(this, arguments);
+        if (!event) {
+          return promise;
+        }
+        event.request = promise;
+        beginRequest(intercept, event);
+        return promise.then(
+          (response) => {
+            endRequest(promise);
+            return response;
+          },
+          (error) => {
+            endRequest(promise);
+            throw error;
+          },
+        );
       };
     }
   };
@@ -488,7 +567,7 @@
 
   let _intercept = null;
 
-  // Hooks into XMLHttpRequest and WebSocket the first time a run tracks ajax.
+  // Hooks into XMLHttpRequest, WebSocket and fetch the first time a run tracks ajax.
   const getIntercept = () => {
     _intercept ??= new RequestIntercept();
     return _intercept;
@@ -512,7 +591,7 @@
       if (!isOpen(event) || this.elements.some((tracker) => tracker.event === event)) {
         return;
       }
-      const Tracker = event.type === 'socket' ? SocketRequestTracker : XHRRequestTracker;
+      const Tracker = event.kind === 'xhr' ? XHRRequestTracker : RequestTracker;
       this.elements.push(new Tracker(event, this.complete));
     }
 
@@ -548,7 +627,9 @@
     }
   }
 
-  class SocketRequestTracker {
+  // A request that reports no progress until it ends: a fetch (whose progress
+  // can't be seen without reading its body) or a WebSocket connecting.
+  class RequestTracker {
     constructor(event, completeCallback) {
       this.event = event;
       this.progress = 0;
