@@ -95,7 +95,8 @@ test('a request sent again from its own load handler gets its own maxWait', asyn
 });
 
 test.describe('with a real server', () => {
-  // A request that never ends (/hang), with the page's clock run forward.
+  // A request that never ends (/hang), with the page's clock run forward: runFor() runs every
+  // timer and animation frame on the way, fastForward() jumps ahead and runs due timers once.
   const hangAfterLoad = async (page, server, options) => {
     await page.clock.install();
     await page.goto(`${server}/?options=${encodeURIComponent(options)}`);
@@ -109,7 +110,8 @@ test.describe('with a real server', () => {
 
   test('by default, pace stops waiting for a request 15 s after it was sent', async ({ page, server }) => {
     await hangAfterLoad(page, server, '{ eventLag: false }');
-    await page.clock.runFor(14500);
+    await page.clock.runFor(1000); // the bar restarts at 500 ms
+    await page.clock.fastForward(13500);
     expect(await page.evaluate(() => events)).toEqual(['restart', 'stop', 'start']);
     await page.clock.runFor(1000);
     expect(await page.evaluate(() => events)).toEqual(RESTARTED);
@@ -117,7 +119,9 @@ test.describe('with a real server', () => {
 
   test('with maxWait: false, pace keeps waiting for a request that never ends', async ({ page, server }) => {
     await hangAfterLoad(page, server, '{ eventLag: false, ajax: { maxWait: false } }');
-    await page.clock.runFor(60000);
+    await page.clock.runFor(1000); // the bar restarts at 500 ms
+    await page.clock.fastForward(59000);
+    await page.clock.runFor(1000);
     expect(await page.evaluate(() => events)).toEqual(['restart', 'stop', 'start']);
   });
 
