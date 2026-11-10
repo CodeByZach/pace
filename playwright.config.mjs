@@ -3,8 +3,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 const CI = Boolean(process.env.CI);
 
-// CI runs every engine (one job each, picked with --project); locally only Chromium
-// (npx playwright install --only-shell chromium).
+// CI runs every engine, each project in its own job (listed in .github/workflows/checks.yml);
+// locally only Chromium (npx playwright install --only-shell chromium).
 const browsers = CI ? ['chromium', 'firefox', 'webkit'] : ['chromium'];
 const devicesByBrowser = { chromium: 'Desktop Chrome', firefox: 'Desktop Firefox', webkit: 'Desktop Safari' };
 

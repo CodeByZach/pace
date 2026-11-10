@@ -31,15 +31,20 @@ jobs:
       - name: List package contents
         run: npm pack --dry-run
 
-  # One job per engine, in parallel.
-  browser-engines:
-    name: browser-tests (${{ matrix.browser }})
+  # One job per Playwright project (an engine and a pace file), in parallel.
+  browser-projects:
+    name: browser-tests (${{ matrix.browser }} ${{ matrix.file }})
     runs-on: ubuntu-26.04
     timeout-minutes: 10
     strategy:
-      fail-fast: false # report every engine
+      fail-fast: false # report every project
       matrix:
-        browser: [chromium, firefox, webkit]
+        # Every project in playwright.config.mjs; one missing here isn't tested in CI.
+        include:
+          - { browser: chromium, file: pace.js }
+          - { browser: chromium, file: pace.min.js }
+          - { browser: firefox, file: pace.min.js }
+          - { browser: webkit, file: pace.min.js }
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -55,17 +60,17 @@ jobs:
       - name: Install the browser
         run: npx playwright install --with-deps --only-shell ${{ matrix.browser }}
 
-      - run: npm run test:browsers -- --project="${{ matrix.browser }} *"
+      - run: npm run test:browsers -- --project="${{ matrix.browser }} ${{ matrix.file }}"
 
-  # The required check: passes only if every engine passed, so the required
-  # checks stay the same when engines change.
+  # The required check: passes only if every project passed, so the required
+  # checks stay the same when projects change.
   browser-tests:
-    needs: browser-engines
+    needs: browser-projects
     if: always()
     runs-on: ubuntu-26.04
     timeout-minutes: 1
     steps:
-      - name: Check that every engine passed
+      - name: Check that every project passed
         env:
-          RESULT: ${{ needs.browser-engines.result }}
+          RESULT: ${{ needs.browser-projects.result }}
         run: test "$RESULT" = success
