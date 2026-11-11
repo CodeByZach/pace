@@ -15,7 +15,10 @@ const filesByBrowser = { chromium: ['pace.js', 'pace.min.js'], firefox: ['pace.m
 export default defineConfig({
   testDir: 'tests',
   forbidOnly: CI,
-  workers: CI ? 1 : undefined,
+  // The tests spend their time waiting for pace's timers and their own requests, not on the
+  // CPU, so they run in parallel, also within a file; on CI, one worker per CPU core.
+  fullyParallel: true,
+  workers: CI ? '100%' : undefined,
   reporter: CI ? [['github'], ['list']] : 'list',
   projects: browsers.flatMap((browser) =>
     filesByBrowser[browser].map((paceFile) => ({

@@ -35,7 +35,14 @@ jobs:
   browser-projects:
     name: browser-tests (${{ matrix.browser }} ${{ matrix.file }})
     runs-on: ubuntu-26.04
-    timeout-minutes: 10
+    timeout-minutes: 5
+    # Playwright's image comes with its browsers and the system packages they need
+    # (https://playwright.dev/docs/ci#via-containers), so nothing is installed here.
+    # Its version must match @playwright/test in package.json, or the tests fail
+    # to find their browsers. Pinned by digest, like the actions in actions.lock.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+      options: --user 1001
     strategy:
       fail-fast: false # report every project
       matrix:
@@ -55,10 +62,6 @@ jobs:
           node-version-file: .tool-versions
 
       - run: npm ci
-
-      # Not cached: Playwright's docs say restoring takes about as long as downloading.
-      - name: Install the browser
-        run: npx playwright install --with-deps --only-shell ${{ matrix.browser }}
 
       - run: npm run test:browsers -- --project="${{ matrix.browser }} ${{ matrix.file }}"
 
