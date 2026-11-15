@@ -37,8 +37,8 @@ You can set `window.paceOptions` before bringing in the file:
 
 ```javascript
 paceOptions = {
-  // Disable the 'elements' source
-  elements: false,
+  // Don't wait for any elements to appear
+  waitFor: [],
 
   // Only show the progress on regular and ajax-y page navigation,
   // not every request
@@ -46,14 +46,44 @@ paceOptions = {
 }
 ```
 
-You can also put options on the script tag (the value must be valid JSON):
+You can also put options on Pace's own script tag (the value must be valid JSON). They apply after `window.paceOptions`:
 
 ```html
-<script data-pace-options='{ "ajax": false }' src="https://cdn.jsdelivr.net/npm/pace-js@1/pace.min.js"></script>
+<script data-pace-options='{ "trackXHR": false }' src="https://cdn.jsdelivr.net/npm/pace-js@1/pace.min.js"></script>
 ```
 
-Pace reads its options once, when pace.js loads, so set them before including it.
-Assigning `Pace.options` afterwards has no effect.
+To change settings later, call `Pace.configure({ ... })`; `Pace.start({ ... })` does the same, then starts. Settings
+about requests and navigation (`restartOnNavigation`, `restartOnRequestAfter`, `trackXHR`, `trackFetch`,
+`trackWebSockets`, `requestMethods`, `ignoreRequests` and `maxWait`) apply from the next request or navigation; the
+others from the next time the bar starts, so a bar that is showing doesn't change halfway. `Pace.getOptions()` returns a
+copy of the settings in use.
+
+A wrong value or an unknown name is ignored, and the console shows a warning (once) that says what Pace expected. Pace
+never throws because of a wrong value.
+
+| Setting | Default | What it does |
+|---|---|---|
+| `startOnPageLoad` | `true` | Show the bar while the page loads. With a bundler, call `Pace.start()` instead. |
+| `restartOnNavigation` | `true` | Restart when the page calls `history.pushState` or `replaceState`. |
+| `restartOnRequestAfter` | `500` | Restart for a tracked request still running after this many milliseconds; `false` to never. |
+| `target` | `'body'` | A selector for the element the bar is added to. |
+| `className` | `''` | Class names added to the bar's `.pace-progress` element. |
+| `trackDocument` | `true` | Wait for the document to load. |
+| `trackEventLag` | `true` | Wait until the page's scripts stop keeping it busy. |
+| `waitFor` | `['body']` | Selectors that must each match an element; `[]` to not wait for any. |
+| `trackXHR` | `true` | Track `XMLHttpRequest` requests. |
+| `trackFetch` | `true` | Track `fetch()` requests. |
+| `trackWebSockets` | `true` | Track WebSocket connections until they open. |
+| `requestMethods` | `['GET']` | The methods of the requests to track, in any case. |
+| `ignoreRequests` | `[]` | URL patterns (non-empty strings and regular expressions) of requests not to track. |
+| `maxWait` | `15000` | The longest Pace waits for one request, in milliseconds; `false` for no limit. |
+| `minVisible` | `250` | The shortest time the bar is shown, in milliseconds. |
+| `hideDelay` | `100` | How long the full bar stays before it's hidden, in milliseconds. |
+| `catchupTime` | `100` | About how many milliseconds the bar takes to catch up when the progress jumps. |
+| `initialRate` | `0.03` | How fast the bar moves before any progress is known, in percent per millisecond. |
+| `maxProgressPerFrame` | `20` | The most the bar moves in one frame, in percent. |
+| `easeFactor` | `1.25` | How the bar slows down as it fills; higher values slow it later. |
+| `extraSources` | `[]` | Your own progress sources, see Collectors below. |
 
 If you load pace with a bundler or module loader (AMD or CommonJS), it doesn't start on its own:
 set `window.paceOptions` before pace loads, then call `Pace.start()`. `import` statements run
@@ -62,7 +92,7 @@ before the rest of a file, so put the options in their own file and import it fi
 ```javascript
 // pace-options.js
 window.paceOptions = {
-  document: false
+  trackDocument: false
 };
 ```
 
@@ -113,16 +143,16 @@ Collectors are the bits of code which gather progress information. Pace includes
 
   Checks for event loop lag signaling that javascript is being executed
 
-They can each be configured or disabled through configuration options of the same name.
+They can each be configured or disabled through settings:
 
 ```javascript
 paceOptions = {
-  ajax: false, // disabled
-  document: false, // disabled
-  eventLag: false, // disabled
-  elements: {
-    selectors: ['.my-page']
-  }
+  trackXHR: false, // disabled
+  trackFetch: false, // disabled
+  trackWebSockets: false, // disabled
+  trackDocument: false, // disabled
+  trackEventLag: false, // disabled
+  waitFor: ['.my-page']
 };
 ```
 
@@ -142,13 +172,11 @@ may never appear:
 
 ```javascript
 paceOptions = {
-  elements: {
-    selectors: ['.timeline, .timeline-error', '.user-profile, .profile-error']
-  }
+  waitFor: ['.timeline, .timeline-error', '.user-profile, .profile-error']
 }
 ```
 
-Pace will consider the elements test successful when each selector matches something. For
+Pace will consider the elements test successful when each selector matches something (it checks every 100 ms). For
 this example, when either `.timeline` or `.timeline-error` exist, and either `.user-profile`
 or `.profile-error` exist.
 
@@ -160,7 +188,7 @@ Most users want the progress bar to automatically restart when a pushState event
 
 ```javascript
 paceOptions = {
-  restartOnPushState: false
+  restartOnNavigation: false
 }
 ```
 
@@ -179,15 +207,18 @@ paceOptions = {
 
 You can always trigger a restart manually by calling `Pace.restart()`
 
-See [the source](https://github.com/CodeByZach/pace/blob/master/pace.js) for a full list of options.
-
 API
 ---
 
 Pace exposes the following methods:
 
 - `Pace.start`: Show the progress bar and start updating. Called automatically if you don't use AMD or CommonJS.
-While a run is in progress (not yet `done`), it only stores the options for the next run.
+While a run is in progress (not yet `done`), it doesn't restart it; the options it's given apply as described in
+Configuration above.
+
+- `Pace.configure`: Change settings without starting the bar, see Configuration above.
+
+- `Pace.getOptions`: A copy of the settings in use.
 
 - `Pace.restart`: Show the progress bar if it's hidden and start reporting the progress from scratch. Called automatically
 whenever `pushState` or `replaceState` is called by default.
@@ -208,7 +239,7 @@ Pace fires the following events:
 - `restart`: When pace is restarted (manually, or by a new AJAX request)
 - `progress`: On every frame while the bar is running, with the current progress (0–100)
 - `done`: When pace is finished
-- `hide`: When the pace is hidden (can be later than `done`, based on `ghostTime` and `minTime`)
+- `hide`: When the pace is hidden (can be later than `done`, based on `hideDelay` and `minVisible`)
 
 You can bind onto events using the `on`, `off` and `once` methods:
 
@@ -229,32 +260,30 @@ Only `GET` requests are tracked by default. To also show the bar for other metho
 
 ```javascript
 paceOptions = {
-  ajax: {
-    trackMethods: ['GET', 'POST']
-  }
+  requestMethods: ['GET', 'POST']
 }
 ```
 
 `fetch()` requests are tracked the same way, until their response arrives: Pace can't see a response's body load
-without reading it. To stop tracking them, set `trackFetch: false` inside `ajax`.
+without reading it. To stop tracking them, set `trackFetch: false`.
 
 Pace waits for each request at most `maxWait` milliseconds after it's sent (15000 by default), so a request that never
-finishes can't hold the bar forever. The request itself keeps going. Set a different number, or `false` to wait for
-every request until it ends (anything other than a number from 0 to 2147483647, about 24 days, means the same):
+finishes can't hold the bar forever. The request itself keeps going. Set a different number (up to 2147483647, about 24
+days), or `false` to wait for every request until it ends:
 
 ```javascript
 paceOptions = {
-  ajax: {
-    maxWait: 30000
-  }
+  maxWait: 30000
 }
 ```
 
-You can disable all ajax tracking by setting `ajax` to false:
+You can disable all ajax tracking by turning off each kind of request:
 
 ```javascript
 paceOptions = {
-  ajax: false
+  trackXHR: false,
+  trackFetch: false,
+  trackWebSockets: false
 }
 ```
 
@@ -288,9 +317,7 @@ You can also ignore URLs based on a pattern:
 
 ```javascript
 paceOptions = {
-  ajax: {
-    ignoreURLs: ['some-substring', /some-regexp/]
-  }
+  ignoreRequests: ['some-substring', /some-regexp/]
 }
 ```
 
@@ -302,11 +329,11 @@ resources on the page.
 
 Requests a page keeps open on purpose, such as long polling for chat or live updates, show the bar each time one
 starts, and so do slow requests a page makes in the background, such as prefetching links. Add their URLs to
-`ignoreURLs`.
+`ignoreRequests`.
 
-WebSocket connections are tracked too. To stop that, set `trackWebSockets: false` inside `ajax`. When `trackFetch` or
-`trackWebSockets` is false the first time Pace starts, Pace leaves `fetch` or `WebSocket` alone, so `Pace.track` can't
-track them either.
+WebSocket connections are tracked too. To stop that, set `trackWebSockets: false`. While `trackXHR`, `trackFetch` or
+`trackWebSockets` is false, Pace doesn't track that kind of request, not even inside `Pace.track`, and until Pace has started
+with it on, Pace leaves `XMLHttpRequest`, `fetch` or `WebSocket` alone.
 
 A few things Pace can't track:
 
@@ -320,7 +347,7 @@ A few things Pace can't track:
 
 Avoid calling `Pace.restart()` for every request, for example from jQuery's `ajaxStart`. It restarts the bar even for
 ignored requests, and parallel requests restart it several times. To show the bar for `POST` requests, add `POST` to
-`trackMethods` as shown above.
+`requestMethods` as shown above.
 
 Dependencies
 ------------

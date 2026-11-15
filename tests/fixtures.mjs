@@ -15,7 +15,7 @@ const root = new URL('..', import.meta.url);
 // `server` is the origin of a real server on 127.0.0.1, one per worker, for what routed
 // responses don't reproduce: responses that arrive in parts, network errors, requests that never
 // end, and WebSockets. (Chrome doesn't let the fake public origin above connect to 127.0.0.1.)
-//   /?options=JS           a page that sets window.paceOptions to JS (default { eventLag: false }),
+//   /?options=JS           a page that sets window.paceOptions to JS (default { trackEventLag: false }),
 //                          loads pace and records its events like open(); with ?socket it opens
 //                          a WebSocket to /socket, recording window.openedAt
 //   /delay?ms=N            answers after N ms. No Content-Length (chunked), so a request's progress
@@ -66,7 +66,7 @@ export const test = base.extend({
       }
       res.writeHead(200, { 'content-type': 'text/html' });
       res.end(`<!doctype html>
-<script>window.paceOptions = ${url.searchParams.get('options') ?? '{ eventLag: false }'};</script>
+<script>window.paceOptions = ${url.searchParams.get('options') ?? '{ trackEventLag: false }'};</script>
 <script src="/pace.js"></script>
 <script>
   window.events = [];
@@ -176,7 +176,7 @@ export const clearEvents = (page) => page.evaluate(() => { window.events = []; w
 // paceOptions that hold the bar at 0% until `hold.progress` is set (a documented
 // extraSources source; pace creates a new one on every restart).
 export const HOLD = `<script>
-  window.paceOptions = { eventLag: false, extraSources: [function () { window.hold = this; this.progress = 0; }] };
+  window.paceOptions = { trackEventLag: false, extraSources: [function () { window.hold = this; this.progress = 0; }] };
 </script>`;
 
-export const NO_EVENT_LAG = '<script>window.paceOptions = { eventLag: false };</script>';
+export const NO_EVENT_LAG = '<script>window.paceOptions = { trackEventLag: false };</script>';

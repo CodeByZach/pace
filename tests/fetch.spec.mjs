@@ -7,22 +7,17 @@ import { test, expect, idle, request, clearEvents, RESTARTED, NO_EVENT_LAG } fro
 const SAVE_FETCH = '<script>window.nativeFetch = fetch;</script>';
 
 test('pace hooks into fetch only once it starts', async ({ page, open }) => {
-  await open({ head: SAVE_FETCH + '<script>window.paceOptions = { startOnPageLoad: false, eventLag: false };</script>' });
+  await open({ head: SAVE_FETCH + '<script>window.paceOptions = { startOnPageLoad: false, trackEventLag: false };</script>' });
   expect(await page.evaluate(() => fetch === nativeFetch)).toBe(true);
   await page.evaluate(() => Pace.start());
   expect(await page.evaluate(() => [fetch === nativeFetch, fetch.length === nativeFetch.length])).toEqual([false, true]);
 });
 
-for (const [name, options] of [
-  ['trackFetch: false', '{ eventLag: false, ajax: { trackFetch: false } }'],
-  ['ajax: false', '{ eventLag: false, ajax: false }'],
-]) {
-  test(`with ${name}, fetch stays native`, async ({ page, open }) => {
-    await open({ head: `${SAVE_FETCH}<script>window.paceOptions = ${options};</script>` });
-    await idle(page);
-    expect(await page.evaluate(() => fetch === nativeFetch)).toBe(true);
-  });
-}
+test('with trackFetch: false, fetch stays native', async ({ page, open }) => {
+  await open({ head: `${SAVE_FETCH}<script>window.paceOptions = { trackEventLag: false, trackFetch: false };</script>` });
+  await idle(page);
+  expect(await page.evaluate(() => fetch === nativeFetch)).toBe(true);
+});
 
 test('a fetch during page load holds the bar until it settles', async ({ page, open }) => {
   await open({
@@ -55,8 +50,8 @@ test('the method comes from init, then from a Request', async ({ page, open }) =
   }
 });
 
-test('ajax.ignoreURLs patterns see the URL of a Request', async ({ page, open }) => {
-  await open({ head: "<script>window.paceOptions = { eventLag: false, ajax: { ignoreURLs: ['ignored'] } };</script>" });
+test('ignoreRequests patterns see the URL of a Request', async ({ page, open }) => {
+  await open({ head: "<script>window.paceOptions = { trackEventLag: false, ignoreRequests: ['ignored'] };</script>" });
   await idle(page);
   await clearEvents(page);
   await page.evaluate(() => fetch(new Request('/delay?ms=900&ignored')).then((response) => response.text()));
@@ -64,7 +59,7 @@ test('ajax.ignoreURLs patterns see the URL of a Request', async ({ page, open })
 });
 
 test('a Request made in another frame is read like one made in this frame', async ({ page, open }) => {
-  await open({ head: "<script>window.paceOptions = { eventLag: false, ajax: { ignoreURLs: ['ignored'] } };</script>", body: '<iframe></iframe>' });
+  await open({ head: "<script>window.paceOptions = { trackEventLag: false, ignoreRequests: ['ignored'] };</script>", body: '<iframe></iframe>' });
   await idle(page);
   await clearEvents(page);
   await page.evaluate(() => {
@@ -82,7 +77,7 @@ test('turning trackFetch off in a later Pace.start() stops tracking fetch', asyn
   await idle(page);
   await page.evaluate(() => {
     Pace.stop();
-    Pace.start({ ajax: { trackFetch: false } });
+    Pace.start({ trackFetch: false });
   });
   await idle(page);
   await clearEvents(page);
@@ -197,7 +192,7 @@ test.describe('with a real server', () => {
   });
 
   test('a tracked Request keeps its body for the server', async ({ page, server }) => {
-    await page.goto(`${server}/?options=${encodeURIComponent("{ eventLag: false, ajax: { trackMethods: ['POST'] } }")}`);
+    await page.goto(`${server}/?options=${encodeURIComponent("{ trackEventLag: false, requestMethods: ['POST'] }")}`);
     await idle(page);
     await clearEvents(page);
     const result = await page.evaluate(async () => {

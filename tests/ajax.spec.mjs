@@ -5,20 +5,20 @@ import { test, expect, idle, request, clearEvents, RESTARTED, NO_EVENT_LAG } fro
 
 // The same rules apply to XMLHttpRequest and fetch().
 for (const api of ['XMLHttpRequest', 'fetch']) {
-  test(`${api}: ajax.ignoreURLs patterns see the full URL`, async ({ page, open }) => {
-    await open({ head: "<script>window.paceOptions = { eventLag: false, ajax: { ignoreURLs: [/^http:\\/\\/pace\\.test\\/delay/] } };</script>" });
+  test(`${api}: ignoreRequests patterns see the full URL`, async ({ page, open }) => {
+    await open({ head: "<script>window.paceOptions = { trackEventLag: false, ignoreRequests: [/^http:\\/\\/pace\\.test\\/delay/] };</script>" });
     await idle(page);
     await clearEvents(page);
     await request(page, { ms: 900, api }); // a relative URL
     expect(await page.evaluate(() => events)).toEqual([]);
   });
 
-  test(`${api}: ajax.ignoreURLs patterns also see the path and query of a request to the page's origin, not another's`, async ({ page, open }) => {
+  test(`${api}: ignoreRequests patterns also see the path and query of a request to the page's origin, not another's`, async ({ page, open }) => {
     await page.route('http://other.test/**', async (route) => {
       await new Promise((resolve) => setTimeout(resolve, 900));
       await route.fulfill({ headers: { 'access-control-allow-origin': '*' }, body: 'ok' });
     });
-    await open({ head: "<script>window.paceOptions = { eventLag: false, ajax: { ignoreURLs: [/^\\/delay\\?ms=900#part$/] } };</script>" });
+    await open({ head: "<script>window.paceOptions = { trackEventLag: false, ignoreRequests: [/^\\/delay\\?ms=900#part$/] };</script>" });
     await idle(page);
     await clearEvents(page);
     await request(page, { ms: 900, api, origin: 'http://pace.test', query: '#part' }); // an absolute URL
@@ -28,8 +28,8 @@ for (const api of ['XMLHttpRequest', 'fetch']) {
     expect(await page.evaluate(() => events)).toEqual(RESTARTED);
   });
 
-  test(`${api}: ajax.ignoreURLs patterns also see the URL as the page wrote it`, async ({ page, open }) => {
-    await open({ head: "<script>window.paceOptions = { eventLag: false, ajax: { ignoreURLs: ['q=a b', 'http://PACE.test'] } };</script>" });
+  test(`${api}: ignoreRequests patterns also see the URL as the page wrote it`, async ({ page, open }) => {
+    await open({ head: "<script>window.paceOptions = { trackEventLag: false, ignoreRequests: ['q=a b', 'http://PACE.test'] };</script>" });
     await idle(page);
     await clearEvents(page);
     // Neither appears in the full URL, which has %20 for the space and a lowercase domain.
@@ -38,8 +38,8 @@ for (const api of ['XMLHttpRequest', 'fetch']) {
     expect(await page.evaluate(() => events)).toEqual([]);
   });
 
-  test(`${api}: ajax.ignoreURLs patterns see the full URL resolved against <base href>`, async ({ page, open }) => {
-    await open({ head: '<base href="/sub/"><script>window.paceOptions = { eventLag: false, ajax: { ignoreURLs: [/^http:\\/\\/pace\\.test\\/sub\\/delay/] } };</script>' });
+  test(`${api}: ignoreRequests patterns see the full URL resolved against <base href>`, async ({ page, open }) => {
+    await open({ head: '<base href="/sub/"><script>window.paceOptions = { trackEventLag: false, ignoreRequests: [/^http:\\/\\/pace\\.test\\/sub\\/delay/] };</script>' });
     await idle(page);
     await clearEvents(page);
     await page.evaluate((api) => (api === 'fetch'
@@ -54,7 +54,7 @@ for (const api of ['XMLHttpRequest', 'fetch']) {
     expect(await page.evaluate(() => events)).toEqual([]);
   });
 
-  test.describe(`${api} with default ajax options`, () => {
+  test.describe(`${api} with default request settings`, () => {
     test.beforeEach(async ({ page, open }) => {
       await open({ head: NO_EVENT_LAG });
       await idle(page);
@@ -91,39 +91,22 @@ for (const api of ['XMLHttpRequest', 'fetch']) {
     });
   });
 
-  test.describe(`${api} with ajax options`, () => {
+  test.describe(`${api} with request settings`, () => {
     test.beforeEach(async ({ page, open }) => {
-      await open({ head: "<script>window.paceOptions = { eventLag: false, ajax: { trackMethods: ['GET', 'POST'], ignoreURLs: ['ignored'] } };</script>" });
+      await open({ head: "<script>window.paceOptions = { trackEventLag: false, requestMethods: ['GET', 'POST'], ignoreRequests: ['ignored'] };</script>" });
       await idle(page);
       await clearEvents(page);
     });
 
-    test('ajax.trackMethods can add POST', async ({ page }) => {
+    test('requestMethods can add POST', async ({ page }) => {
       await request(page, { ms: 900, method: 'POST', api });
       await idle(page);
       expect(await page.evaluate(() => events)).toEqual(RESTARTED);
     });
 
-    test('ajax.ignoreURLs skips matching URLs', async ({ page }) => {
+    test('ignoreRequests skips matching URLs', async ({ page }) => {
       await request(page, { ms: 900, query: '&ignored', api });
       expect(await page.evaluate(() => events)).toEqual([]);
     });
   });
 }
-
-test.describe('with ajax.trackMethods that is not an array', () => {
-  test('a string matches nothing, not substrings', async ({ page, open }) => {
-    await open({ head: "<script>window.paceOptions = { eventLag: false, ajax: { trackMethods: 'GET' } };</script>" });
-    await idle(page);
-    await clearEvents(page);
-    await request(page, { ms: 900 });
-    expect(await page.evaluate(() => events)).toEqual([]);
-  });
-
-  test('a number does not break the page\'s requests', async ({ page, open }) => {
-    await open({ head: '<script>window.paceOptions = { eventLag: false, ajax: { trackMethods: 5 } };</script>' });
-    await idle(page);
-    // Resolves only if the page's xhr.open() didn't throw.
-    await request(page, { ms: 100 });
-  });
-});

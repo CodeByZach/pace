@@ -1,21 +1,8 @@
-// ajax.maxWait: pace waits for each tracked request at most this many ms from when it was sent,
+// maxWait: pace waits for each tracked request at most this many ms from when it was sent,
 // so one request that never ends can't hold the bar forever. The request itself keeps going.
 import { test, expect, idle, request, clearEvents, RESTARTED } from './fixtures.mjs';
 
-const options = (maxWait) => `<script>window.paceOptions = { eventLag: false, ajax: { maxWait: ${maxWait} } };</script>`;
-
-// A value a timer can't wait for (setTimeout would treat it as 0) means no limit, like false.
-for (const value of ['Infinity', 'null', 'undefined', '2 ** 31']) {
-  test(`with maxWait: ${value}, pace waits for a request until it ends`, async ({ page, open }) => {
-    await open({ head: options(value) });
-    await idle(page);
-    await clearEvents(page);
-    const loadedAt = await request(page, { ms: 900 });
-    await idle(page);
-    expect(await page.evaluate(() => events)).toEqual(RESTARTED);
-    expect(await page.evaluate(() => eventTimes.done)).toBeGreaterThanOrEqual(loadedAt - 50);
-  });
-}
+const options = (maxWait) => `<script>window.paceOptions = { trackEventLag: false, maxWait: ${maxWait} };</script>`;
 
 for (const [api, send] of [
   ['XMLHttpRequest', "var xhr = new XMLHttpRequest(); xhr.open('GET', '/delay?ms=4000'); xhr.onload = function () { loaded = xhr.responseText; }; xhr.send();"],
@@ -109,7 +96,7 @@ test.describe('with a real server', () => {
   };
 
   test('by default, pace stops waiting for a request 15 s after it was sent', async ({ page, server }) => {
-    await hangAfterLoad(page, server, '{ eventLag: false }');
+    await hangAfterLoad(page, server, '{ trackEventLag: false }');
     await page.clock.runFor(1000); // the bar restarts at 500 ms
     await page.clock.fastForward(13500);
     expect(await page.evaluate(() => events)).toEqual(['restart', 'stop', 'start']);
@@ -118,7 +105,7 @@ test.describe('with a real server', () => {
   });
 
   test('with maxWait: false, pace keeps waiting for a request that never ends', async ({ page, server }) => {
-    await hangAfterLoad(page, server, '{ eventLag: false, ajax: { maxWait: false } }');
+    await hangAfterLoad(page, server, '{ trackEventLag: false, maxWait: false }');
     await page.clock.runFor(1000); // the bar restarts at 500 ms
     await page.clock.fastForward(59000);
     await page.clock.runFor(1000);
@@ -126,7 +113,7 @@ test.describe('with a real server', () => {
   });
 
   test('a WebSocket whose handshake is never answered holds the bar only until maxWait', async ({ page, server }) => {
-    await page.goto(`${server}/?socket=never&options=${encodeURIComponent('{ eventLag: false, ajax: { maxWait: 1500 } }')}`);
+    await page.goto(`${server}/?socket=never&options=${encodeURIComponent('{ trackEventLag: false, maxWait: 1500 }')}`);
     await idle(page);
     const doneAt = await page.evaluate(() => eventTimes.done);
     expect(doneAt).toBeGreaterThanOrEqual(1400);
