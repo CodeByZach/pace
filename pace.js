@@ -983,7 +983,7 @@
     define(function() {
       return Pace;
     });
-  } else if (typeof exports === 'object') {
+  } else if (typeof module === 'object') {
     module.exports = Pace;
   } else {
     if (options.startOnPageLoad) {
