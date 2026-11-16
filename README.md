@@ -229,6 +229,17 @@ whenever `pushState` or `replaceState` is called by default.
 
 - `Pace.ignore`: Explicitly ignore one or more requests, see Tracking below
 
+And these properties:
+
+- `Pace.running`: Whether a run is in progress, from `Pace.start()` until the bar is hidden or `Pace.stop()`. Read-only:
+assigning to it does nothing, or throws a TypeError in strict-mode code such as modules.
+
+- `Pace.version`: The version of pace.js, such as `'2.0.0'`.
+
+If a page loads pace.js again after it's already there (a second script tag or bundle, or after Pace 1.x), the later
+copy only logs a warning and the first one keeps running. Pace 1.x loaded after this version can't tell, so load only
+one copy.
+
 Events
 ------
 

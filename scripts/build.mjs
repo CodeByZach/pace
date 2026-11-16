@@ -1,5 +1,6 @@
 // Builds every generated file from its source:
-//   package.json version    -> the headers of pace.js and pace-theme-default.css
+//   package.json version    -> the headers of pace.js and pace-theme-default.css,
+//                              and Pace.version in pace.js
 //   pace.js                 -> pace.min.js
 //   pace-theme-default.css  -> pace-theme-default.min.css
 //   templates/*.tmpl.css    -> themes/<color>/*.css
@@ -57,19 +58,24 @@ const compileTheme = (template, color) =>
 const withFinalNewline = (text) => text.trimEnd() + '\n';
 
 // package.json is the only place the version is set. This copies it into the
-// " * pace.js v…" header line of a source file and returns the updated source.
+// " * pace.js v…" header line of a source file (and into other lines that
+// `patterns` match, keeping their first and last groups) and returns the
+// updated source.
 const { version } = JSON.parse(read('package.json'));
-const VERSION_LINE = /^( \* pace\.js v)\S+/m;
+const VERSION_LINE = /^( \* pace\.js v)\S+()/m;
+const VERSION_CONSTANT = /^(  const VERSION = ')[^']*(';)$/m;
 
-const stampVersion = (file) => {
-  const source = read(file);
-  if (!VERSION_LINE.test(source)) throw new Error(`${file}: no " * pace.js v…" header line`);
-  const stamped = source.replace(VERSION_LINE, `$1${version}`);
-  if (stamped !== source) write(file, stamped);
+const stampVersion = (file, patterns = [VERSION_LINE]) => {
+  let stamped = read(file);
+  for (const pattern of patterns) {
+    if (!pattern.test(stamped)) throw new Error(`${file}: no line matches ${pattern}`);
+    stamped = stamped.replace(pattern, `$1${version}$2`);
+  }
+  if (stamped !== read(file)) write(file, stamped);
   return stamped;
 };
 
-write('pace.min.js', minify(stampVersion('pace.js'), 'js'));
+write('pace.min.js', minify(stampVersion('pace.js', [VERSION_LINE, VERSION_CONSTANT]), 'js'));
 write('pace-theme-default.min.css', minify(stampVersion('pace-theme-default.css'), 'css'));
 
 for (const template of fs.readdirSync(path.join(root, 'templates')).filter((f) => f.endsWith('.tmpl.css'))) {
