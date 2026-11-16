@@ -4,34 +4,163 @@
  * Licensed MIT © HubSpot, Inc. and Zachary Miller
  */
 (function () {
-  const defaultOptions = {
-    className: '',
-    catchupTime: 100,
-    initialRate: 0.03,
-    minTime: 250,
-    ghostTime: 100,
-    maxProgressPerFrame: 20,
-    easeFactor: 1.25,
-    startOnPageLoad: true,
-    restartOnPushState: true,
-    restartOnRequestAfter: 500,
-    target: 'body',
-    elements: {
-      checkInterval: 100,
-      selectors: ['body'],
+  // The longest delay a timer can wait: setTimeout treats more, and Infinity, as 0.
+  const MAX_DELAY = 2147483647;
+
+  const isNumber = (value) => typeof value === 'number' && Number.isFinite(value);
+  const isMilliseconds = (value) => isNumber(value) && value >= 0 && value <= MAX_DELAY;
+
+  // querySelector throws on anything that isn't a valid selector.
+  const isSelector = (value) => {
+    if (typeof value !== 'string') {
+      return false;
+    }
+    try {
+      document.createDocumentFragment().querySelector(value);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // RegExp.prototype's source getter throws for anything that isn't a RegExp,
+  // so this also accepts a RegExp made in another frame, which instanceof
+  // wouldn't, and rejects an object that only claims to be one.
+  const regExpSource = Object.getOwnPropertyDescriptor(RegExp.prototype, 'source').get;
+  const isRegExp = (value) => {
+    try {
+      regExpSource.call(value);
+      return value !== RegExp.prototype;
+    } catch {
+      return false;
+    }
+  };
+
+  // Whether `new value()` works, without calling or reading anything from it:
+  // Reflect.construct checks that its target is a constructor before it reads
+  // the arguments, which throw here.
+  const notArguments = {
+    get length() {
+      throw notArguments;
     },
-    eventLag: {
-      minSamples: 10,
-      sampleCount: 3,
-      lagThreshold: 3,
-    },
-    ajax: {
-      trackMethods: ['GET'],
-      trackWebSockets: true,
-      trackFetch: true,
-      ignoreURLs: [],
-      maxWait: 15000,
-    },
+  };
+  const isConstructor = (value) => {
+    try {
+      Reflect.construct(value, notArguments);
+    } catch (error) {
+      return error === notArguments;
+    }
+  };
+
+  const BOOLEAN = { expected: 'true or false', test: (value) => typeof value === 'boolean' };
+  const MILLISECONDS = { expected: `a number of milliseconds from 0 to ${MAX_DELAY}`, test: isMilliseconds };
+  const MILLISECONDS_OR_FALSE = { expected: `false or ${MILLISECONDS.expected}`, test: (value) => value === false || isMilliseconds(value) };
+  const ABOVE_ZERO = { expected: 'a number greater than 0', test: (value) => isNumber(value) && value > 0 };
+  const listOf = (expected, test) => ({ expected: `an array of ${expected}`, test: Array.isArray, item: test });
+
+  // Each setting with its default and the values it accepts.
+  const SETTINGS = new Map([
+    ['startOnPageLoad', [true, BOOLEAN]],
+    ['restartOnNavigation', [true, BOOLEAN]],
+    ['restartOnRequestAfter', [500, MILLISECONDS_OR_FALSE]],
+    ['target', ['body', { expected: 'a valid CSS selector', test: isSelector }]],
+    ['className', ['', { expected: 'a string', test: (value) => typeof value === 'string' }]],
+    ['trackDocument', [true, BOOLEAN]],
+    ['trackEventLag', [true, BOOLEAN]],
+    ['waitFor', [['body'], listOf('valid CSS selectors', isSelector)]],
+    ['trackXHR', [true, BOOLEAN]],
+    ['trackFetch', [true, BOOLEAN]],
+    ['trackWebSockets', [true, BOOLEAN]],
+    ['requestMethods', [['GET'], listOf('strings', (item) => typeof item === 'string')]],
+    ['ignoreRequests', [[], listOf('non-empty strings and RegExps', (item) => (typeof item === 'string' && item !== '') || isRegExp(item))]],
+    ['maxWait', [15000, MILLISECONDS_OR_FALSE]],
+    ['minVisible', [250, MILLISECONDS]],
+    ['hideDelay', [100, MILLISECONDS]],
+    ['catchupTime', [100, ABOVE_ZERO]],
+    ['initialRate', [0.03, { expected: 'a number of 0 or more', test: (value) => isNumber(value) && value >= 0 }]],
+    ['maxProgressPerFrame', [20, ABOVE_ZERO]],
+    ['easeFactor', [1.25, ABOVE_ZERO]],
+    ['extraSources', [[], listOf('constructors', isConstructor)]],
+  ]);
+
+  // Version 1 settings, and what replaced them.
+  const RENAMED = new Map([
+    ['ajax', 'trackXHR, trackFetch, trackWebSockets, requestMethods, ignoreRequests and maxWait'],
+    ['document', 'trackDocument'],
+    ['elements', 'waitFor'],
+    ['eventLag', 'trackEventLag'],
+    ['ghostTime', 'hideDelay'],
+    ['minTime', 'minVisible'],
+    ['restartOnPushState', 'restartOnNavigation'],
+  ]);
+
+  // A copy of a setting's value that shares nothing that can change: a list
+  // becomes a plain array, read once, and its RegExps (whose lastIndex changes,
+  // and which the page could freeze) are copied.
+  const copyValue = (value) => {
+    if (!Array.isArray(value)) {
+      return value;
+    }
+    const copy = [];
+    for (let i = 0, n = value.length; i < n; i++) {
+      const item = value[i];
+      copy.push(isRegExp(item) ? new RegExp(item) : item);
+    }
+    return copy;
+  };
+
+  const copyOptions = (settings) => {
+    const copy = {};
+    for (const name of SETTINGS.keys()) {
+      copy[name] = copyValue(settings[name]);
+    }
+    return copy;
+  };
+
+  const options = copyOptions(Object.fromEntries([...SETTINGS].map(([name, [value]]) => [name, value])));
+
+  // A value as a warning shows it: its type, and the value itself when that is short.
+  const describe = (value) => {
+    if (value == null) {
+      return String(value);
+    }
+    if (Array.isArray(value)) {
+      return 'array';
+    }
+    switch (typeof value) {
+      case 'string': {
+        const json = JSON.stringify(value);
+        return `string ${json.length > 50 ? json.slice(0, 48) + '…"' : json}`;
+      }
+      case 'object':
+        return Object.prototype.toString.call(value).slice(8, -1);
+      case 'function':
+        return 'function';
+      default:
+        return `${typeof value} ${String(value)}`;
+    }
+  };
+
+  const warned = new Set();
+
+  // Logs each distinct warning once.
+  const warn = (message) => {
+    message = `Pace: ${message}`;
+    if (!warned.has(message)) {
+      warned.add(message);
+      console.warn(message);
+    }
+  };
+
+  // What is wrong with `value` for a setting that accepts `check`, or undefined.
+  const problemWith = (check, value) => {
+    if (!check.test(value)) {
+      return describe(value);
+    }
+    const index = check.item ? value.findIndex((item) => !check.item(item)) : -1;
+    if (index !== -1) {
+      return `array containing ${describe(value[index])}`;
+    }
   };
 
   const now = () => performance.now();
@@ -46,25 +175,6 @@
     return obj[key];
   };
 
-  const extend = (out, ...sources) => {
-    for (const source of sources) {
-      if (!source) {
-        continue;
-      }
-      for (const key in source) {
-        if (!Object.prototype.hasOwnProperty.call(source, key)) continue;
-        if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
-        const val = source[key];
-        if (out[key] != null && typeof out[key] === 'object' && val != null && typeof val === 'object') {
-          extend(out[key], val);
-        } else {
-          out[key] = val;
-        }
-      }
-    }
-    return out;
-  };
-
   const avgAmplitude = (arr) => {
     let sum = 0;
     let count = 0;
@@ -73,22 +183,6 @@
       count++;
     }
     return sum / count;
-  };
-
-  const getFromDOM = (key = 'options', json = true) => {
-    const el = document.querySelector(`script[data-pace-${key}]`);
-    if (!el) {
-      return;
-    }
-    const data = el.getAttribute(`data-pace-${key}`);
-    if (!json) {
-      return data;
-    }
-    try {
-      return JSON.parse(data);
-    } catch (e) {
-      console.error('Error parsing inline pace options', e);
-    }
   };
 
   const Pace = window.Pace || {};
@@ -166,21 +260,74 @@
     },
   });
 
-  const options = (Pace.options = extend({}, defaultOptions, window.paceOptions, getFromDOM()));
-
-  // `true` turns a collector on with its default settings.
-  const normalizeOptions = () => {
-    for (const key of ['ajax', 'document', 'eventLag', 'elements']) {
-      if (options[key] === true) {
-        options[key] = defaultOptions[key];
+  // Applies the settings in `given`, from `channel` (named in warnings). A wrong
+  // value or an unknown name is ignored with a warning; undefined means not given.
+  // Each value is copied, then the copy is checked and kept, so changing the
+  // page's own list later changes nothing. An error from reading a setting (a
+  // getter that throws, say) is reported, and the other settings still apply.
+  const applyOptions = (given, channel) => {
+    if (given === undefined) {
+      return;
+    }
+    try {
+      if (Object.prototype.toString.call(given) !== '[object Object]') {
+        warn(`ignored the options from ${channel}: expected an object, got ${describe(given)}.`);
+        return;
       }
+      for (const name of Object.keys(given)) {
+        try {
+          const value = copyValue(given[name]);
+          if (value === undefined) {
+            continue;
+          }
+          if (SETTINGS.has(name)) {
+            const [, check] = SETTINGS.get(name);
+            const problem = problemWith(check, value);
+            if (problem) {
+              warn(`ignored the ${name} option from ${channel}: expected ${check.expected}, got ${problem}.`);
+            } else {
+              options[name] = value;
+            }
+          } else if (RENAMED.has(name)) {
+            warn(`ignored the ${name} option from ${channel}: use ${RENAMED.get(name)} instead.`);
+          } else {
+            const match = [...SETTINGS.keys()].find((known) => known.toLowerCase() === name.toLowerCase());
+            warn(`ignored the unknown option ${name} from ${channel}.${match ? ` Did you mean ${match}?` : ''}`);
+          }
+        } catch (error) {
+          reportException(error);
+        }
+      }
+    } catch (error) {
+      reportException(error);
     }
   };
 
-  normalizeOptions();
+  // Pace's own <script>, read with the DOM's getter: markup such as
+  // <img name="currentScript"> replaces document.currentScript.
+  const script = Object.getOwnPropertyDescriptor(Document.prototype, 'currentScript').get.call(document);
+
+  const readAttribute = () => {
+    const json = script?.getAttribute('data-pace-options');
+    if (json == null) {
+      return;
+    }
+    try {
+      return JSON.parse(json);
+    } catch {
+      warn(`ignored the options from data-pace-options: expected valid JSON, got ${describe(json)}.`);
+    }
+  };
+
+  applyOptions(window.paceOptions, 'window.paceOptions');
+  applyOptions(readAttribute(), 'data-pace-options');
+
+  Pace.getOptions = () => copyOptions(options);
 
   class Bar {
-    constructor() {
+    // `settings`: the run's settings.
+    constructor(settings) {
+      this.settings = settings;
       this.progress = 0;
     }
 
@@ -191,7 +338,7 @@
         return null;
       }
       if (this.el == null) {
-        const targetElement = document.querySelector(options.target);
+        const targetElement = document.querySelector(this.settings.target);
         if (!targetElement) {
           return null;
         }
@@ -200,7 +347,7 @@
         document.body.classList.remove('pace-done');
         document.body.classList.add('pace-running');
         const progress = document.createElement('div');
-        progress.className = 'pace-progress' + (options.className !== '' ? ' ' + options.className : '');
+        progress.className = 'pace-progress' + (this.settings.className !== '' ? ' ' + this.settings.className : '');
         const inner = document.createElement('div');
         inner.className = 'pace-progress-inner';
         progress.appendChild(inner);
@@ -232,7 +379,7 @@
     }
 
     render() {
-      if (document.querySelector(options.target) == null) {
+      if (document.querySelector(this.settings.target) == null) {
         return;
       }
       const el = this.getElement();
@@ -300,14 +447,16 @@
     return ret;
   };
 
+  // The setting that turns tracking each kind of request on or off.
+  const TRACK_SETTING = { xhr: 'trackXHR', fetch: 'trackFetch', socket: 'trackWebSockets' };
+
   // Whether to track a request of `kind` ('xhr', 'fetch' or 'socket'): true,
-  // false, or 'force' (inside Pace.track). With `ajax: false`, nothing is
-  // tracked, not even inside Pace.track.
+  // false, or 'force' (inside Pace.track). With its track setting off, a kind
+  // isn't tracked, not even inside Pace.track.
   const shouldTrack = (kind, method) => {
-    if (!options.ajax) {
+    if (!options[TRACK_SETTING[kind]]) {
       return false;
     }
-    method ??= 'GET';
     if (ignoreStack[0] === 'track') {
       return 'force';
     }
@@ -315,17 +464,13 @@
       return false;
     }
     if (kind === 'socket') {
-      return Boolean(options.ajax.trackWebSockets);
+      return true;
     }
-    if (kind === 'fetch' && !options.ajax.trackFetch) {
-      return false;
-    }
-    // Array.prototype.includes, so a string or number from a misconfiguration
-    // matches nothing instead of matching substrings or throwing.
-    return Array.prototype.includes.call(options.ajax.trackMethods, String(method).toUpperCase());
+    method = String(method ?? 'GET').toUpperCase();
+    return options.requestMethods.some((tracked) => tracked.toUpperCase() === method);
   };
 
-  // What ajax.ignoreURLs patterns are matched against: a request's URL as the page
+  // What ignoreRequests patterns are matched against: a request's URL as the page
   // wrote it, its full URL, and for a request to the page's own origin the part
   // after the origin (/api/items?page=2), so a pattern matches however the URL was
   // written. `resolved` is the full URL when the browser already resolved it.
@@ -343,21 +488,19 @@
     return urls;
   };
 
+  // `pattern`: a string or a RegExp.
   const matches = (pattern, url) => {
     if (typeof pattern === 'string') {
       return url.includes(pattern);
     }
-    if (pattern instanceof RegExp) {
-      // A pattern with the g or y flag keeps state between test() calls.
-      pattern.lastIndex = 0;
-      return pattern.test(url);
-    }
-    return false;
+    // A pattern with the g or y flag keeps state between test() calls.
+    pattern.lastIndex = 0;
+    return pattern.test(url);
   };
 
   // `urls` from urlsToMatch().
   const shouldIgnoreURL = (urls) => {
-    const patterns = options.ajax?.ignoreURLs ?? [];
+    const patterns = options.ignoreRequests;
     for (let i = 0, n = patterns.length; i < n; i++) {
       if (urls.some((candidate) => matches(patterns[i], candidate))) {
         return true;
@@ -390,7 +533,7 @@
   };
 
   // Ends the request, either because it ended or because pace stopped waiting
-  // for it (ajax.maxWait).
+  // for it (maxWait).
   const endRequest = (request) => {
     const event = openRequests.get(request);
     if (!event) {
@@ -404,17 +547,14 @@
     }
   };
 
-  const beginRequest = (intercept, event) => {
+  const beginRequest = (event) => {
     endRequest(event.request);
     openRequests.set(event.request, event);
     endCallbacks.set(event, []);
-    // Pace waits for a request at most ajax.maxWait ms from when it was sent, so
-    // one that never ends can't hold the bar forever. The request keeps going.
-    // false, or a value a timer can't wait for (setTimeout would treat Infinity,
-    // null or more than 2^31 - 1 ms as 0), means no limit.
-    const maxWait = options.ajax?.maxWait;
-    if (typeof maxWait === 'number' && maxWait >= 0 && maxWait <= 2147483647) {
-      const timer = setTimeout(() => endRequest(event.request), maxWait);
+    // Pace waits for a request at most maxWait ms from when it was sent, so one
+    // that never ends can't hold the bar forever. The request keeps going.
+    if (options.maxWait !== false) {
+      const timer = setTimeout(() => endRequest(event.request), options.maxWait);
       endCallbacks.get(event).push(() => clearTimeout(timer));
     }
     intercept.trigger('request', event);
@@ -423,59 +563,67 @@
   // What open() decided about each XMLHttpRequest, used when it is sent.
   const opened = new WeakMap();
 
-  // Wraps XMLHttpRequest.prototype.open and send, and replaces WebSocket with a
-  // subclass, so the page keeps the native classes: instanceof, constants,
-  // subclasses and other libraries' prototype patches keep working. Replaces
-  // fetch with a function that behaves the same. Outside the class on purpose:
-  // class bodies are strict mode, where assigning to a read-only property (a
-  // page may lock these) throws.
-  const installIntercepts = (intercept) => {
-    const proto = window.XMLHttpRequest.prototype;
-    const open = proto.open;
-    const send = proto.send;
-    // XMLHttpRequests that already have pace's readystatechange listener.
-    const listening = new WeakSet();
-    proto.open = function (...args) {
-      const [method, url] = args;
-      const decision = shouldTrack('xhr', method);
-      const result = open.apply(this, args);
-      // Opening a request again cancels the one it was making (only once open()
-      // has succeeded: when it throws, the earlier request keeps going).
-      endRequest(this);
-      opened.delete(this);
-      if (decision) {
-        // The URL as open() used it, before the page can change a URL object.
-        opened.set(this, { kind: 'xhr', urls: urlsToMatch(url), force: decision === 'force' });
-      }
-      return result;
-    };
-    proto.send = function (...args) {
-      const info = opened.get(this);
-      opened.delete(this);
-      if (!info || shouldIgnoreURL(info.urls)) {
-        return send.apply(this, args);
-      }
-      // One listener per XMLHttpRequest, added before send() because a
-      // synchronous request ends inside it. Every way a request ends passes
-      // readyState 4 (done) or, when the page aborts it from that handler, 0;
-      // a request in flight is always at 1 to 3.
-      if (!listening.has(this)) {
-        listening.add(this);
-        this.addEventListener('readystatechange', () => {
-          if (this.readyState === 4 || this.readyState === 0) {
-            endRequest(this);
-          }
-        });
-      }
-      beginRequest(intercept, { ...info, request: this });
-      try {
-        return send.apply(this, args);
-      } catch (error) {
+  // The kinds of request pace has hooked into.
+  const hooked = { xhr: false, fetch: false, socket: false };
+
+  // Hooks into each kind of request the first time its track setting is on, and
+  // leaves the others alone. Wraps XMLHttpRequest.prototype.open and send, and
+  // replaces WebSocket with a subclass, so the page keeps the native classes:
+  // instanceof, constants, subclasses and other libraries' prototype patches keep
+  // working. Replaces fetch with a function that behaves the same. Not in a class
+  // on purpose: class bodies are strict mode, where assigning to a read-only
+  // property (a page may lock these) throws.
+  const installHooks = () => {
+    if (options.trackXHR && !hooked.xhr) {
+      hooked.xhr = true;
+      const proto = window.XMLHttpRequest.prototype;
+      const open = proto.open;
+      const send = proto.send;
+      // XMLHttpRequests that already have pace's readystatechange listener.
+      const listening = new WeakSet();
+      proto.open = function (...args) {
+        const [method, url] = args;
+        const decision = shouldTrack('xhr', method);
+        const result = open.apply(this, args);
+        // Opening a request again cancels the one it was making (only once open()
+        // has succeeded: when it throws, the earlier request keeps going).
         endRequest(this);
-        throw error;
-      }
-    };
-    if (options.ajax.trackWebSockets) {
+        opened.delete(this);
+        if (decision) {
+          // The URL as open() used it, before the page can change a URL object.
+          opened.set(this, { kind: 'xhr', urls: urlsToMatch(url), force: decision === 'force' });
+        }
+        return result;
+      };
+      proto.send = function (...args) {
+        const info = opened.get(this);
+        opened.delete(this);
+        if (!info || shouldIgnoreURL(info.urls)) {
+          return send.apply(this, args);
+        }
+        // One listener per XMLHttpRequest, added before send() because a
+        // synchronous request ends inside it. Every way a request ends passes
+        // readyState 4 (done) or, when the page aborts it from that handler, 0;
+        // a request in flight is always at 1 to 3.
+        if (!listening.has(this)) {
+          listening.add(this);
+          this.addEventListener('readystatechange', () => {
+            if (this.readyState === 4 || this.readyState === 0) {
+              endRequest(this);
+            }
+          });
+        }
+        beginRequest({ ...info, request: this });
+        try {
+          return send.apply(this, args);
+        } catch (error) {
+          endRequest(this);
+          throw error;
+        }
+      };
+    }
+    if (options.trackWebSockets && !hooked.socket) {
+      hooked.socket = true;
       const NativeWebSocket = window.WebSocket;
       window.WebSocket = class WebSocket extends NativeWebSocket {
         constructor(url, protocols) {
@@ -489,12 +637,13 @@
             for (const name of ['open', 'error', 'close']) {
               this.addEventListener(name, () => endRequest(this), { once: true });
             }
-            beginRequest(intercept, { kind: 'socket', force: decision === 'force', request: this });
+            beginRequest({ kind: 'socket', force: decision === 'force', request: this });
           }
         }
       };
     }
-    if (options.ajax.trackFetch && typeof window.fetch === 'function') {
+    if (options.trackFetch && !hooked.fetch && typeof window.fetch === 'function') {
+      hooked.fetch = true;
       const originalFetch = window.fetch;
       // Calls the original with the same `this` and arguments, never reads or
       // copies a Request's body, and returns a promise that settles like the
@@ -519,7 +668,7 @@
           return promise;
         }
         event.request = promise;
-        beginRequest(intercept, event);
+        beginRequest(event);
         return promise.then(
           (response) => {
             endRequest(promise);
@@ -540,10 +689,6 @@
     if (isActive() || (options.restartOnRequestAfter === false && !event.force)) {
       return;
     }
-    let after = options.restartOnRequestAfter || 0;
-    if (typeof after === 'boolean') {
-      after = 0;
-    }
     awaitingCheck.add(event);
     setTimeout(() => {
       awaitingCheck.delete(event);
@@ -554,24 +699,12 @@
         Pace.restart();
       }
       ajaxMonitor()?.watch(event);
-    }, after);
+    }, options.restartOnRequestAfter || 0);
   };
 
-  class RequestIntercept extends Events {
-    constructor() {
-      super();
-      installIntercepts(this);
-      this.on('request', onRequest);
-    }
-  }
-
-  let _intercept = null;
-
-  // Hooks into XMLHttpRequest, WebSocket and fetch the first time a run tracks ajax.
-  const getIntercept = () => {
-    _intercept ??= new RequestIntercept();
-    return _intercept;
-  };
+  // Fires 'request' for each tracked request as it starts.
+  const intercept = new Events();
+  intercept.on('request', onRequest);
 
   class AjaxMonitor {
     constructor() {
@@ -579,7 +712,7 @@
       // The trackers of the watched requests that are still loading.
       this.elements = [];
       this.onRequest = (event) => this.watch(event);
-      getIntercept().on('request', this.onRequest);
+      intercept.on('request', this.onRequest);
       for (const event of awaitingCheck) {
         this.watch(event);
       }
@@ -605,7 +738,7 @@
     }
 
     destroy() {
-      getIntercept().off('request', this.onRequest);
+      intercept.off('request', this.onRequest);
     }
   }
 
@@ -640,16 +773,14 @@
     }
   }
 
+  // Waits for an element to match each of `selectors` (waitFor).
   class ElementMonitor {
-    constructor(settings) {
-      settings ??= {};
+    constructor(selectors) {
       this.complete = this.complete.bind(this);
       this.elements = [];
-      settings.selectors ??= [];
       this.trackers = [];
-      const selectors = settings.selectors;
       for (let i = 0, n = selectors.length; i < n; i++) {
-        const tracker = new ElementTracker(selectors[i], settings.checkInterval, this.complete);
+        const tracker = new ElementTracker(selectors[i], this.complete);
         this.trackers.push(tracker);
         this.elements.push(tracker);
       }
@@ -666,10 +797,11 @@
     }
   }
 
+  // Checks every 100 ms: no event tells when a selector starts to match, and a
+  // MutationObserver misses matches that come from state, such as :checked.
   class ElementTracker {
-    constructor(selector, checkInterval, completeCallback) {
+    constructor(selector, completeCallback) {
       this.selector = selector;
-      this.checkInterval = checkInterval;
       this.completeCallback = completeCallback;
       this.progress = 0;
       this.check();
@@ -679,7 +811,7 @@
       if (document.querySelector(this.selector)) {
         this.done();
       } else {
-        this.timer = setTimeout(() => this.check(), this.checkInterval);
+        this.timer = setTimeout(() => this.check(), 100);
       }
     }
 
@@ -718,8 +850,10 @@
     complete: 100,
   };
 
+  // Done once the last 3 samples, 50 ms apart, average under 3 ms of lag, and
+  // after at least 10 samples.
   class EventLagMonitor {
-    constructor(settings) {
+    constructor() {
       this.progress = 0;
       let avg = 0;
       const samples = [];
@@ -729,11 +863,11 @@
         const diff = now() - last - 50;
         last = now();
         samples.push(diff);
-        if (samples.length > settings.sampleCount) {
+        if (samples.length > 3) {
           samples.shift();
         }
         avg = avgAmplitude(samples);
-        if (++points >= settings.minSamples && avg < settings.lagThreshold) {
+        if (++points >= 10 && avg < 3) {
           this.progress = 100;
           clearInterval(interval);
         } else {
@@ -748,10 +882,12 @@
   }
 
   class Scaler {
-    constructor(source) {
+    // `settings`: the run's settings.
+    constructor(source, settings) {
       this.source = source;
+      this.settings = settings;
       this.last = this.sinceLastUpdate = 0;
-      this.rate = options.initialRate;
+      this.rate = settings.initialRate;
       this.catchup = 0;
       this.progress = this.lastProgress = 0;
       if (this.source != null) {
@@ -770,16 +906,16 @@
         if (this.sinceLastUpdate) {
           this.rate = (val - this.last) / this.sinceLastUpdate;
         }
-        this.catchup = (val - this.progress) / options.catchupTime;
+        this.catchup = (val - this.progress) / this.settings.catchupTime;
         this.sinceLastUpdate = 0;
         this.last = val;
       }
       if (val > this.progress) {
         this.progress += this.catchup * frameTime;
       }
-      const scaling = 1 - Math.pow(this.progress / 100, options.easeFactor);
+      const scaling = 1 - Math.pow(this.progress / 100, this.settings.easeFactor);
       this.progress += scaling * this.rate * frameTime;
-      this.progress = Math.min(this.lastProgress + options.maxProgressPerFrame, this.progress);
+      this.progress = Math.min(this.lastProgress + this.settings.maxProgressPerFrame, this.progress);
       this.progress = Math.max(0, this.progress);
       this.progress = Math.min(100, this.progress);
       this.lastProgress = this.progress;
@@ -792,7 +928,7 @@
   let run = null;
 
   const ajaxMonitor = () => run?.collectors.find((collector) => collector instanceof AjaxMonitor);
-  let bar = (Pace.bar = new Bar());
+  let bar = (Pace.bar = new Bar(copyOptions(options)));
 
   Pace.sources = [];
   Pace.running = false;
@@ -801,7 +937,7 @@
   const isActive = () => run != null && (run.state === 'waiting' || run.state === 'running');
 
   const handlePushState = () => {
-    if (options.restartOnPushState) {
+    if (options.restartOnNavigation) {
       Pace.restart();
     }
   };
@@ -826,13 +962,6 @@
       reportException(error);
     }
     return _replaceState.apply(window.history, args);
-  };
-
-  const SOURCE_KEYS = {
-    ajax: AjaxMonitor,
-    elements: ElementMonitor,
-    document: DocumentMonitor,
-    eventLag: EventLagMonitor,
   };
 
   // Stops the collectors that pace created (not extraSources) from watching.
@@ -873,7 +1002,7 @@
       Pace.running = false;
       bar.finish();
       Pace.trigger('hide');
-    }, Math.max(options.ghostTime, options.minTime - shownFor, 0));
+    }, Math.max(current.settings.hideDelay, current.settings.minVisible - shownFor, 0));
   };
 
   // About 30 frames a second, on requestAnimationFrame.
@@ -902,7 +1031,7 @@
           // leave the list.
           let scaler = current.scalers.get(element);
           if (!scaler) {
-            scaler = new Scaler(element);
+            scaler = new Scaler(element, current.settings);
             current.scalers.set(element, scaler);
           }
           if (scaler.done) {
@@ -926,27 +1055,43 @@
     current.frame = requestAnimationFrame(frame);
   };
 
+  // Whether pace has started a run, after which it hooks into requests as soon
+  // as their track settings are turned on.
+  let started = false;
+
   const beginRun = () => {
+    started = true;
+    installHooks();
+    // A run keeps the settings it started with.
+    const settings = copyOptions(options);
     const current = {
       state: 'waiting',
+      settings,
       collectors: [],
       sources: [],
       scalers: new WeakMap(),
-      uniScaler: new Scaler(),
+      uniScaler: new Scaler(null, settings),
     };
-    // Built before the run counts as started: if a collector or an extra
-    // source throws (an invalid selector, say), pace stays idle.
+    const add = (collector) => {
+      current.collectors.push(collector);
+      current.sources.push(collector);
+    };
+    // Built before the run counts as started: if an extra source throws, pace
+    // stays idle.
     try {
-      for (const type of ['ajax', 'elements', 'document', 'eventLag']) {
-        if (options[type] !== false) {
-          const collector = new SOURCE_KEYS[type](options[type]);
-          current.collectors.push(collector);
-          current.sources.push(collector);
-        }
+      add(new AjaxMonitor());
+      if (settings.waitFor.length) {
+        add(new ElementMonitor(settings.waitFor));
       }
-      const extraSources = options.extraSources ?? [];
+      if (settings.trackDocument) {
+        add(new DocumentMonitor());
+      }
+      if (settings.trackEventLag) {
+        add(new EventLagMonitor());
+      }
+      const extraSources = settings.extraSources;
       for (let i = 0, n = extraSources.length; i < n; i++) {
-        current.sources.push(new extraSources[i](options));
+        current.sources.push(new extraSources[i](copyOptions(settings)));
       }
     } catch (error) {
       stopCollectors(current);
@@ -954,7 +1099,7 @@
     }
     run = current;
     Pace.running = true;
-    Pace.bar = bar = new Bar();
+    Pace.bar = bar = new Bar(settings);
     Pace.sources = current.sources;
     const show = () => {
       if (run !== current) {
@@ -976,9 +1121,20 @@
     show();
   };
 
-  Pace.start = (startOptions) => {
-    extend(options, startOptions);
-    normalizeOptions();
+  // Request settings apply to the next request; the others from the next run.
+  const configure = (given, channel) => {
+    applyOptions(given, channel);
+    if (started) {
+      installHooks();
+    }
+  };
+
+  Pace.configure = (given) => {
+    configure(given, 'Pace.configure()');
+  };
+
+  Pace.start = (given) => {
+    configure(given, 'Pace.start()');
     if (isActive()) {
       return;
     }

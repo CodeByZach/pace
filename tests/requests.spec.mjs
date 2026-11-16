@@ -64,8 +64,8 @@ test('WebSocket keeps its prototype and constants', async ({ page, open }) => {
   expect(result).toEqual({ instance: true, open: 1, url: 'ws://127.0.0.1:9/', subclass: 'hi' });
 });
 
-test('with ajax: false, pace leaves XMLHttpRequest and WebSocket alone, and Pace.track does not throw', async ({ page, open }) => {
-  await open({ head: SAVE_NATIVES + '<script>window.paceOptions = { ajax: false, eventLag: false };</script>' });
+test('with trackXHR and trackWebSockets off, pace leaves XMLHttpRequest and WebSocket alone, and Pace.track does not throw', async ({ page, open }) => {
+  await open({ head: SAVE_NATIVES + '<script>window.paceOptions = { trackXHR: false, trackWebSockets: false, trackEventLag: false };</script>' });
   await idle(page);
   const result = await page.evaluate(() => new Promise((resolve) => {
     const untouched = XMLHttpRequest === NativeXHR && XMLHttpRequest.prototype.open === nativeOpen && WebSocket === NativeWebSocket;
@@ -78,7 +78,7 @@ test('with ajax: false, pace leaves XMLHttpRequest and WebSocket alone, and Pace
 });
 
 test('pace hooks into XMLHttpRequest only once it starts', async ({ page, open }) => {
-  await open({ head: SAVE_NATIVES + '<script>window.paceOptions = { startOnPageLoad: false, eventLag: false };</script>' });
+  await open({ head: SAVE_NATIVES + '<script>window.paceOptions = { startOnPageLoad: false, trackEventLag: false };</script>' });
   expect(await page.evaluate(() => XMLHttpRequest.prototype.open === nativeOpen)).toBe(true);
   await page.evaluate(() => Pace.start());
   expect(await page.evaluate(() => XMLHttpRequest.prototype.open === nativeOpen)).toBe(false);
@@ -105,8 +105,8 @@ test('a request opened but never sent on an idle page does not restart the bar',
   expect(await page.evaluate(() => events)).toEqual([]);
 });
 
-test('a URL object works with ajax.ignoreURLs', async ({ page, open }) => {
-  await open({ head: "<script>window.paceOptions = { eventLag: false, ajax: { ignoreURLs: ['ignored'] } };</script>" });
+test('a URL object works with ignoreRequests', async ({ page, open }) => {
+  await open({ head: "<script>window.paceOptions = { trackEventLag: false, ignoreRequests: ['ignored'] };</script>" });
   await idle(page);
   await clearEvents(page);
   await page.evaluate(() => new Promise((resolve, reject) => {
@@ -120,7 +120,7 @@ test('a URL object works with ajax.ignoreURLs', async ({ page, open }) => {
 });
 
 test('a URL object changed after open() is matched as open() used it', async ({ page, open }) => {
-  await open({ head: "<script>window.paceOptions = { eventLag: false, ajax: { ignoreURLs: ['ignored'] } };</script>" });
+  await open({ head: "<script>window.paceOptions = { trackEventLag: false, ignoreRequests: ['ignored'] };</script>" });
   await idle(page);
   await clearEvents(page);
   await page.evaluate(() => new Promise((resolve, reject) => {
@@ -135,8 +135,8 @@ test('a URL object changed after open() is matched as open() used it', async ({ 
   expect(await page.evaluate(() => events)).toEqual([]);
 });
 
-test('an ajax.ignoreURLs pattern with the g flag ignores every matching request', async ({ page, open }) => {
-  await open({ head: '<script>window.paceOptions = { eventLag: false, ajax: { ignoreURLs: [/delay/g] } };</script>' });
+test('an ignoreRequests pattern with the g flag ignores every matching request', async ({ page, open }) => {
+  await open({ head: '<script>window.paceOptions = { trackEventLag: false, ignoreRequests: [/delay/g] };</script>' });
   await idle(page);
   await clearEvents(page);
   // Two requests, so a pattern that kept its lastIndex from the first would miss the second.
@@ -144,8 +144,8 @@ test('an ajax.ignoreURLs pattern with the g flag ignores every matching request'
   expect(await page.evaluate(() => events)).toEqual([]);
 });
 
-test('an ajax.ignoreURLs entry that is neither a string nor a RegExp is skipped', async ({ page, open }) => {
-  await open({ head: '<script>window.paceOptions = { eventLag: false, ajax: { ignoreURLs: [null, {}] } };</script>' });
+test('ignoreRequests with an entry that is neither a string nor a RegExp is ignored, and requests still work', async ({ page, open }) => {
+  await open({ head: '<script>window.paceOptions = { trackEventLag: false, ignoreRequests: [null, {}] };</script>' });
   await idle(page);
   await request(page, { ms: 10 }); // rejects if send() throws
 });
@@ -237,7 +237,7 @@ test('an open() that throws on a loading request does not stop tracking it', asy
 });
 
 test('a background request that no run was tracking does not hold a navigation', async ({ page, open }) => {
-  await open({ head: '<script>window.paceOptions = { eventLag: false, restartOnRequestAfter: false };</script>' });
+  await open({ head: '<script>window.paceOptions = { trackEventLag: false, restartOnRequestAfter: false };</script>' });
   await idle(page);
   await clearEvents(page);
   const loaded = request(page, { ms: 3000 });
@@ -313,7 +313,7 @@ test('a navigation keeps tracking the requests of the run it replaces', async ({
 });
 
 test('with trackWebSockets: false, WebSocket stays native', async ({ page, open }) => {
-  await open({ head: SAVE_NATIVES + '<script>window.paceOptions = { eventLag: false, ajax: { trackWebSockets: false } };</script>' });
+  await open({ head: SAVE_NATIVES + '<script>window.paceOptions = { trackEventLag: false, trackWebSockets: false };</script>' });
   await idle(page);
   expect(await page.evaluate(() => WebSocket === NativeWebSocket)).toBe(true);
 });
@@ -328,8 +328,8 @@ test.describe('with a real server', () => {
     expect(doneAt).toBeGreaterThanOrEqual(openedAt);
   });
 
-  test('ajax.ignoreURLs patterns see the full URL of a WebSocket', async ({ page, server }) => {
-    await page.goto(`${server}/?options=${encodeURIComponent('{ eventLag: false, ajax: { ignoreURLs: [/^ws:\\/\\/127\\.0\\.0\\.1:\\d+\\/socket/] } }')}`);
+  test('ignoreRequests patterns see the full URL of a WebSocket', async ({ page, server }) => {
+    await page.goto(`${server}/?options=${encodeURIComponent('{ trackEventLag: false, ignoreRequests: [/^ws:\\/\\/127\\.0\\.0\\.1:\\d+\\/socket/] }')}`);
     await idle(page);
     await clearEvents(page);
     await page.evaluate(() => { window.socket = new WebSocket('/socket?never'); }); // a relative URL

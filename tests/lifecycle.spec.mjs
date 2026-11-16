@@ -4,7 +4,7 @@ import { test, expect, idle, request, clearEvents, RESTARTED, HOLD, NO_EVENT_LAG
 
 // Like HOLD, plus other options.
 const hold = (extra) => `<script>
-  window.paceOptions = Object.assign({ eventLag: false, extraSources: [function () { window.hold = this; this.progress = 0; }] }, ${extra});
+  window.paceOptions = Object.assign({ trackEventLag: false, extraSources: [function () { window.hold = this; this.progress = 0; }] }, ${extra});
 </script>`;
 
 const bodyClasses = (page) => page.evaluate(() => [...document.body.classList].filter((name) => name.startsWith('pace-')));
@@ -48,7 +48,7 @@ test('Pace.start() while running does nothing', async ({ page, open }) => {
 });
 
 test('pushState while the bar is finishing starts a new run that finishes once', async ({ page, open }) => {
-  await open({ head: hold('{ ghostTime: 1000 }') });
+  await open({ head: hold('{ hideDelay: 1000 }') });
   await page.evaluate(() => new Promise((resolve) => {
     Pace.once('done', () => setTimeout(resolve, 100));
     hold.progress = 100;
@@ -65,7 +65,7 @@ test('pushState while the bar is finishing starts a new run that finishes once',
 });
 
 test('Pace.stop() from a done handler: no hide and no bar', async ({ page, open }) => {
-  await open({ head: hold('{ ghostTime: 300 }') });
+  await open({ head: hold('{ hideDelay: 300 }') });
   await page.evaluate(() => { Pace.once('done', () => Pace.stop()); hold.progress = 100; });
   await page.waitForTimeout(800);
   expect(await page.evaluate(() => events)).toEqual(['start', 'done', 'stop']);
@@ -73,7 +73,7 @@ test('Pace.stop() from a done handler: no hide and no bar', async ({ page, open 
 });
 
 test('a request that starts while the bar is finishing restarts it', async ({ page, open }) => {
-  await open({ head: hold('{ ghostTime: 1000 }') });
+  await open({ head: hold('{ hideDelay: 1000 }') });
   const loaded = page.evaluate(() => new Promise((resolve) => {
     Pace.once('done', () => {
       const xhr = new XMLHttpRequest();
@@ -141,7 +141,7 @@ test('waits for the last of several requests, whatever order they finish in', as
 
 test('waits for every selector, whatever order they appear in', async ({ page, open }) => {
   await open({
-    head: "<script>window.paceOptions = { eventLag: false, elements: { selectors: ['#first', '#second'] } };</script>",
+    head: "<script>window.paceOptions = { trackEventLag: false, waitFor: ['#first', '#second'] };</script>",
     body: `<script>
       window.addedAt = {};
       [['first', 200], ['second', 1500]].forEach(function (item) {
@@ -162,7 +162,7 @@ test('waits for every selector, whatever order they appear in', async ({ page, o
 test('restarts do not pile up work from earlier runs', async ({ page, open }) => {
   await open({
     head: `<script>
-      window.paceOptions = { eventLag: false, elements: { selectors: ['#never'] } };
+      window.paceOptions = { trackEventLag: false, waitFor: ['#never'] };
       window.lookups = 0;
       var querySelector = document.querySelector;
       document.querySelector = function (selector) {
@@ -193,8 +193,8 @@ test('Pace.stop() cancels waiting for a missing target', async ({ page, open }) 
 });
 
 test('options passed to Pace.start() apply to that run', async ({ page, open }) => {
-  await open({ head: "<script>window.paceOptions = { startOnPageLoad: false, eventLag: false };</script>" });
-  await page.evaluate(() => Pace.start({ elements: { selectors: ['#late'] } }));
+  await open({ head: "<script>window.paceOptions = { startOnPageLoad: false, trackEventLag: false };</script>" });
+  await page.evaluate(() => Pace.start({ waitFor: ['#late'] }));
   await page.waitForTimeout(800);
   expect(await page.evaluate(() => events)).toEqual(['start']);
   await page.evaluate(() => { const el = document.createElement('i'); el.id = 'late'; document.body.appendChild(el); });
@@ -238,16 +238,16 @@ test('a navigation from a progress handler leaves one bar', async ({ page, open 
 });
 
 test('Pace.stop() while the bar first renders means no start event', async ({ page, open }) => {
-  await open({ head: "<script>window.paceOptions = { startOnPageLoad: false, eventLag: false };</script>" });
+  await open({ head: "<script>window.paceOptions = { startOnPageLoad: false, trackEventLag: false };</script>" });
   await page.evaluate(() => { Pace.once('change', () => Pace.stop()); Pace.start(); });
   await page.waitForTimeout(300);
   expect(await page.evaluate(() => [events, Pace.running])).toEqual([['stop'], false]);
 });
 
-test('an invalid selector neither leaves pace stuck nor breaks navigation', async ({ page, open }) => {
+test('an extra source that throws neither leaves pace stuck nor breaks navigation', async ({ page, open }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await open({ head: "<script>window.paceOptions = { eventLag: false, elements: { selectors: ['#1a'] } };</script>" });
+  await open({ head: "<script>window.paceOptions = { trackEventLag: false, extraSources: [function () { throw new Error('source'); }] };</script>" });
   const [search, running] = await page.evaluate(() => {
     history.pushState({}, '', '?next');
     return [location.search, Pace.running];

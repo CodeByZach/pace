@@ -10,8 +10,8 @@ test('history.pushState restarts the bar', async ({ page, open }) => {
   expect(await page.evaluate(() => events)).toEqual(RESTARTED);
 });
 
-test('restartOnPushState: false does not restart the bar', async ({ page, open }) => {
-  await open({ head: '<script>window.paceOptions = { eventLag: false, restartOnPushState: false };</script>' });
+test('restartOnNavigation: false does not restart the bar', async ({ page, open }) => {
+  await open({ head: '<script>window.paceOptions = { trackEventLag: false, restartOnNavigation: false };</script>' });
   await idle(page);
   await clearEvents(page);
   await page.evaluate(() => history.pushState({}, '', '/next'));
