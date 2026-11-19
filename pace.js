@@ -21,6 +21,7 @@
     easeFactor: 1.25,
     startOnPageLoad: true,
     restartOnPushState: true,
+    appendToParent: false,
     restartOnRequestAfter: 500,
     target: 'body',
     elements: {
@@ -284,7 +285,7 @@
         activity.className = 'pace-activity';
         this.el.appendChild(progress);
         this.el.appendChild(activity);
-        if (targetElement.firstChild != null) {
+        if (targetElement.firstChild != null && options.appendToParent === false ) {
           targetElement.insertBefore(this.el, targetElement.firstChild);
         } else {
           targetElement.appendChild(this.el);
