@@ -1,5 +1,6 @@
 // What starting, stopping, restarting and finishing a run do. Each run fires start,
 // done and hide once; stop() and restart() end the current run completely.
+import fs from 'node:fs';
 import { test, expect, idle, request, clearEvents, RESTARTED, HOLD, NO_EVENT_LAG } from './fixtures.mjs';
 
 // Like HOLD, plus other options.
@@ -244,14 +245,84 @@ test('Pace.stop() while the bar first renders means no start event', async ({ pa
   expect(await page.evaluate(() => [events, Pace.running])).toEqual([['stop'], false]);
 });
 
-test('an extra source that throws neither leaves pace stuck nor breaks navigation', async ({ page, open }) => {
+test('an extra source that throws is reported, and the run goes on without it', async ({ page, open }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await open({ head: "<script>window.paceOptions = { trackEventLag: false, extraSources: [function () { throw new Error('source'); }] };</script>" });
-  const [search, running] = await page.evaluate(() => {
-    history.pushState({}, '', '?next');
-    return [location.search, Pace.running];
+  await open({ head: "<script>window.paceOptions = { trackEventLag: false, extraSources: [function () { throw new Error('source'); }, Symbol, function () { window.hold = this; this.progress = 0; }] };</script>" });
+  // The working source after the two that throw still holds the bar.
+  await page.waitForTimeout(500);
+  await expect(page.locator('.pace')).toHaveClass('pace pace-active');
+  await page.evaluate(() => { hold.progress = 100; });
+  await idle(page);
+  await clearEvents(page);
+  await page.evaluate(() => { history.pushState({}, '', '?next'); hold.progress = 100; });
+  await idle(page);
+  expect(await page.evaluate(() => [location.search, events, Pace.running])).toEqual(['?next', RESTARTED, false]);
+  // Each source, at load and on the navigation.
+  await expect.poll(() => errors.length).toBe(4);
+});
+
+test('Pace.start() while a run is finishing never throws or leaves Pace.running stuck', async ({ page, open }) => {
+  await open({ head: "<script>window.paceOptions = { trackEventLag: false, hideDelay: 2000 };</script>" });
+  await page.waitForFunction(() => events.includes('done'));
+  const [finishing, threw] = await page.evaluate(() => {
+    const finishing = Pace.running && !events.includes('hide');
+    try {
+      Pace.start({ hideDelay: 0, extraSources: [function () { throw new Error('source'); }] });
+      return [finishing, false];
+    } catch {
+      return [finishing, true];
+    }
   });
-  expect([search, running]).toEqual(['?next', false]);
-  await expect.poll(() => errors.length).toBe(2); // at load, and on the navigation
+  expect([finishing, threw]).toEqual([true, false]);
+  await expect.poll(() => page.evaluate(() => [Pace.running, document.body.className]), { timeout: 5000 }).toEqual([false, 'pace-done']);
+});
+
+test('a target that exists before <body> gets the bar once <body> exists', async ({ page, open }) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await open({ head: "<script>window.paceOptions = { trackEventLag: false, target: 'html' };</script>" });
+  await idle(page);
+  expect(await page.evaluate(() => [document.querySelector('.pace').parentElement.tagName, Pace.running])).toEqual(['HTML', false]);
+  expect(errors).toEqual([]);
+});
+
+test('an error listener that restarts pace while a source error is reported leaves one bar', async ({ page, open }) => {
+  await open({
+    head: `<script>
+  window.paceOptions = { trackEventLag: false, extraSources: [function () { throw new Error('source'); }] };
+  addEventListener('error', function () { if (window.restartOnError) { window.restartOnError = false; Pace.stop(); Pace.start(); } });
+</script>`,
+  });
+  await idle(page);
+  await clearEvents(page);
+  await page.evaluate(() => { window.restartOnError = true; Pace.restart(); });
+  await idle(page);
+  await expect(page.locator('.pace')).toHaveCount(1);
+  expect(await page.evaluate(() => Pace.running)).toBe(false);
+});
+
+test('history.pushState before <body> exists restarts the bar', async ({ page, paceFile }) => {
+  // A router that sets the URL from a script in <head>, after pace.
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  const pace = fs.readFileSync(new URL(`../${paceFile}`, import.meta.url), 'utf8');
+  await page.route('http://pace.test/**', (route) => (new URL(route.request().url()).pathname === '/pace.js'
+    ? route.fulfill({ contentType: 'text/javascript', body: pace })
+    : route.fulfill({
+      contentType: 'text/html',
+      body: `<!doctype html><html><head>
+<script>window.paceOptions = { trackEventLag: false };</script>
+<script src="/pace.js"></script>
+<script>
+  window.events = [];
+  ['start', 'stop', 'restart', 'done', 'hide'].forEach(function (name) { Pace.on(name, function () { events.push(name); }); });
+  history.pushState({}, '', '?next');
+</script>
+</head><body><p>page</p></body></html>`,
+    })));
+  await page.goto('http://pace.test/');
+  await idle(page);
+  expect(await page.evaluate(() => events)).toEqual(RESTARTED);
+  expect(errors).toEqual([]);
 });

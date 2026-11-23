@@ -44,7 +44,8 @@
     return;
   }
 
-  // The longest delay a timer can wait: setTimeout treats more, and Infinity, as 0.
+  // The longest delay a timer can wait (2^31 - 1 ms). setTimeout treats Infinity as 0
+  // and wraps larger numbers around 2^32.
   const MAX_DELAY = 2147483647;
 
   const isNumber = (value) => typeof value === 'number' && Number.isFinite(value);
@@ -123,15 +124,15 @@
     ['extraSources', [[], listOf('constructors', isConstructor)]],
   ]);
 
-  // Version 1 settings, and what replaced them.
+  // Version 1 settings, what replaced them, and what was removed.
   const RENAMED = new Map([
-    ['ajax', 'trackXHR, trackFetch, trackWebSockets, requestMethods, ignoreRequests and maxWait'],
-    ['document', 'trackDocument'],
-    ['elements', 'waitFor'],
-    ['eventLag', 'trackEventLag'],
-    ['ghostTime', 'hideDelay'],
-    ['minTime', 'minVisible'],
-    ['restartOnPushState', 'restartOnNavigation'],
+    ['ajax', 'use trackXHR, trackFetch, trackWebSockets, requestMethods, ignoreRequests and maxWait instead'],
+    ['document', 'use trackDocument instead'],
+    ['elements', 'use waitFor instead (checkInterval was removed)'],
+    ['eventLag', 'use trackEventLag instead (its tuning settings were removed)'],
+    ['ghostTime', 'use hideDelay instead'],
+    ['minTime', 'use minVisible instead'],
+    ['restartOnPushState', 'use restartOnNavigation instead'],
   ]);
 
   // A copy of a setting's value that shares nothing that can change: a list
@@ -337,7 +338,7 @@
               options[name] = value;
             }
           } else if (RENAMED.has(name)) {
-            warn(`ignored the ${name} option from ${channel}: use ${RENAMED.get(name)} instead.`);
+            warn(`ignored the ${name} option from ${channel}: ${RENAMED.get(name)}.`);
           } else {
             const match = [...SETTINGS.keys()].find((known) => known.toLowerCase() === name.toLowerCase());
             warn(`ignored the unknown option ${name} from ${channel}.${match ? ` Did you mean ${match}?` : ''}`);
@@ -387,7 +388,7 @@
       }
       if (this.el == null) {
         const targetElement = document.querySelector(this.settings.target);
-        if (!targetElement) {
+        if (!targetElement || !document.body) {
           return null;
         }
         this.el = document.createElement('div');
@@ -410,8 +411,8 @@
 
     finish() {
       this.el?.classList.replace('pace-active', 'pace-inactive');
-      document.body.classList.remove('pace-running');
-      document.body.classList.add('pace-done');
+      document.body?.classList.remove('pace-running');
+      document.body?.classList.add('pace-done');
     }
 
     update(prog) {
@@ -650,9 +651,10 @@
           return send.apply(this, args);
         }
         // One listener per XMLHttpRequest, added before send() because a
-        // synchronous request ends inside it. Every way a request ends passes
-        // readyState 4 (done) or, when the page aborts it from that handler, 0;
-        // a request in flight is always at 1 to 3.
+        // synchronous request ends inside it. A request that ends passes
+        // readyState 4 (done) or, when the page aborts it from that handler, 0,
+        // except a synchronous one that fails: send() throws (caught below). A
+        // request in flight is always at 1 to 3.
         if (!listening.has(this)) {
           listening.add(this);
           this.addEventListener('readystatechange', () => {
@@ -1122,26 +1124,27 @@
       current.collectors.push(collector);
       current.sources.push(collector);
     };
-    // Built before the run counts as started: if an extra source throws, pace
-    // stays idle.
-    try {
-      add(new AjaxMonitor());
-      if (settings.waitFor.length) {
-        add(new ElementMonitor(settings.waitFor));
-      }
-      if (settings.trackDocument) {
-        add(new DocumentMonitor());
-      }
-      if (settings.trackEventLag) {
-        add(new EventLagMonitor());
-      }
-      const extraSources = settings.extraSources;
-      for (let i = 0, n = extraSources.length; i < n; i++) {
+    add(new AjaxMonitor());
+    if (settings.waitFor.length) {
+      add(new ElementMonitor(settings.waitFor));
+    }
+    if (settings.trackDocument) {
+      add(new DocumentMonitor());
+    }
+    if (settings.trackEventLag) {
+      add(new EventLagMonitor());
+    }
+    // An extra source that throws while it's constructed is reported once the
+    // run is set up (an error listener may call Pace.start), and the run goes on
+    // without it.
+    const errors = [];
+    const extraSources = settings.extraSources;
+    for (let i = 0, n = extraSources.length; i < n; i++) {
+      try {
         current.sources.push(new extraSources[i](copyOptions(settings)));
+      } catch (error) {
+        errors.push(error);
       }
-    } catch (error) {
-      stopCollectors(current);
-      throw error;
     }
     run = current;
     running = true;
@@ -1164,6 +1167,9 @@
       animate(current);
     };
     show();
+    for (const error of errors) {
+      reportException(error);
+    }
   };
 
   // Request settings apply to the next request; the others from the next run.
@@ -1190,8 +1196,8 @@
   Pace.stop = () => {
     endRun();
     running = false;
-    document.body.classList.remove('pace-running');
-    document.body.classList.add('pace-done');
+    document.body?.classList.remove('pace-running');
+    document.body?.classList.add('pace-done');
     Pace.trigger('stop');
   };
 

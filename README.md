@@ -56,7 +56,7 @@ To change settings later, call `Pace.configure({ ... })`; `Pace.start({ ... })` 
 about requests and navigation (`restartOnNavigation`, `restartOnRequestAfter`, `trackXHR`, `trackFetch`,
 `trackWebSockets`, `requestMethods`, `ignoreRequests` and `maxWait`) apply from the next request or navigation; the
 others from the next time the bar starts, so a bar that is showing doesn't change halfway. `Pace.getOptions()` returns a
-copy of the settings in use.
+copy of the current settings (a bar that is showing keeps the other settings it started with).
 
 A wrong value or an unknown name is ignored, and the console shows a warning (once) that says what Pace expected. Pace
 never throws because of a wrong value.
@@ -218,7 +218,7 @@ Configuration above.
 
 - `Pace.configure`: Change settings without starting the bar, see Configuration above.
 
-- `Pace.getOptions`: A copy of the settings in use.
+- `Pace.getOptions`: A copy of the current settings.
 
 - `Pace.restart`: Show the progress bar if it's hidden and start reporting the progress from scratch. Called automatically
 whenever `pushState` or `replaceState` is called by default.
@@ -247,8 +247,8 @@ Pace fires the following events:
 
 - `start`: When pace is initially started, or as a part of a restart
 - `stop`: When pace is manually stopped, or as a part of a restart
-- `restart`: When pace is restarted (manually, or by a new AJAX request)
-- `progress`: On every frame while the bar is running, with the current progress (0–100)
+- `restart`: When pace is restarted (manually, by a new AJAX request, or on `pushState` or `replaceState`)
+- `progress`: While the bar is running, with the current progress (0–100), up to about 30 times a second
 - `done`: When pace is finished
 - `hide`: When the pace is hidden (can be later than `done`, based on `hideDelay` and `minVisible`)
 
@@ -379,7 +379,7 @@ If you run into a compatibility issue, please create an issue.
 Size
 ----
 
-pace.min.js is about 4 kB gzipped. The themes are between 0.2 and 3.2 kB gzipped.
+pace.min.js is about 5.7 kB gzipped. The themes are between 0.3 and 3.2 kB gzipped.
 
 Issues
 ------

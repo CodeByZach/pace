@@ -202,8 +202,8 @@ test.describe('wrong values and unknown names', () => {
     await open({ head: options("{ ajax: { trackMethods: ['POST'] }, eventLag: false, elements: { selectors: ['#x'] }, document: false, restartOnPushState: false, minTime: 0, ghostTime: 0 }") });
     expect(logged).toEqual([
       'Pace: ignored the ajax option from window.paceOptions: use trackXHR, trackFetch, trackWebSockets, requestMethods, ignoreRequests and maxWait instead.',
-      'Pace: ignored the eventLag option from window.paceOptions: use trackEventLag instead.',
-      'Pace: ignored the elements option from window.paceOptions: use waitFor instead.',
+      'Pace: ignored the eventLag option from window.paceOptions: use trackEventLag instead (its tuning settings were removed).',
+      'Pace: ignored the elements option from window.paceOptions: use waitFor instead (checkInterval was removed).',
       'Pace: ignored the document option from window.paceOptions: use trackDocument instead.',
       'Pace: ignored the restartOnPushState option from window.paceOptions: use restartOnNavigation instead.',
       'Pace: ignored the minTime option from window.paceOptions: use minVisible instead.',
