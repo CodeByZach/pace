@@ -20,8 +20,7 @@
   };
 
   // Where the first copy of pace on a page keeps its Pace object, for a later
-  // copy (another script tag or bundle) to find. Page markup can't replace it:
-  // element names are strings.
+  // copy (another script tag or bundle) to find.
   const FIRST_COPY = Symbol.for('pace-js');
 
   // Pace 1.x doesn't set FIRST_COPY, but puts an object with a start function on
@@ -36,7 +35,6 @@
 
   const firstCopy = window[FIRST_COPY] ?? olderPace();
 
-  // A later copy would wrap requests and history again and add a second bar.
   if (firstCopy) {
     const firstVersion = typeof firstCopy.version === 'string' ? ` (${firstCopy.version})` : '';
     console.warn(`Pace: pace.js ${VERSION} was loaded after another copy${firstVersion}; only the first copy runs.`);
@@ -65,8 +63,7 @@
   };
 
   // RegExp.prototype's source getter throws for anything that isn't a RegExp,
-  // so this also accepts a RegExp made in another frame, which instanceof
-  // wouldn't, and rejects an object that only claims to be one.
+  // including from another frame (instanceof would reject those).
   const regExpSource = Object.getOwnPropertyDescriptor(RegExp.prototype, 'source').get;
   const isRegExp = (value) => {
     try {
@@ -79,7 +76,7 @@
 
   // Whether `new value()` works, without calling or reading anything from it:
   // Reflect.construct checks that its target is a constructor before it reads
-  // the arguments, which throw here.
+  // the arguments, which throw here (as es-abstract's IsConstructor does).
   const notArguments = {
     get length() {
       throw notArguments;
@@ -135,9 +132,8 @@
     ['restartOnPushState', 'use restartOnNavigation instead'],
   ]);
 
-  // A copy of a setting's value that shares nothing that can change: a list
-  // becomes a plain array, read once, and its RegExps (whose lastIndex changes,
-  // and which the page could freeze) are copied.
+  // A copy of a setting's value: a list becomes a plain array, read once, with
+  // its RegExps copied.
   const copyValue = (value) => {
     if (!Array.isArray(value)) {
       return value;
@@ -256,10 +252,8 @@
     });
   };
 
-  // Reports an error like an uncaught one, without throwing. reportError keeps
-  // the details for window.onerror even when pace.js is served from another
-  // origin; Safari before 15.4 lacks it, so there the error is thrown from a
-  // microtask instead.
+  // Reports an error like an uncaught one, without throwing. Safari before 15.4
+  // has no reportError, so there the error is thrown from a microtask.
   const reportException = (error) => {
     if (typeof reportError === 'function') {
       reportError(error);
@@ -311,9 +305,8 @@
 
   // Applies the settings in `given`, from `channel` (named in warnings). A wrong
   // value or an unknown name is ignored with a warning; undefined means not given.
-  // Each value is copied, then the copy is checked and kept, so changing the
-  // page's own list later changes nothing. An error from reading a setting (a
-  // getter that throws, say) is reported, and the other settings still apply.
+  // Each value is copied, then the copy is checked and kept. An error from
+  // reading a setting is reported, and the other settings still apply.
   const applyOptions = (given, channel) => {
     if (given === undefined) {
       return;
@@ -565,9 +558,8 @@
   // The callbacks waiting for each open request (by its event) to end.
   const endCallbacks = new WeakMap();
 
-  // Requests waiting for their restartOnRequestAfter check. A request sent just
-  // before a run starts (Turbolinks sends one, then calls pushState) belongs to
-  // that run, so a run that starts meanwhile picks them up.
+  // Requests waiting for their restartOnRequestAfter check; a run that starts
+  // meanwhile picks them up.
   const awaitingCheck = new Set();
 
   const isOpen = (event) => openRequests.get(event.request) === event;
@@ -600,8 +592,8 @@
     endRequest(event.request);
     openRequests.set(event.request, event);
     endCallbacks.set(event, []);
-    // Pace waits for a request at most maxWait ms from when it was sent, so one
-    // that never ends can't hold the bar forever. The request keeps going.
+    // Pace waits for a request at most maxWait ms from when it was sent. The
+    // request keeps going.
     if (options.maxWait !== false) {
       const timer = setTimeout(() => endRequest(event.request), options.maxWait);
       endCallbacks.get(event).push(() => clearTimeout(timer));
@@ -616,12 +608,10 @@
   const hooked = { xhr: false, fetch: false, socket: false };
 
   // Hooks into each kind of request the first time its track setting is on, and
-  // leaves the others alone. Wraps XMLHttpRequest.prototype.open and send, and
-  // replaces WebSocket with a subclass, so the page keeps the native classes:
-  // instanceof, constants, subclasses and other libraries' prototype patches keep
-  // working. Replaces fetch with a function that behaves the same. Not in a class
-  // on purpose: class bodies are strict mode, where assigning to a read-only
-  // property (a page may lock these) throws.
+  // leaves the others alone: wraps XMLHttpRequest.prototype.open and send, and
+  // replaces WebSocket with a subclass and fetch with a function that behaves
+  // the same. Not in a class: class bodies are strict mode, where assigning to a
+  // read-only property (a page may lock these) throws.
   const installHooks = () => {
     if (options.trackXHR && !hooked.xhr) {
       hooked.xhr = true;
@@ -650,11 +640,10 @@
         if (!info || shouldIgnoreURL(info.urls)) {
           return send.apply(this, args);
         }
-        // One listener per XMLHttpRequest, added before send() because a
-        // synchronous request ends inside it. A request that ends passes
-        // readyState 4 (done) or, when the page aborts it from that handler, 0,
-        // except a synchronous one that fails: send() throws (caught below). A
-        // request in flight is always at 1 to 3.
+        // One listener per XMLHttpRequest, added before send(): a synchronous
+        // request ends inside it. A request that ends passes readyState 4 (done)
+        // or, when the page aborts it from that handler, 0; a synchronous one
+        // that fails throws from send() instead (caught below).
         if (!listening.has(this)) {
           listening.add(this);
           this.addEventListener('readystatechange', () => {
@@ -697,14 +686,13 @@
       const originalFetch = window.fetch;
       // Calls the original with the same `this` and arguments, never reads or
       // copies a Request's body, and returns a promise that settles like the
-      // original's. A request ends when that promise settles: on the response's
-      // headers, an error or an abort, not at the end of its body.
-      // Declares only `input`, so its length is 1 like the native fetch's.
+      // original's. A request ends when that promise settles (its headers, an
+      // error or an abort). Declares only `input`, so its length is 1 like fetch's.
       window.fetch = function fetch(input) {
         const init = arguments[1];
         let event = null;
-        // Deciding whether to track never throws into the page: fetch itself
-        // rejects input it can't use (a URL whose toString() throws, say).
+        // Deciding whether to track never throws into the page; fetch itself
+        // rejects input it can't use.
         try {
           // Also a Request made in another frame, which instanceof wouldn't see.
           const isRequest = Object.prototype.toString.call(input) === '[object Request]';
@@ -847,8 +835,7 @@
     }
   }
 
-  // Checks every 100 ms: no event tells when a selector starts to match, and a
-  // MutationObserver misses matches that come from state, such as :checked.
+  // Checks every 100 ms.
   class ElementTracker {
     constructor(selector, completeCallback) {
       this.selector = selector;
@@ -879,8 +866,6 @@
   class DocumentMonitor {
     constructor() {
       this.progress = this.states[document.readyState] ?? 100;
-      // A listener, not document.onreadystatechange, so a page that sets that
-      // property doesn't disconnect pace.
       this.onChange = () => {
         if (this.states[document.readyState] != null) {
           this.progress = this.states[document.readyState];
@@ -1135,8 +1120,7 @@
       add(new EventLagMonitor());
     }
     // An extra source that throws while it's constructed is reported once the
-    // run is set up (an error listener may call Pace.start), and the run goes on
-    // without it.
+    // run is set up, and the run goes on without it.
     const errors = [];
     const extraSources = settings.extraSources;
     for (let i = 0, n = extraSources.length; i < n; i++) {
@@ -1213,7 +1197,7 @@
     }
   };
 
-  // Only now, when it's complete, can a later copy use this one.
+  // Registered last, once this copy is complete.
   Object.defineProperty(window, FIRST_COPY, { value: Pace });
 
   if (!exportPace(Pace) && options.startOnPageLoad) {
