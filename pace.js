@@ -4,7 +4,48 @@
  * Licensed MIT © HubSpot, Inc. and Zachary Miller
  */
 (function () {
-  // The longest delay a timer can wait: setTimeout treats more, and Infinity, as 0.
+  const VERSION = '1.3.1';
+
+  // Hands `value` to a module loader. False when pace was loaded by a <script>.
+  const exportPace = (value) => {
+    if (typeof define === 'function' && define.amd) {
+      define(() => value);
+      return true;
+    }
+    if (typeof exports === 'object') {
+      module.exports = value;
+      return true;
+    }
+    return false;
+  };
+
+  // Where the first copy of pace on a page keeps its Pace object, for a later
+  // copy (another script tag or bundle) to find. Page markup can't replace it:
+  // element names are strings.
+  const FIRST_COPY = Symbol.for('pace-js');
+
+  // Pace 1.x doesn't set FIRST_COPY, but puts an object with a start function on
+  // window.Pace. Reading from a cross-origin frame named Pace throws.
+  const olderPace = () => {
+    try {
+      return typeof window.Pace?.start === 'function' ? window.Pace : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
+  const firstCopy = window[FIRST_COPY] ?? olderPace();
+
+  // A later copy would wrap requests and history again and add a second bar.
+  if (firstCopy) {
+    const firstVersion = typeof firstCopy.version === 'string' ? ` (${firstCopy.version})` : '';
+    console.warn(`Pace: pace.js ${VERSION} was loaded after another copy${firstVersion}; only the first copy runs.`);
+    exportPace(firstCopy);
+    return;
+  }
+
+  // The longest delay a timer can wait (2^31 - 1 ms). setTimeout treats Infinity as 0
+  // and wraps larger numbers around 2^32.
   const MAX_DELAY = 2147483647;
 
   const isNumber = (value) => typeof value === 'number' && Number.isFinite(value);
@@ -83,15 +124,15 @@
     ['extraSources', [[], listOf('constructors', isConstructor)]],
   ]);
 
-  // Version 1 settings, and what replaced them.
+  // Version 1 settings, what replaced them, and what was removed.
   const RENAMED = new Map([
-    ['ajax', 'trackXHR, trackFetch, trackWebSockets, requestMethods, ignoreRequests and maxWait'],
-    ['document', 'trackDocument'],
-    ['elements', 'waitFor'],
-    ['eventLag', 'trackEventLag'],
-    ['ghostTime', 'hideDelay'],
-    ['minTime', 'minVisible'],
-    ['restartOnPushState', 'restartOnNavigation'],
+    ['ajax', 'use trackXHR, trackFetch, trackWebSockets, requestMethods, ignoreRequests and maxWait instead'],
+    ['document', 'use trackDocument instead'],
+    ['elements', 'use waitFor instead (checkInterval was removed)'],
+    ['eventLag', 'use trackEventLag instead (its tuning settings were removed)'],
+    ['ghostTime', 'use hideDelay instead'],
+    ['minTime', 'use minVisible instead'],
+    ['restartOnPushState', 'use restartOnNavigation instead'],
   ]);
 
   // A copy of a setting's value that shares nothing that can change: a list
@@ -185,18 +226,28 @@
     return sum / count;
   };
 
-  const Pace = window.Pace || {};
+  const Pace = {};
 
   window.Pace = Pace;
 
+  // Whether a run is waiting, running or finishing; Pace.running reads it.
+  let running = false;
+
+  Object.defineProperties(Pace, {
+    version: { value: VERSION, enumerable: true },
+    running: { get: () => running, enumerable: true },
+  });
+
+  // The handlers of each event, from Pace.on and Pace.once.
+  const bindings = Object.create(null);
+
   // Removes the handlers of `event` that match `test`, and marks them so an
   // event that is firing right now skips them too.
-  const removeBindings = (target, event, test) => {
-    const bindings = target.bindings?.[event];
-    if (!bindings) {
+  const removeBindings = (event, test) => {
+    if (!bindings[event]) {
       return;
     }
-    target.bindings[event] = bindings.filter((binding) => {
+    bindings[event] = bindings[event].filter((binding) => {
       if (!test(binding)) {
         return true;
       }
@@ -226,33 +277,31 @@
   Object.assign(Pace, {
     on(event, handler, ctx, once) {
       once ??= false;
-      this.bindings ??= Object.create(null);
-      this.bindings[event] ??= [];
-      this.bindings[event].push({ handler, ctx, once });
+      bindings[event] ??= [];
+      bindings[event].push({ handler, ctx, once });
     },
 
     once(event, handler, ctx) {
-      this.on(event, handler, ctx, true);
+      Pace.on(event, handler, ctx, true);
     },
 
     off(event, handler) {
-      removeBindings(this, event, (binding) => handler == null || binding.handler === handler);
+      removeBindings(event, (binding) => handler == null || binding.handler === handler);
     },
 
     trigger(event, ...args) {
-      const bindings = this.bindings?.[event];
-      if (!bindings) {
+      if (!bindings[event]) {
         return;
       }
-      for (const binding of bindings.slice()) {
+      for (const binding of bindings[event].slice()) {
         if (binding.removed) {
           continue;
         }
         if (binding.once) {
-          removeBindings(this, event, (other) => other === binding);
+          removeBindings(event, (other) => other === binding);
         }
         try {
-          binding.handler.apply(binding.ctx ?? this, args);
+          binding.handler.apply(binding.ctx ?? Pace, args);
         } catch (error) {
           reportException(error);
         }
@@ -289,7 +338,7 @@
               options[name] = value;
             }
           } else if (RENAMED.has(name)) {
-            warn(`ignored the ${name} option from ${channel}: use ${RENAMED.get(name)} instead.`);
+            warn(`ignored the ${name} option from ${channel}: ${RENAMED.get(name)}.`);
           } else {
             const match = [...SETTINGS.keys()].find((known) => known.toLowerCase() === name.toLowerCase());
             warn(`ignored the unknown option ${name} from ${channel}.${match ? ` Did you mean ${match}?` : ''}`);
@@ -339,7 +388,7 @@
       }
       if (this.el == null) {
         const targetElement = document.querySelector(this.settings.target);
-        if (!targetElement) {
+        if (!targetElement || !document.body) {
           return null;
         }
         this.el = document.createElement('div');
@@ -362,8 +411,8 @@
 
     finish() {
       this.el?.classList.replace('pace-active', 'pace-inactive');
-      document.body.classList.remove('pace-running');
-      document.body.classList.add('pace-done');
+      document.body?.classList.remove('pace-running');
+      document.body?.classList.add('pace-done');
     }
 
     update(prog) {
@@ -602,9 +651,10 @@
           return send.apply(this, args);
         }
         // One listener per XMLHttpRequest, added before send() because a
-        // synchronous request ends inside it. Every way a request ends passes
-        // readyState 4 (done) or, when the page aborts it from that handler, 0;
-        // a request in flight is always at 1 to 3.
+        // synchronous request ends inside it. A request that ends passes
+        // readyState 4 (done) or, when the page aborts it from that handler, 0,
+        // except a synchronous one that fails: send() throws (caught below). A
+        // request in flight is always at 1 to 3.
         if (!listening.has(this)) {
           listening.add(this);
           this.addEventListener('readystatechange', () => {
@@ -928,10 +978,8 @@
   let run = null;
 
   const ajaxMonitor = () => run?.collectors.find((collector) => collector instanceof AjaxMonitor);
-  let bar = (Pace.bar = new Bar(copyOptions(options)));
+  let bar = new Bar(copyOptions(options));
 
-  Pace.sources = [];
-  Pace.running = false;
 
   // Waiting or running: a new request joins it instead of restarting the bar.
   const isActive = () => run != null && (run.state === 'waiting' || run.state === 'running');
@@ -999,7 +1047,7 @@
     const shownFor = now() - current.startedAt;
     current.hideTimer = setTimeout(() => {
       run = null;
-      Pace.running = false;
+      running = false;
       bar.finish();
       Pace.trigger('hide');
     }, Math.max(current.settings.hideDelay, current.settings.minVisible - shownFor, 0));
@@ -1076,31 +1124,31 @@
       current.collectors.push(collector);
       current.sources.push(collector);
     };
-    // Built before the run counts as started: if an extra source throws, pace
-    // stays idle.
-    try {
-      add(new AjaxMonitor());
-      if (settings.waitFor.length) {
-        add(new ElementMonitor(settings.waitFor));
-      }
-      if (settings.trackDocument) {
-        add(new DocumentMonitor());
-      }
-      if (settings.trackEventLag) {
-        add(new EventLagMonitor());
-      }
-      const extraSources = settings.extraSources;
-      for (let i = 0, n = extraSources.length; i < n; i++) {
+    add(new AjaxMonitor());
+    if (settings.waitFor.length) {
+      add(new ElementMonitor(settings.waitFor));
+    }
+    if (settings.trackDocument) {
+      add(new DocumentMonitor());
+    }
+    if (settings.trackEventLag) {
+      add(new EventLagMonitor());
+    }
+    // An extra source that throws while it's constructed is reported once the
+    // run is set up (an error listener may call Pace.start), and the run goes on
+    // without it.
+    const errors = [];
+    const extraSources = settings.extraSources;
+    for (let i = 0, n = extraSources.length; i < n; i++) {
+      try {
         current.sources.push(new extraSources[i](copyOptions(settings)));
+      } catch (error) {
+        errors.push(error);
       }
-    } catch (error) {
-      stopCollectors(current);
-      throw error;
     }
     run = current;
-    Pace.running = true;
-    Pace.bar = bar = new Bar(settings);
-    Pace.sources = current.sources;
+    running = true;
+    bar = new Bar(settings);
     const show = () => {
       if (run !== current) {
         return;
@@ -1119,6 +1167,9 @@
       animate(current);
     };
     show();
+    for (const error of errors) {
+      reportException(error);
+    }
   };
 
   // Request settings apply to the next request; the others from the next run.
@@ -1144,9 +1195,9 @@
 
   Pace.stop = () => {
     endRun();
-    Pace.running = false;
-    document.body.classList.remove('pace-running');
-    document.body.classList.add('pace-done');
+    running = false;
+    document.body?.classList.remove('pace-running');
+    document.body?.classList.add('pace-done');
     Pace.trigger('stop');
   };
 
@@ -1162,11 +1213,10 @@
     }
   };
 
-  if (typeof define === 'function' && define.amd) {
-    define(() => Pace);
-  } else if (typeof exports === 'object') {
-    module.exports = Pace;
-  } else if (options.startOnPageLoad) {
+  // Only now, when it's complete, can a later copy use this one.
+  Object.defineProperty(window, FIRST_COPY, { value: Pace });
+
+  if (!exportPace(Pace) && options.startOnPageLoad) {
     Pace.start();
   }
 })();
